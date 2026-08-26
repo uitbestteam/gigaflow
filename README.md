@@ -4,7 +4,7 @@ AI-powered fitness app — workout planning with automatic progressive-overload
 suggestions, meal planning, InBody OCR, and analytics. Backend-first with cloud
 sync; guest mode works with no sign-up.
 
-> **Status:** E4 — Workout plans backend ✅ complete. Building toward the full app;
+> **Status:** E5 — Session logging & progression backend ✅ complete. Building toward the full app;
 > see the [feature roadmap](docs/superpowers/specs/2026-08-26-gigaflow-features-spec.md).
 
 ## Tech stack
@@ -134,6 +134,14 @@ logic through **Level 1 tests** (which inject a fake verifier) rather than curl.
 - `POST /api/plans/from-template` — Create a plan from a preset split template. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ templateType: "ppl" | "upper_lower" | "full_body" }`. Creates a plan with workout templates and exercise slots nested; sets the plan as active and returns it as 201. Returns 400 for unknown or `custom` template type.
 - `GET /api/plans/active` — Retrieve the caller's active plan with templates and slots nested. Requires `Authorization: Bearer <Firebase ID token>` header. Returns `{ data: Plan | null }` if no active plan exists.
 
+**Sessions:**
+- `POST /api/sessions/start` — Start a new session from a workout template. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ templateId }`. Returns the created session with prefilled slot targets (weightSuggested/repsSuggested from last performance).
+- `GET /api/sessions/active` — Retrieve the current in-progress session, or null if none. Requires `Authorization: Bearer <Firebase ID token>` header.
+- `POST /api/sessions/:id/sets` — Log or replace sets in an active session. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ sets: [...] }`. Replaces the session's logged sets.
+- `POST /api/sessions/:id/finish` — Finish a session, computing volume/duration rollup and refreshing the progression cache. Requires `Authorization: Bearer <Firebase ID token>` header.
+- `POST /api/sessions/:id/cancel` — Cancel a session. Requires `Authorization: Bearer <Firebase ID token>` header.
+- `GET /api/exercises/:id/last` — Retrieve the last performance for an exercise (used as the progression source for prefill). Requires `Authorization: Bearer <Firebase ID token>` header.
+
 ## Testing
 
 Vitest across the workspace. The `apps/api` DB test uses
@@ -164,11 +172,12 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 ## Roadmap
 
 E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
-E5 Session Logging & Progression · E6 Rest Timer & RIR · E7 AI Workout Planner ·
+E5 Session Logging & Progression ✅ · E6 Rest Timer & RIR · E7 AI Workout Planner ·
 E8 InBody OCR · E9 Meal Planner · E10 Notifications · E11 Analytics ·
 E12 Subscription & Quota · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening.
 
 *Notes:*
 - *E3-S4 Exercise library UI is deferred to E13 (web app frontend).*
 - *E4-S3 Custom plan builder UI and E4-S5 Home/Today queue UI are deferred to E13 (web app frontend).*
+- *E5-S6 Active Session UI and E5-S7 Session Summary UI are deferred to E13 (web app frontend).*
 - *Frontend auth (anonymous sign-in, Google/password sign-in/link, account upgrade UI) is deferred to E13, after the web app is scaffolded.*
