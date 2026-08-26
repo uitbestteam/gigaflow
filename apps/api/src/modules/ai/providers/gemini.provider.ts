@@ -1,7 +1,7 @@
 import { AiProviderName } from '@gigaflow/shared';
 import type { AiProvider, AiPrompt } from '../ai-provider.js';
 
-const DEFAULT_MODEL = 'gemini-1.5-flash';
+const DEFAULT_MODEL = 'gemini-2.0-flash';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;

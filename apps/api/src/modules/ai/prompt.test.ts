@@ -10,6 +10,10 @@ const input = {
 describe('buildWorkoutPrompt', () => {
   it('embeds catalog slugs, history and constraints', () => {
     const { system, user } = buildWorkoutPrompt(input);
+    // Schema field names must be present to ensure correct model instruction
+    expect(system).toContain('templates');
+    expect(system).toContain('exerciseSlug');
+    expect(system).toContain('colorTag');
     expect(system.toLowerCase()).toContain('json');
     expect(user).toContain('bench-barbell');
     expect(user).toContain('hypertrophy');

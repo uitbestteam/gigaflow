@@ -26,16 +26,29 @@ export function buildWorkoutPrompt(input: WorkoutPromptInput): {
   const { goal, experienceLevel, daysPerWeek, catalog, history } = input;
 
   // System prompt: defines role and constraints
-  const system = `You are a strength coach specializing in creating personalized workout plans.
+  // Instructs model to return minified JSON only, matching zGeneratedPlan schema exactly
+  const system = `You are a strength coach. Return ONLY minified JSON matching this exact schema—no prose, no markdown, no explanation.
 
-You MUST respond with ONLY valid JSON that matches the following schema structure. Do not include any explanation or additional text—only the JSON object.
+{
+  "name": string,
+  "templates": [
+    {
+      "name": { "en": string, "vi": string },
+      "colorTag": "push"|"pull"|"legs"|"upper"|"lower"|"full"|"custom",
+      "slots": [
+        { "exerciseSlug": string, "setsTarget": 1-10, "repRangeMin": >=1, "repRangeMax": >=1 }
+      ]
+    }
+  ]
+}
 
-The JSON plan schema has:
-- "days": an array of day objects
-- Each day has "dayNumber" (1 to ${daysPerWeek}), "name", and "exercises" array
-- Each exercise in the plan MUST use only exerciseSlug values from the provided catalog
-
-For ${daysPerWeek} days per week, structure the plan with appropriate training split templates matching the athlete's goal and experience level.`;
+CONSTRAINTS:
+- templates array MUST have exactly ${daysPerWeek} entries
+- exerciseSlug MUST be one of the provided catalog slugs only
+- colorTag MUST be one of: push, pull, legs, upper, lower, full, custom
+- setsTarget must be 1-10
+- repRangeMin and repRangeMax must be >= 1
+- Respond with ONLY the JSON object, minified`;
 
   // Build catalog section
   const catalogLines = catalog
@@ -51,7 +64,7 @@ For ${daysPerWeek} days per week, structure the plan with appropriate training s
               `${h.slug}: last set ${h.lastWeightKg}kg × ${h.lastReps} reps, best e1RM ${h.bestE1RM}kg`
           )
           .join('\n')
-      : 'No prior history.';
+      : 'No prior training history.';
 
   // User prompt: context and request
   const user = `Create a ${daysPerWeek}-day per week strength training program.
@@ -61,13 +74,13 @@ For ${daysPerWeek} days per week, structure the plan with appropriate training s
 - Experience Level: ${experienceLevel}
 - Training Days Per Week: ${daysPerWeek}
 
-**Exercise Catalog (available for this program):**
+**Exercise Catalog (use only these exerciseSlug values):**
 ${catalogLines}
 
-**Training History (if available):**
+**Training History:**
 ${historyLines}
 
-Based on the athlete's goal, experience level, and training frequency, design a structured ${daysPerWeek}-day workout split using only exercises from the catalog above. Progress from the athlete's last recorded lifts. Return the plan as a valid JSON object with days and exercises.`;
+Design a structured ${daysPerWeek}-day workout plan using ONLY the provided catalog exerciseSlug values. Progress from the athlete's prior lifts. Return as minified JSON only.`;
 
   return { system, user };
 }
