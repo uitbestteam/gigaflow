@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AuthProvider, AuthSource, Language } from '../enums/index.js';
+import { zSubscription } from './subscription.js';
 
 export const zUser = z.object({
   authId: z.string().min(1),
@@ -12,6 +13,7 @@ export const zUser = z.object({
   language: z.nativeEnum(Language),
   createdAt: z.date(),
   updatedAt: z.date(),
+  subscription: zSubscription.optional(),
 });
 
 export type User = z.infer<typeof zUser>;

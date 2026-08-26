@@ -58,3 +58,13 @@ export enum SessionStatus {
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
 }
+
+export enum SubscriptionPlan {
+  FREE = 'free',
+}
+
+export enum GenerationType {
+  WORKOUT = 'workout',
+  MEAL = 'meal',
+  INBODY = 'inbody',
+}
