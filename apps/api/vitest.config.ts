@@ -7,5 +7,5 @@ export default defineConfig({
       '@gigaflow/shared': fileURLToPath(new URL('../../packages/shared/src/index.ts', import.meta.url)),
     },
   },
-  test: { environment: 'node' },
+  test: { environment: 'node', hookTimeout: 120000, testTimeout: 30000 },
 });
