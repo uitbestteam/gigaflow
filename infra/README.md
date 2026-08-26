@@ -112,3 +112,28 @@ Note: GitHub Actions workflow (`.github/workflows/ci.yaml`) runs on pull request
 to main for fast local test feedback (no GCP resources needed). Cloud Build
 (`cloudbuild.yaml`) runs on main branch merges to build, push image to Artifact
 Registry, deploy to Cloud Run, and deploy Firebase Hosting.
+
+## Firebase auth (deferred)
+
+The backend API implements Firebase ID token verification for the `/api/auth/session` endpoint. Setup steps:
+
+1. **Enable providers in Firebase Console** (one-time, manual):
+   - Go to the Firebase project console (`gigaflow-dev`).
+   - In **Authentication → Sign-in method**, enable:
+     - **Anonymous** — for guest mode (zero migration path).
+     - **Google** — for social sign-in.
+     - **Email/Password** — for email + password sign-in.
+
+2. **Cloud Run runtime credentials** (automatic in production):
+   - The Cloud Run service account (created by Terraform) has the `roles/iam.serviceAccountTokenCreator` role bound to it.
+   - At runtime, `firebase-admin` uses **Application Default Credentials (ADC)** to verify ID tokens — no key file in the container.
+   - Credentials are automatically injected by the Cloud Run environment.
+
+3. **Local development**:
+   - Download a service account JSON key from the Firebase project console (**Project Settings → Service Accounts → Generate new private key**).
+   - Set `GOOGLE_APPLICATION_CREDENTIALS` to the absolute path of the key file (see `.env.example`).
+   - The `firebase-admin` SDK uses this to verify real Firebase ID tokens during local development.
+
+4. **Unit tests**:
+   - Tests use a fake token verifier (no real Firebase credentials needed).
+   - Tests run in isolation and do not call Firebase services.

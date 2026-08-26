@@ -4,7 +4,7 @@ AI-powered fitness app — workout planning with automatic progressive-overload
 suggestions, meal planning, InBody OCR, and analytics. Backend-first with cloud
 sync; guest mode works with no sign-up.
 
-> **Status:** E1 — Foundation ✅ complete. Building toward the full app; see the
+> **Status:** E2 — Backend auth ✅ complete. Building toward the full app; see the
 > [feature roadmap](docs/superpowers/specs/2026-08-26-gigaflow-features-spec.md).
 
 ## Tech stack
@@ -65,6 +65,15 @@ curl http://localhost:8080/api/health
 The API mounts all routes under `/api` (matching the Firebase Hosting rewrite).
 If `MONGODB_URI` is unset, the server still boots (DB connection is skipped).
 
+## API Endpoints
+
+**Auth:**
+- `POST /api/auth/session` — Exchange Firebase ID token for a user session. Requires `Authorization: Bearer <Firebase ID token>` header. Upserts the user (creates if new, updates provider/email if upgrading) and returns the user object.
+- `GET /api/auth/session` — Retrieve the current user session. Requires `Authorization: Bearer <Firebase ID token>` header.
+
+**Health:**
+- `GET /api/health` — Health check.
+
 ## Testing
 
 Vitest across the workspace. The `apps/api` DB test uses
@@ -94,7 +103,9 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 
 ## Roadmap
 
-E1 Foundation ✅ · E2 Auth 3-mode · E3 Exercise Catalog · E4 Workout Plans ·
+E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog · E4 Workout Plans ·
 E5 Session Logging & Progression · E6 Rest Timer & RIR · E7 AI Workout Planner ·
 E8 InBody OCR · E9 Meal Planner · E10 Notifications · E11 Analytics ·
-E12 Subscription & Quota · E13 UI/UX Design System · E14 Testing & Hardening.
+E12 Subscription & Quota · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening.
+
+*Note: Frontend auth (anonymous sign-in, Google/password sign-in/link, account upgrade UI) is deferred to E13, after the web app is scaffolded.*
