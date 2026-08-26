@@ -107,3 +107,13 @@ export async function findById(id: string): Promise<Exercise | null> {
   const doc = await collection().findOne({ _id: new ObjectId(id) });
   return doc ? toExercise(doc) : null;
 }
+
+export async function findBySlugs(slugs: string[]): Promise<Map<string, Exercise>> {
+  const docs = await collection().find({ slug: { $in: slugs }, ownerUserId: null }).toArray();
+  const map = new Map<string, Exercise>();
+  for (const doc of docs) {
+    const ex = toExercise(doc);
+    map.set(ex.slug, ex);
+  }
+  return map;
+}
