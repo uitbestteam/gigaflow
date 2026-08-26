@@ -8,6 +8,8 @@ async function main(): Promise<void> {
   const uri = process.env.MONGODB_URI;
   if (uri) {
     await connectDb(uri, process.env.MONGODB_DB ?? 'gigaflow');
+    const { ensureUserIndexes } = await import('./modules/auth/user.repo.js');
+    await ensureUserIndexes();
   }
   const app = createApp();
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
