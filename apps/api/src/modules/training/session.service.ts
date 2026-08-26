@@ -69,7 +69,7 @@ export async function finishSession(userId: string, sessionId: string): Promise<
   const totalVolume = completed.reduce((sum, s) => sum + s.weightKg * s.repsDone, 0);
   const now = new Date();
   const elapsedSeconds = (now.getTime() - session.startedAt.getTime()) / 1000;
-  const durationSeconds = Math.max(0, elapsedSeconds - (session.pausedDurationSeconds ?? 0));
+  const durationSeconds = Math.round(Math.max(0, elapsedSeconds - (session.pausedDurationSeconds ?? 0)));
 
   const exerciseIds = [...new Set(completed.map((s) => s.exerciseId))];
   for (const exerciseId of exerciseIds) {
