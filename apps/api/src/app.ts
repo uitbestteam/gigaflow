@@ -5,7 +5,7 @@ import { internalAuth } from './middleware/internal-auth.js';
 import { health } from './modules/health/health.routes.js';
 
 export function createApp(): Hono {
-  const app = new Hono();
+  const app = new Hono().basePath('/api');
   app.use('*', logger());
   app.route('/health', health);
   app.use('/internal/*', internalAuth());

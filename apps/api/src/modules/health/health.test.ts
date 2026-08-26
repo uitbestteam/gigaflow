@@ -4,7 +4,7 @@ import { createApp } from '../../app';
 describe('health', () => {
   it('GET /health returns ok envelope', async () => {
     const app = createApp();
-    const res = await app.request('/health');
+    const res = await app.request('/api/health');
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
       success: boolean;
@@ -16,7 +16,7 @@ describe('health', () => {
   });
   it('GET /health/ready returns ready', async () => {
     const app = createApp();
-    const res = await app.request('/health/ready');
+    const res = await app.request('/api/health/ready');
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
       success: boolean;
@@ -27,7 +27,7 @@ describe('health', () => {
   });
   it('unknown route returns error envelope 404', async () => {
     const app = createApp();
-    const res = await app.request('/nope');
+    const res = await app.request('/api/nope');
     expect(res.status).toBe(404);
     const body = (await res.json()) as {
       success: boolean;
