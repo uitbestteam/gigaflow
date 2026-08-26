@@ -51,4 +51,18 @@ describe('ExerciseRepository', () => {
       createCustom('u1', { name: { en: 'My Special Curl', vi: 'x' }, muscleGroup: MuscleGroup.ARMS, equipmentType: EquipmentType.DUMBBELL }),
     ).rejects.toBeInstanceOf(ExerciseConflictError);
   });
+  it('omits ownerUserId for presets but keeps it for custom exercises', async () => {
+    const all = await listVisible('u1', {});
+    const preset = all.find((e) => e.slug === 'bench-barbell');
+    expect(preset).toBeDefined();
+    expect(preset?.ownerUserId).toBeUndefined();
+    expect(preset && 'ownerUserId' in preset).toBe(false);
+
+    const presetById = await findById(preset!.id);
+    expect(presetById?.ownerUserId).toBeUndefined();
+    expect(presetById && 'ownerUserId' in presetById).toBe(false);
+
+    const custom = all.find((e) => e.slug === 'my-special-curl');
+    expect(custom?.ownerUserId).toBe('u1');
+  });
 });

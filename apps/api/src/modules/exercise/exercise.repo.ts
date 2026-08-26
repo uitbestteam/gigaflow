@@ -29,8 +29,9 @@ function collection() {
 }
 
 function toExercise(doc: WithId<Document>): Exercise {
-  const { _id, ...rest } = doc;
-  return { id: _id.toString(), ...(rest as Omit<Exercise, 'id'>) };
+  const { _id, ownerUserId, ...rest } = doc as WithId<Document> & { ownerUserId?: string | null };
+  const base = { id: _id.toString(), ...(rest as Omit<Exercise, 'id' | 'ownerUserId'>) };
+  return ownerUserId ? { ...base, ownerUserId } : base;
 }
 
 function isDuplicateKeyError(err: unknown): boolean {
