@@ -12,9 +12,11 @@
   "dependencies": {
     "@gigaflow/shared": "workspace:*",
     "@hono/node-server": "^1.13.0",
+    "@hono/zod-validator": "^0.9.0",
     "firebase-admin": "^14.3.0",
     "hono": "^4.6.0",
-    "mongodb": "^6.10.0"
+    "mongodb": "^6.10.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

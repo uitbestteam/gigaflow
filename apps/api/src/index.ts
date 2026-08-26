@@ -10,6 +10,10 @@ async function main(): Promise<void> {
     await connectDb(uri, process.env.MONGODB_DB ?? 'gigaflow');
     const { ensureUserIndexes } = await import('./modules/auth/user.repo.js');
     await ensureUserIndexes();
+    const { ensureExerciseIndexes } = await import('./modules/exercise/exercise.repo.js');
+    const { seedPresets } = await import('./modules/exercise/seed-exercises.js');
+    await ensureExerciseIndexes();
+    await seedPresets();
   }
   const app = createApp();
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
