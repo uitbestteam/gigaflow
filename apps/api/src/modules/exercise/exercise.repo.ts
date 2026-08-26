@@ -29,9 +29,16 @@ function collection() {
 }
 
 function toExercise(doc: WithId<Document>): Exercise {
-  const { _id, ownerUserId, ...rest } = doc as WithId<Document> & { ownerUserId?: string | null };
-  const base = { id: _id.toString(), ...(rest as Omit<Exercise, 'id' | 'ownerUserId'>) };
-  return ownerUserId ? { ...base, ownerUserId } : base;
+  const { _id, ownerUserId, videoUrl, ...rest } = doc as WithId<Document> & {
+    ownerUserId?: string | null;
+    videoUrl?: string | null;
+  };
+  const base = { id: _id.toString(), ...(rest as Omit<Exercise, 'id' | 'ownerUserId' | 'videoUrl'>) };
+  return {
+    ...base,
+    ...(ownerUserId ? { ownerUserId } : {}),
+    ...(videoUrl ? { videoUrl } : {}),
+  };
 }
 
 function isDuplicateKeyError(err: unknown): boolean {

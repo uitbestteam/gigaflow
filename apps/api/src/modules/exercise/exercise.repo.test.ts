@@ -65,4 +65,15 @@ describe('ExerciseRepository', () => {
     const custom = all.find((e) => e.slug === 'my-special-curl');
     expect(custom?.ownerUserId).toBe('u1');
   });
+  it('omits videoUrl for a preset created without one', async () => {
+    const all = await listVisible('u1', {});
+    const preset = all.find((e) => e.slug === 'bench-barbell');
+    expect(preset).toBeDefined();
+    expect(preset?.videoUrl).toBeUndefined();
+    expect(preset && 'videoUrl' in preset).toBe(false);
+
+    const presetById = await findById(preset!.id);
+    expect(presetById?.videoUrl).toBeUndefined();
+    expect(presetById && 'videoUrl' in presetById).toBe(false);
+  });
 });
