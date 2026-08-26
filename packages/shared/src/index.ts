@@ -1,3 +1,3 @@
-export * from './enums';
-export * from './schemas/common';
-export * from './types';
+export * from './enums/index.js';
+export * from './schemas/common.js';
+export * from './types.js';

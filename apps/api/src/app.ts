@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
-import { onError, notFound } from './middleware/error';
-import { health } from './modules/health/health.routes';
+import { onError, notFound } from './middleware/error.js';
+import { health } from './modules/health/health.routes.js';
 
 export function createApp(): Hono {
   const app = new Hono();

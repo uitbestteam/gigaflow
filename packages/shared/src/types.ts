@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zTranslatable } from './schemas/common';
+import { zTranslatable } from './schemas/common.js';
 
 export type Translatable = z.infer<typeof zTranslatable>;
 
