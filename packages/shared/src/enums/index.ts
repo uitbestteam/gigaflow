@@ -68,3 +68,28 @@ export enum GenerationType {
   MEAL = 'meal',
   INBODY = 'inbody',
 }
+
+export enum Goal {
+  STRENGTH = 'strength',
+  HYPERTROPHY = 'hypertrophy',
+  GENERAL_FITNESS = 'general_fitness',
+  WEIGHT_LOSS = 'weight_loss',
+}
+
+export enum ExperienceLevel {
+  BEGINNER = 'beginner',
+  INTERMEDIATE = 'intermediate',
+  ADVANCED = 'advanced',
+}
+
+export enum JobStatus {
+  QUEUED = 'queued',
+  PROCESSING = 'processing',
+  DONE = 'done',
+  FAILED = 'failed',
+}
+
+export enum AiProviderName {
+  GEMINI = 'gemini',
+  OPENAI = 'openai',
+}

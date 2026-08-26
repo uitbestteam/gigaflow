@@ -5,4 +5,5 @@ export * from './schemas/exercise.js';
 export * from './schemas/plan.js';
 export * from './schemas/session.js';
 export * from './schemas/subscription.js';
+export * from './schemas/ai.js';
 export * from './types.js';
