@@ -14,10 +14,14 @@ export function computeTarget(
   if (!last || last.sets.length === 0) {
     return { weightSuggested: 0, repsSuggested: slot.repRangeMin, reason: 'first' };
   }
-  const prevWeight = last.sets[0].weightKg;
+  const first = last.sets[0];
+  if (!first) {
+    return { weightSuggested: 0, repsSuggested: slot.repRangeMin, reason: 'first' };
+  }
+  const prevWeight = first.weightKg;
   const allHitMax = last.sets.every((s) => s.repsDone >= slot.repRangeMax);
   if (allHitMax) {
     return { weightSuggested: prevWeight + slot.weightIncrement, repsSuggested: slot.repRangeMin, reason: 'increase' };
   }
-  return { weightSuggested: prevWeight, repsSuggested: Math.min(last.sets[0].repsDone + 1, slot.repRangeMax), reason: 'hold' };
+  return { weightSuggested: prevWeight, repsSuggested: Math.min(first.repsDone + 1, slot.repRangeMax), reason: 'hold' };
 }
