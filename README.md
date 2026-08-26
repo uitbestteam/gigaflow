@@ -4,7 +4,7 @@ AI-powered fitness app — workout planning with automatic progressive-overload
 suggestions, meal planning, InBody OCR, and analytics. Backend-first with cloud
 sync; guest mode works with no sign-up.
 
-> **Status:** E3 — Exercise catalog backend ✅ complete. Building toward the full app;
+> **Status:** E4 — Workout plans backend ✅ complete. Building toward the full app;
 > see the [feature roadmap](docs/superpowers/specs/2026-08-26-gigaflow-features-spec.md).
 
 ## Tech stack
@@ -130,6 +130,10 @@ logic through **Level 1 tests** (which inject a fake verifier) rather than curl.
 - `GET /api/exercises?muscleGroup=&q=` — List preset and custom exercises. Requires `Authorization: Bearer <Firebase ID token>` header. Guests (anonymous users) included. Query params: `muscleGroup` (optional, ignored if invalid), `q` (optional, filters by name).
 - `POST /api/exercises` — Create a custom exercise. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ name: { en: string, vi: string }, muscleGroup: string, equipmentType: string, defaultIncrement?: number, videoUrl?: string }`. Returns 201 on success, 409 on duplicate slug.
 
+**Plans:**
+- `POST /api/plans/from-template` — Create a plan from a preset split template. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ templateType: "ppl" | "upper_lower" | "full_body" }`. Creates a plan with workout templates and exercise slots nested; sets the plan as active and returns it as 201. Returns 400 for unknown or `custom` template type.
+- `GET /api/plans/active` — Retrieve the caller's active plan with templates and slots nested. Requires `Authorization: Bearer <Firebase ID token>` header. Returns `{ data: Plan | null }` if no active plan exists.
+
 ## Testing
 
 Vitest across the workspace. The `apps/api` DB test uses
@@ -159,11 +163,12 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 
 ## Roadmap
 
-E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ·
+E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
 E5 Session Logging & Progression · E6 Rest Timer & RIR · E7 AI Workout Planner ·
 E8 InBody OCR · E9 Meal Planner · E10 Notifications · E11 Analytics ·
 E12 Subscription & Quota · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening.
 
 *Notes:*
 - *E3-S4 Exercise library UI is deferred to E13 (web app frontend).*
+- *E4-S3 Custom plan builder UI and E4-S5 Home/Today queue UI are deferred to E13 (web app frontend).*
 - *Frontend auth (anonymous sign-in, Google/password sign-in/link, account upgrade UI) is deferred to E13, after the web app is scaffolded.*
