@@ -5,6 +5,7 @@ import { internalAuth } from './middleware/internal-auth.js';
 import { health } from './modules/health/health.routes.js';
 import { makeAuthRoutes } from './modules/auth/auth.routes.js';
 import { makeExerciseRoutes } from './modules/exercise/exercise.routes.js';
+import { makeWorkoutRoutes } from './modules/workout/workout.routes.js';
 import { firebaseVerifier } from './lib/firebase.js';
 
 export function createApp(): Hono {
@@ -15,6 +16,7 @@ export function createApp(): Hono {
   app.get('/internal/tasks/ping', (c) => c.json({ success: true, data: { pong: true } }));
   app.route('/auth', makeAuthRoutes({ verify: firebaseVerifier }));
   app.route('/exercises', makeExerciseRoutes({ verify: firebaseVerifier }));
+  app.route('/plans', makeWorkoutRoutes({ verify: firebaseVerifier }));
   app.notFound(notFound);
   app.onError(onError);
   return app;
