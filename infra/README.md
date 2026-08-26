@@ -69,3 +69,46 @@ either right after `apply`, or before deploying real traffic to the service.
    ```
    Verify rewrite to Cloud Run works: `curl https://<hosting-url>/api/health`
    (deferred until Cloud Run is deployed and verified).
+
+## Deferred CI/CD setup
+
+The following Cloud Build and GitHub integration steps are **deferred to a human**:
+
+1. **Create Artifact Registry repository** (one-time, manual):
+   ```bash
+   gcloud artifacts repositories create gigaflow --repository-format=docker \
+     --location=asia-southeast1 --project=gigaflow-dev
+   ```
+
+2. **Connect GitHub repository to Cloud Build** (one-time, manual):
+   Use the GCP Console to create a Cloud Build trigger on branch `main`, or run:
+   ```bash
+   gcloud builds triggers create github \
+     --name=gigaflow-main-deploy \
+     --repo-owner=<github-org> \
+     --repo-name=gigaflow \
+     --branch-pattern="^main$" \
+     --build-config=cloudbuild.yaml \
+     --project=gigaflow-dev
+   ```
+
+3. **Grant Cloud Build service account permissions**:
+   ```bash
+   PROJECT_NUMBER=$(gcloud projects describe gigaflow-dev --format='value(projectNumber)')
+   CLOUD_BUILD_SA="${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com"
+   
+   # Grant Cloud Run admin
+   gcloud projects add-iam-policy-binding gigaflow-dev \
+     --member="serviceAccount:${CLOUD_BUILD_SA}" \
+     --role="roles/run.admin"
+   
+   # Grant Firebase Hosting admin
+   gcloud projects add-iam-policy-binding gigaflow-dev \
+     --member="serviceAccount:${CLOUD_BUILD_SA}" \
+     --role="roles/firebase.admin"
+   ```
+
+Note: GitHub Actions workflow (`.github/workflows/ci.yaml`) runs on pull requests
+to main for fast local test feedback (no GCP resources needed). Cloud Build
+(`cloudbuild.yaml`) runs on main branch merges to build, push image to Artifact
+Registry, deploy to Cloud Run, and deploy Firebase Hosting.

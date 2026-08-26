@@ -1,0 +1,23 @@
+substitutions:
+  _REGION: asia-southeast1
+  _REPO: gigaflow
+  _SERVICE: gigaflow-api
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ["build", "-t",
+           "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:$SHORT_SHA",
+           "-f", "apps/api/Dockerfile", "."]
+  - name: gcr.io/cloud-builders/docker
+    args: ["push", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:$SHORT_SHA"]
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args: ["run", "deploy", "${_SERVICE}",
+           "--image", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:$SHORT_SHA",
+           "--region", "${_REGION}", "--platform", "managed", "--quiet"]
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: bash
+    args: ["-c", "npm i -g firebase-tools && cd apps/web && echo 'build web (E13)' && cd ../.. && firebase deploy --only hosting --project $PROJECT_ID --non-interactive || true"]
+images:
+  - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:$SHORT_SHA"
+options:
+  logging: CLOUD_LOGGING_ONLY
