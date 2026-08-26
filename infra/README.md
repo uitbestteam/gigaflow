@@ -62,3 +62,10 @@ Ordering note: `terraform apply` creates the Secret Manager secret
 account, and IAM bindings. The Cloud Run revision will fail to start until
 each secret has at least one version, so add the secret versions (steps 3-4)
 either right after `apply`, or before deploying real traffic to the service.
+
+6. **Firebase Hosting deployment**:
+   ```bash
+   firebase deploy --only hosting --project gigaflow-dev
+   ```
+   Verify rewrite to Cloud Run works: `curl https://<hosting-url>/api/health`
+   (deferred until Cloud Run is deployed and verified).
