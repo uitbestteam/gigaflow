@@ -81,3 +81,17 @@ export async function setActivePlan(userId: string, planId: string): Promise<voi
   await plans().updateMany({ userId, isActive: true }, { $set: { isActive: false } });
   await plans().updateOne({ _id: new ObjectId(planId), userId }, { $set: { isActive: true } });
 }
+
+export async function getTemplateWithSlotsForUser(
+  userId: string, templateId: string,
+): Promise<{ template: WorkoutTemplate; slots: ExerciseSlot[] } | null> {
+  if (!ObjectId.isValid(templateId)) return null;
+  const tDoc = await templates().findOne({ _id: new ObjectId(templateId) });
+  if (!tDoc) return null;
+  const template = mapId<WorkoutTemplate>(tDoc);
+  if (!ObjectId.isValid(template.planId)) return null;
+  const planDoc = await plans().findOne({ _id: new ObjectId(template.planId), userId });
+  if (!planDoc) return null;
+  const sDocs = await slots().find({ templateId: template.id }).sort({ orderIndex: 1 }).toArray();
+  return { template, slots: sDocs.map((d) => mapId<ExerciseSlot>(d)) };
+}
