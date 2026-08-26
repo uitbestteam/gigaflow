@@ -27,6 +27,13 @@ resource "google_project_iam_member" "sa_cloud_tasks_enqueuer" {
   member  = "serviceAccount:${google_service_account.api.email}"
 }
 
+module "cloud_tasks" {
+  source     = "../../modules/cloud-tasks"
+  project_id = var.project_id
+  region     = var.region
+  queues     = ["workout-gen", "meal-gen", "inbody-ocr"]
+}
+
 module "cloud_run" {
   source          = "../../modules/cloud-run"
   project_id      = var.project_id
