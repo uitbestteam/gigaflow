@@ -4,7 +4,7 @@ AI-powered fitness app — workout planning with automatic progressive-overload
 suggestions, meal planning, InBody OCR, and analytics. Backend-first with cloud
 sync; guest mode works with no sign-up.
 
-> **Status:** E5 — Session logging & progression backend ✅ complete. Building toward the full app;
+> **Status:** E12 — Subscription & quota backend ✅ complete. Building toward the full app;
 > see the [feature roadmap](docs/superpowers/specs/2026-08-26-gigaflow-features-spec.md).
 
 ## Tech stack
@@ -142,6 +142,9 @@ logic through **Level 1 tests** (which inject a fake verifier) rather than curl.
 - `POST /api/sessions/:id/cancel` — Cancel a session. Requires `Authorization: Bearer <Firebase ID token>` header.
 - `GET /api/exercises/:id/last` — Retrieve the last performance for an exercise (used as the progression source for prefill). Requires `Authorization: Bearer <Firebase ID token>` header.
 
+**Quota:**
+AI generation is limited per 30-day period per user. FREE plan limits: workout 10 / meal 10 / inbody 5. Guests and registered users share the same basic limits. The `quotaGuard(type)` middleware returns **429** when exceeded and is applied to the AI-generation routes in E7. Usage is incremented on job enqueue and rolled back on job failure.
+
 ## Testing
 
 Vitest across the workspace. The `apps/api` DB test uses
@@ -174,7 +177,7 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
 E5 Session Logging & Progression ✅ · E6 Rest Timer & RIR · E7 AI Workout Planner ·
 E8 InBody OCR · E9 Meal Planner · E10 Notifications · E11 Analytics ·
-E12 Subscription & Quota · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening.
+E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening.
 
 *Notes:*
 - *E3-S4 Exercise library UI is deferred to E13 (web app frontend).*
