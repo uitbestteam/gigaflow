@@ -16,6 +16,8 @@ async function main(): Promise<void> {
     await seedPresets();
     const { ensureWorkoutIndexes } = await import('./modules/workout/workout.repo.js');
     await ensureWorkoutIndexes();
+    const { ensureTrainingIndexes } = await import('./modules/training/session.repo.js');
+    await ensureTrainingIndexes();
   }
   const app = createApp();
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
