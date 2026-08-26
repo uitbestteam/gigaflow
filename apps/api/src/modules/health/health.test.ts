@@ -6,7 +6,11 @@ describe('health', () => {
     const app = createApp();
     const res = await app.request('/health');
     expect(res.status).toBe(200);
-    const body = await res.json();
+    const body = (await res.json()) as {
+      success: boolean;
+      data: { status?: string; ready?: boolean };
+      message?: string;
+    };
     expect(body.success).toBe(true);
     expect(body.data.status).toBe('ok');
   });
@@ -14,14 +18,22 @@ describe('health', () => {
     const app = createApp();
     const res = await app.request('/health/ready');
     expect(res.status).toBe(200);
-    const body = await res.json();
+    const body = (await res.json()) as {
+      success: boolean;
+      data: { status?: string; ready?: boolean };
+      message?: string;
+    };
     expect(body.data.ready).toBe(true);
   });
   it('unknown route returns error envelope 404', async () => {
     const app = createApp();
     const res = await app.request('/nope');
     expect(res.status).toBe(404);
-    const body = await res.json();
+    const body = (await res.json()) as {
+      success: boolean;
+      data?: { status?: string; ready?: boolean };
+      message?: string;
+    };
     expect(body.success).toBe(false);
   });
 });
