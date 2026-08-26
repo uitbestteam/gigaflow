@@ -19,6 +19,7 @@ afterAll(async () => {
 const fakeVerify: TokenVerifier = async (t) => {
   if (t === 'good-anon') return { uid: 'uid_anon', signInProvider: 'anonymous' };
   if (t === 'good-google') return { uid: 'uid_anon', email: 'g@x.com', signInProvider: 'google.com' };
+  if (t === 'unsupported-provider') return { uid: 'uid_x', signInProvider: 'facebook.com' };
   throw new Error('invalid token');
 };
 
@@ -52,5 +53,9 @@ describe('firebaseAuth', () => {
     expect(body.data.isGuest).toBe(false);
     expect(body.data.authProvider).toBe('google');
     expect(body.data.email).toBe('g@x.com');
+  });
+  it('403 when token verifies but sign-in provider is unsupported', async () => {
+    const res = await app().request('/me', { headers: { Authorization: 'Bearer unsupported-provider' } });
+    expect(res.status).toBe(403);
   });
 });

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { connectDb, closeDb } from '../../lib/db.js';
+import { connectDb, closeDb, getDb } from '../../lib/db.js';
 import { AuthProvider } from '@gigaflow/shared';
 import { ensureUserIndexes, upsertByAuthId, findByAuthId } from './user.repo.js';
 
@@ -36,5 +36,17 @@ describe('UserRepository', () => {
     expect(linked.authProvider).toBe(AuthProvider.GOOGLE);
     expect(linked.isGuest).toBe(false);
     expect(linked.email).toBe('c@x.com');
+  });
+  it('handles concurrent first-time upserts for the same new authId without throwing', async () => {
+    const results = await Promise.all(
+      Array.from({ length: 5 }, () =>
+        upsertByAuthId({ authId: 'uid_race', authProvider: AuthProvider.ANONYMOUS, isGuest: true }),
+      ),
+    );
+    for (const r of results) {
+      expect(r.authId).toBe('uid_race');
+    }
+    const count = await getDb().collection('users').countDocuments({ authId: 'uid_race' });
+    expect(count).toBe(1);
   });
 });

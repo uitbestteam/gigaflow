@@ -38,7 +38,14 @@ export function firebaseAuth(deps: FirebaseAuthDeps): MiddlewareHandler {
       return c.json(errorBody('Unauthorized'), 401);
     }
 
-    const { authProvider, isGuest } = mapSignInProvider(verified.signInProvider);
+    let authProvider: ReturnType<typeof mapSignInProvider>['authProvider'];
+    let isGuest: boolean;
+    try {
+      ({ authProvider, isGuest } = mapSignInProvider(verified.signInProvider));
+    } catch {
+      return c.json(errorBody('Forbidden'), 403);
+    }
+
     const user = await upsert({
       authId: verified.uid,
       authProvider,
