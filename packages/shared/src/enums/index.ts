@@ -30,3 +30,25 @@ export enum EquipmentType {
   BODYWEIGHT = 'bodyweight',
   CABLE = 'cable',
 }
+
+export enum PlanSource {
+  AI = 'ai',
+  CUSTOM = 'custom',
+}
+
+export enum PlanTemplateType {
+  PPL = 'ppl',
+  UPPER_LOWER = 'upper_lower',
+  FULL_BODY = 'full_body',
+  CUSTOM = 'custom',
+}
+
+export enum ColorTag {
+  PUSH = 'push',
+  PULL = 'pull',
+  LEGS = 'legs',
+  UPPER = 'upper',
+  LOWER = 'lower',
+  FULL = 'full',
+  CUSTOM = 'custom',
+}
