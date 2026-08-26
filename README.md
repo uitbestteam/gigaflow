@@ -48,22 +48,74 @@ docs/           Architecture spec, feature spec, plans
 
 ```bash
 pnpm install
-pnpm build        # turbo: builds packages/shared then apps/api
-pnpm test         # all workspaces (Vitest)
-pnpm typecheck
 ```
 
-Run the API locally:
+```bash
+pnpm build        # turbo: builds packages/shared then apps/api
+```
+
+## Running locally
+
+Three levels, from zero-setup to full stack. The API mounts every route under
+`/api` (matching the Firebase Hosting rewrite).
+
+### Level 1 — Automated tests (no external services)
+
+The fastest way to verify the whole backend. Repositories, middleware, and
+routes are covered with an in-memory MongoDB (`mongodb-memory-server`) and a
+**fake Firebase verifier**, so no real Mongo or Firebase is needed.
 
 ```bash
-cp .env.example .env          # set PORT, MONGODB_URI (optional locally), etc.
+pnpm test
+```
+
+First run downloads a MongoDB binary (~66MB, needs network); later runs are
+fast. Also useful: `pnpm typecheck` and `pnpm build`.
+
+### Level 2 — Run the API, health only (no Mongo / no Firebase)
+
+```bash
 pnpm --filter @gigaflow/api dev
-# health check:
+```
+
+```bash
 curl http://localhost:8080/api/health
 ```
 
-The API mounts all routes under `/api` (matching the Firebase Hosting rewrite).
-If `MONGODB_URI` is unset, the server still boots (DB connection is skipped).
+With no `MONGODB_URI` set, the server still boots and skips the DB connection.
+Auth-protected routes return **401** without a token (expected).
+
+### Level 3 — Full API with MongoDB
+
+Start a local MongoDB (Docker):
+
+```bash
+docker run -d --name gf-mongo -p 27017:27017 mongo:7
+```
+
+Create `.env` at the repo root:
+
+```
+PORT=8080
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB=gigaflow
+# GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service-account.json  # only for real Firebase token verification
+```
+
+```bash
+pnpm --filter @gigaflow/api dev
+```
+
+On startup the server ensures indexes (and, from E3 on, seeds the exercise
+catalog). DB-backed reads/writes now work.
+
+### Calling auth-protected endpoints
+
+The running server verifies **real Firebase ID tokens**, so `POST /api/auth/session`
+and the exercise routes need both `GOOGLE_APPLICATION_CREDENTIALS` (a Firebase
+service-account JSON) **and** a client-issued Firebase ID token sent as
+`Authorization: Bearer <token>`. Until the web app (E13) exists, exercise this
+logic through **Level 1 tests** (which inject a fake verifier) rather than curl.
 
 ## API Endpoints
 
