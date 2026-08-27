@@ -113,6 +113,35 @@ describe('SummaryPage', () => {
     expect(screen.getByText('1234')).toBeInTheDocument();
   });
 
+  it('renders the completed-session header with the session number', async () => {
+    renderSummary(makeSession(), makeSetLogs());
+
+    expect(await screen.findByText('✓ Session #3 complete')).toBeInTheDocument();
+  });
+
+  it('rounds a group average with a repeating decimal to 1 decimal place', async () => {
+    const base = {
+      id: 'log',
+      sessionId: 's1',
+      slotId: 'slot-a',
+      exerciseId: 'ex-a',
+      weightSuggested: 0,
+      repsSuggested: 0,
+      repsDone: 8,
+      isCompleted: true,
+      loggedAt: new Date('2026-01-01T00:10:00Z'),
+    };
+    // (10 + 10 + 11) / 3 = 10.333... which should round to 10.3.
+    const setLogs: SetLog[] = [
+      { ...base, id: 'log-1', setNumber: 1, weightKg: 10 },
+      { ...base, id: 'log-2', setNumber: 2, weightKg: 10 },
+      { ...base, id: 'log-3', setNumber: 3, weightKg: 11 },
+    ];
+    renderSummary(makeSession(), setLogs);
+
+    expect(await screen.findByText('3 sets · avg 10.3kg')).toBeInTheDocument();
+  });
+
   it('renders a SummaryRow per exercise with the PR badge only for the PR exercise', async () => {
     renderSummary(makeSession(), makeSetLogs());
 

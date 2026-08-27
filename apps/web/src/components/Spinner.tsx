@@ -4,11 +4,9 @@ export interface SpinnerProps {
 }
 
 /**
- * Reduced-motion-safe spinner: uses Tailwind's `animate-spin`, which is
- * automatically disabled by the browser when `prefers-reduced-motion:
- * reduce` is set (Tailwind's base layer honors this via CSS `@media`
- * override is left to global styles; here we additionally guard with
- * `motion-reduce:animate-none` so the spinner falls back to a static ring).
+ * A spin animation indicator. The `motion-reduce:animate-none` class
+ * disables the spin animation when the user has `prefers-reduced-motion`
+ * enabled, leaving a static ring instead.
  */
 export function Spinner({ className = '', label = 'Loading' }: SpinnerProps) {
   const classes = [

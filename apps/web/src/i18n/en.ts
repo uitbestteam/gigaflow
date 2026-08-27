@@ -54,6 +54,7 @@ export interface TranslationSchema {
   };
   summary: {
     title: string;
+    doneTitle: string;
     duration: string;
     totalVolume: string;
     newPr: string;
@@ -113,6 +114,7 @@ const en: TranslationSchema = {
   },
   summary: {
     title: 'Session summary',
+    doneTitle: 'Session #{{n}} complete',
     duration: 'Duration',
     totalVolume: 'Total volume',
     newPr: 'New PR',

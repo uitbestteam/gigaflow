@@ -54,6 +54,7 @@ const vi: TranslationSchema = {
   },
   summary: {
     title: 'Tổng kết buổi tập',
+    doneTitle: 'Hoàn thành buổi tập #{{n}}',
     duration: 'Thời lượng',
     totalVolume: 'Tổng khối lượng',
     newPr: 'Kỷ lục mới',

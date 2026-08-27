@@ -40,7 +40,7 @@ function groupSetLogs(setLogs: SetLog[]): ExerciseSummary[] {
     return {
       exerciseId,
       setCount: entry.count,
-      avgWeightKg: entry.total / entry.count,
+      avgWeightKg: Math.round((entry.total / entry.count) * 10) / 10,
     };
   });
 }
@@ -77,7 +77,7 @@ export function SummaryPage() {
     <div className="flex flex-col gap-4 p-4">
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-text">
-          ✓ {t('session.title')} #{session.sessionNumber} {t('summary.title')}
+          ✓ {t('summary.doneTitle', { n: session.sessionNumber })}
         </h1>
         <div className="flex items-center gap-4 text-sm text-text-secondary">
           <span>
