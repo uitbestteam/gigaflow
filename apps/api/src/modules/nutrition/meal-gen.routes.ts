@@ -3,7 +3,6 @@ import { zValidator } from '@hono/zod-validator';
 import { apiSuccess, GenerationType, zGenerateMealInput } from '@gigaflow/shared';
 import { firebaseAuth, type TokenVerifier } from '../auth/firebase-auth.js';
 import { quotaGuard } from '../subscription/quota.guard.js';
-import { incrementUsage } from '../subscription/quota.service.js';
 import { createJob, findJobForUser } from '../workout/generation-job.repo.js';
 import type { TaskEnqueuer } from '../workout/workout-gen.routes.js';
 import { processGenerateMeal, type MealGenDeps } from './meal-generation.service.js';
@@ -28,7 +27,6 @@ export function makeMealGenRoutes(deps: {
     async (c) => {
       const user = c.get('user');
       const input = c.req.valid('json');
-      await incrementUsage(user.authId, GenerationType.MEAL, new Date());
       const job = await createJob(user.authId, GenerationType.MEAL, input);
       await deps.enqueue(job.id);
       return c.json(apiSuccess({ jobId: job.id }), 202);

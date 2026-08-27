@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { connectDb, closeDb, getDb } from '../../lib/db.js';
 import { GenerationType, SubscriptionPlan, PLAN_LIMITS } from '@gigaflow/shared';
-import { checkQuota, incrementUsage, rollbackUsage } from './quota.service.js';
+import { checkQuota, incrementUsage, rollbackUsage, tryConsume } from './quota.service.js';
 
 let mongod: MongoMemoryServer;
 const NOW = new Date('2026-08-26T00:00:00Z');
@@ -41,5 +41,19 @@ describe('quota.service', () => {
     const s = await checkQuota('u4', GenerationType.WORKOUT, NOW); // >30 days later
     expect(s.used).toBe(0);
     expect(s.allowed).toBe(true);
+  });
+
+  it('tryConsume under concurrency allows exactly the limit and denies the rest', async () => {
+    await makeUser('u5');
+    const limit = PLAN_LIMITS[SubscriptionPlan.FREE][GenerationType.WORKOUT];
+    const attempts = limit + 5;
+    const results = await Promise.all(
+      Array.from({ length: attempts }, () => tryConsume('u5', GenerationType.WORKOUT, NOW)),
+    );
+    const allowedCount = results.filter((r) => r.allowed).length;
+    const deniedCount = results.filter((r) => !r.allowed).length;
+    expect(allowedCount).toBe(limit);
+    expect(deniedCount).toBe(attempts - limit);
+    expect((await checkQuota('u5', GenerationType.WORKOUT, NOW)).used).toBe(limit);
   });
 });

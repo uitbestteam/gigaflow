@@ -5,7 +5,6 @@ import { apiSuccess, GenerationType, zGenerateWorkoutInput } from '@gigaflow/sha
 import { internalAuth } from '../../middleware/internal-auth.js';
 import { firebaseAuth, type TokenVerifier } from '../auth/firebase-auth.js';
 import { quotaGuard } from '../subscription/quota.guard.js';
-import { incrementUsage } from '../subscription/quota.service.js';
 import { createJob, findJobForUser } from './generation-job.repo.js';
 import { processGenerateWorkout, type WorkoutGenDeps } from './workout-generation.service.js';
 import { processGenerateMeal, type MealGenDeps } from '../nutrition/meal-generation.service.js';
@@ -36,7 +35,6 @@ export function makeWorkoutGenRoutes(deps: {
     async (c) => {
       const user = c.get('user');
       const input = c.req.valid('json');
-      await incrementUsage(user.authId, GenerationType.WORKOUT, new Date());
       const job = await createJob(user.authId, GenerationType.WORKOUT, input);
       await deps.enqueue(job.id);
       return c.json(apiSuccess({ jobId: job.id }), 202);

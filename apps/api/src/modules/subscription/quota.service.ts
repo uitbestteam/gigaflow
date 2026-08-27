@@ -32,19 +32,25 @@ function freshSubscription(now: Date): Subscription {
 }
 
 export async function ensureCurrentPeriod(userId: string, now: Date): Promise<Subscription> {
+  const cutoff = new Date(now.getTime() - PERIOD_MS);
+
+  // Atomically reset the period only if it is missing or expired, so concurrent callers
+  // for a not-yet-initialized/expired user can't each independently overwrite each
+  // other's aiUsage with a fresh zeroed subscription (a TOCTOU on the period reset itself).
+  const reset = await collection().findOneAndUpdate(
+    {
+      authId: userId,
+      $or: [{ subscription: { $exists: false } }, { 'subscription.periodStart': { $lt: cutoff } }],
+    },
+    { $set: { subscription: freshSubscription(now) } },
+    { returnDocument: 'after' },
+  );
+  if (reset?.subscription) return reset.subscription;
+
   const user = await collection().findOne({ authId: userId }, { projection: { _id: 0 } });
   if (!user) throw new Error('User not found');
-
-  const sub = user.subscription;
-  const expired = !sub || now.getTime() - sub.periodStart.getTime() >= PERIOD_MS;
-
-  if (expired) {
-    const next = freshSubscription(now);
-    await collection().updateOne({ authId: userId }, { $set: { subscription: next } });
-    return next;
-  }
-
-  return sub;
+  if (!user.subscription) throw new Error('User not found');
+  return user.subscription;
 }
 
 export async function checkQuota(
@@ -63,6 +69,37 @@ export async function checkQuota(
     used,
     limit,
   };
+}
+
+export interface ConsumeResult {
+  allowed: boolean;
+  used: number;
+  limit: number;
+}
+
+export async function tryConsume(
+  userId: string,
+  type: GenerationType,
+  now: Date,
+): Promise<ConsumeResult> {
+  const sub = await ensureCurrentPeriod(userId, now);
+  const plan = sub.plan;
+  const planLimits = PLAN_LIMITS[plan];
+  if (!planLimits) throw new Error(`No limits configured for plan: ${plan}`);
+  const limit = planLimits[type];
+  if (limit === undefined) throw new Error(`No limit configured for type: ${type}`);
+
+  const field = `subscription.aiUsage.${type}`;
+  const result = await collection().findOneAndUpdate(
+    { authId: userId, [field]: { $lt: limit } },
+    { $inc: { [field]: 1 } },
+    { returnDocument: 'after' },
+  );
+
+  if (!result?.subscription) {
+    return { allowed: false, used: limit, limit };
+  }
+  return { allowed: true, used: result.subscription.aiUsage[type], limit };
 }
 
 export async function incrementUsage(
