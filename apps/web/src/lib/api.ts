@@ -6,6 +6,7 @@ import {
   zTrainingSession,
   zSetLog,
   zPersonalRecord,
+  zExercise,
   type User,
   type PlanWithTemplates,
   type SessionStartResult,
@@ -14,6 +15,7 @@ import {
   type PersonalRecord,
   type LogSetInput,
   type PlanTemplateType,
+  type Exercise,
 } from '@gigaflow/shared';
 
 export class ApiError extends Error {
@@ -173,4 +175,8 @@ export async function cancelSession(id: string): Promise<TrainingSession> {
 
 export async function getPrs(): Promise<PersonalRecord[]> {
   return apiFetch('/stats/prs', { schema: zPersonalRecord.array() });
+}
+
+export async function getExercises(): Promise<Exercise[]> {
+  return apiFetch('/exercises', { schema: zExercise.array() });
 }

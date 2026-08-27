@@ -112,7 +112,7 @@ export const useSessionStore = create<SessionStoreState>((set, get) => ({
     const result: LogSetInput[] = [];
     for (const [slotId, slot] of Object.entries(get().slots)) {
       slot.sets.forEach((s, i) => {
-        if (s.status === 'pending') return;
+        if (s.status !== 'done' && s.status !== 'edited') return;
         result.push({
           slotId,
           exerciseId: slot.exerciseId,

@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { MuscleGroup, type PlanWithTemplates, type SessionStartResult } from '@gigaflow/shared';
-import { cancelSession, finishSession, logSets } from '../../lib/api';
+import { MuscleGroup, type Exercise, type PlanWithTemplates, type SessionStartResult } from '@gigaflow/shared';
+import { cancelSession, finishSession, getExercises, logSets } from '../../lib/api';
 import { resolveTranslatable } from '../../lib/i18n';
 import { useSessionStore } from '../../store/sessionStore';
 import { ROUTES, sessionSummaryPath } from '../../routes';
@@ -11,17 +11,15 @@ import { ExerciseRow, type ExerciseRowSet, type ExerciseRowSlot, type ExerciseRo
 import { RestTimer } from '../../components/RestTimer';
 import { RirPicker } from '../../components/RirPicker';
 import { Button } from '../../components/Button';
+import { Spinner } from '../../components/Spinner';
 import type { SetBoxStatus } from '../../components/SetBox';
 
 const DEFAULT_REST_SECONDS = 90;
 
 /**
- * `SlotTarget` (from `@gigaflow/shared`) only carries `exerciseId` — the
- * session-start payload does not join the exercise catalog, and there is no
- * `getExercises`/similar API helper to fetch it (see `apps/web/src/lib/api.ts`).
- * Per the F1 scope for this screen, the exercise id is used as the display
- * name and a fixed muscle group placeholder is shown, rather than
- * fabricating a backend call. Tracked as a known gap — see task-9 report.
+ * Last-resort placeholder for a slot whose `exerciseId` isn't found in the
+ * `/exercises` catalog (a data-consistency gap, not the expected path —
+ * normally every slot's exercise resolves via `getExercises()`).
  */
 const FALLBACK_MUSCLE_GROUP = MuscleGroup.CHEST;
 
@@ -44,6 +42,15 @@ export function ActiveSessionPage() {
   const queryClient = useQueryClient();
 
   const startResult = id ? queryClient.getQueryData<SessionStartResult>(['session', id]) : undefined;
+
+  const exercisesQuery = useQuery({ queryKey: ['exercises'], queryFn: getExercises });
+  const exercisesById = useMemo(() => {
+    const map = new Map<string, Exercise>();
+    for (const exercise of exercisesQuery.data ?? []) {
+      map.set(exercise.id, exercise);
+    }
+    return map;
+  }, [exercisesQuery.data]);
 
   const storeSlots = useSessionStore((s) => s.slots);
   const initFromSlots = useSessionStore((s) => s.initFromSlots);
@@ -98,12 +105,22 @@ export function ActiveSessionPage() {
     return () => clearInterval(interval);
   }, [activeRest, restRunning, setRest]);
 
-  const startRest = useCallback((slotId: string, setIndex: number) => {
+  // Not memoized with useCallback: it reads the current `activeRest` state
+  // directly (a fresh closure each render), which keeps the "persist the
+  // outgoing rest before replacing it" logic below correct without a stale
+  // closure over a previous `activeRest`.
+  const startRest = (slotId: string, setIndex: number) => {
+    if (activeRest && (activeRest.slotId !== slotId || activeRest.setIndex !== setIndex)) {
+      // Switching to a different set while a rest is still counting down —
+      // persist how long the outgoing set's rest actually ran instead of
+      // silently dropping it.
+      setRest(activeRest.slotId, activeRest.setIndex, restElapsedRef.current);
+    }
     restElapsedRef.current = 0;
     setActiveRest({ slotId, setIndex });
     setRestSeconds(DEFAULT_REST_SECONDS);
     setRestRunning(true);
-  }, []);
+  };
 
   const finishMutation = useMutation({
     mutationFn: async () => {
@@ -132,6 +149,14 @@ export function ActiveSessionPage() {
 
   if (!id || !startResult) {
     return <Navigate to={ROUTES.home} replace />;
+  }
+
+  if (exercisesQuery.isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Spinner label={t('common.loading')} />
+      </div>
+    );
   }
 
   const handleSetTap = (slotId: string, index: number) => {
@@ -192,10 +217,11 @@ export function ActiveSessionPage() {
           const anyStarted = slotSession.sets.some((s) => s.status !== 'pending');
           const rowStatus: ExerciseRowStatus = allDone ? 'done' : anyStarted ? 'active' : 'pending';
 
+          const exercise = exercisesById.get(slotTarget.exerciseId);
           const slot: ExerciseRowSlot = {
             ...slotTarget,
-            name: slotTarget.exerciseId,
-            muscleGroup: FALLBACK_MUSCLE_GROUP,
+            name: exercise ? resolveTranslatable(exercise.name, i18n.language) : slotTarget.exerciseId,
+            muscleGroup: exercise?.muscleGroup ?? FALLBACK_MUSCLE_GROUP,
           };
 
           return (

@@ -104,6 +104,18 @@ describe('sessionStore', () => {
     });
   });
 
+  it('toLogSetInput excludes an auto-activated set the user never tapped', () => {
+    useSessionStore.getState().initFromSlots(session, slots);
+    useSessionStore.getState().markDone('slot_1', 0);
+    // markDone auto-activates slot_1's set index 1, but the user never
+    // tapped or edited it — it must NOT be submitted on Finish.
+    const sets = useSessionStore.getState().slots['slot_1']?.sets;
+    expect(sets?.[1]?.status).toBe('active');
+    const result = useSessionStore.getState().toLogSetInput();
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ slotId: 'slot_1', setNumber: 1 });
+  });
+
   it('reset clears all slots', () => {
     useSessionStore.getState().initFromSlots(session, slots);
     useSessionStore.getState().reset();
