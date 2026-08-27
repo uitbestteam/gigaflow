@@ -9,3 +9,4 @@ coverage/
 *.tfstate
 *.tfstate.*
 .terraform/
+*.tfvars
