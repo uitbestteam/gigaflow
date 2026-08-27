@@ -11,6 +11,10 @@ function getApp(): App {
   return app;
 }
 
+export function getFirebaseApp(): App {
+  return getApp();
+}
+
 export const firebaseVerifier: TokenVerifier = async (token: string): Promise<VerifiedToken> => {
   const decoded = await getAuth(getApp()).verifyIdToken(token);
   return {

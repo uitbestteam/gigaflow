@@ -15,12 +15,15 @@ import { makeWeightRoutes } from './modules/weight/weight.routes.js';
 import { makeDeviceTokenRoutes } from './modules/notification/device-token.routes.js';
 import { firebaseVerifier } from './lib/firebase.js';
 import { buildAiEngine, buildMealAiEngine } from './modules/ai/ai.factory.js';
+import { buildPushSender } from './modules/notification/push-sender.factory.js';
+import { notifyingEnqueuer } from './modules/notification/notifying-enqueuer.js';
 
 export function createApp(): Hono {
   const app = new Hono().basePath('/api');
   const engine = buildAiEngine();
   const mealEngine = buildMealAiEngine();
   const inbodyAnalyzer = buildInbodyAnalyzer();
+  const pushSender = buildPushSender();
   app.use('*', logger());
   app.route('/health', health);
   app.route('/auth', makeAuthRoutes({ verify: firebaseVerifier }));
@@ -31,19 +34,19 @@ export function createApp(): Hono {
   app.route('/workout', makeWorkoutGenRoutes({
     verify: firebaseVerifier,
     engine,
-    enqueue: inlineEnqueuer({ engine }),
+    enqueue: notifyingEnqueuer(inlineEnqueuer({ engine }), 'workout', { sender: pushSender }),
   }));
   app.route('/internal/tasks', makeInternalTaskRoutes({ engine }));
   app.route('/meal', makeMealGenRoutes({
     verify: firebaseVerifier,
     engine: mealEngine,
-    enqueue: inlineMealEnqueuer({ engine: mealEngine }),
+    enqueue: notifyingEnqueuer(inlineMealEnqueuer({ engine: mealEngine }), 'meal', { sender: pushSender }),
   }));
   app.route('/stats', makeStatsRoutes({ verify: firebaseVerifier }));
   app.route('/inbody', makeInbodyRoutes({
     verify: firebaseVerifier,
     analyzer: inbodyAnalyzer,
-    enqueue: inlineInbodyEnqueuer({ analyzer: inbodyAnalyzer }),
+    enqueue: notifyingEnqueuer(inlineInbodyEnqueuer({ analyzer: inbodyAnalyzer }), 'inbody', { sender: pushSender }),
   }));
   app.route('/weight', makeWeightRoutes({ verify: firebaseVerifier }));
   app.route('/notifications', makeDeviceTokenRoutes({ verify: firebaseVerifier }));
