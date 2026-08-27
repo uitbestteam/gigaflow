@@ -93,3 +93,23 @@ export enum AiProviderName {
   GEMINI = 'gemini',
   OPENAI = 'openai',
 }
+
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+}
+
+export enum ActivityLevel {
+  SEDENTARY = 'sedentary',
+  LIGHT = 'light',
+  MODERATE = 'moderate',
+  ACTIVE = 'active',
+  VERY_ACTIVE = 'very_active',
+}
+
+export enum MealType {
+  BREAKFAST = 'breakfast',
+  LUNCH = 'lunch',
+  DINNER = 'dinner',
+  SNACK = 'snack',
+}

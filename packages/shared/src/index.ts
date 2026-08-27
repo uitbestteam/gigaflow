@@ -6,4 +6,5 @@ export * from './schemas/plan.js';
 export * from './schemas/session.js';
 export * from './schemas/subscription.js';
 export * from './schemas/ai.js';
+export * from './schemas/meal.js';
 export * from './types.js';
