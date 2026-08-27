@@ -4,7 +4,7 @@ AI-powered fitness app — workout planning with automatic progressive-overload
 suggestions, meal planning, InBody OCR, and analytics. Backend-first with cloud
 sync; guest mode works with no sign-up.
 
-> **Status:** E9 — Meal Planner backend ✅ complete. Building toward the full app;
+> **Status:** E11 — Analytics/PR/Awards backend ✅ complete. Building toward the full app;
 > see the [feature roadmap](docs/superpowers/specs/2026-08-26-gigaflow-features-spec.md).
 
 ## Tech stack
@@ -174,6 +174,11 @@ logic through **Level 1 tests** (which inject a fake verifier) rather than curl.
 **Quota:**
 AI generation is limited per 30-day period per user. FREE plan limits: workout 10 / meal 10 / inbody 5. Guests and registered users share the same basic limits. The `quotaGuard(type)` middleware returns **429** when exceeded and is applied to the AI-generation routes in E7. Usage is incremented on job enqueue and rolled back on job failure.
 
+**Stats:**
+- `GET /api/stats/summary` — Retrieve aggregated statistics: total completed sessions, total volume, personal records count, and exercise count. Requires `Authorization: Bearer <Firebase ID token>` header. Returns aggregated session and exercise data.
+- `GET /api/stats/prs` — Retrieve personal records (best e1RM) per exercise, sorted by e1RM descending. Requires `Authorization: Bearer <Firebase ID token>` header. Returns array of performance records with exercise, weight, and e1RM estimate.
+- `GET /api/stats/awards` — Retrieve the badge catalog with earned awards and progress toward unearned awards. Requires `Authorization: Bearer <Firebase ID token>` header. Returns earned and in-progress awards with target metrics.
+
 ## Testing
 
 Vitest across the workspace. The `apps/api` DB test uses
@@ -205,7 +210,7 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 
 E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
 E5 Session Logging & Progression ✅ · E6 Rest Timer & RIR · E7 AI Workout Planner ✅ (backend) ·
-E8 InBody OCR · E9 Meal Planner ✅ (backend) · E10 Notifications · E11 Analytics ·
+E8 InBody OCR · E9 Meal Planner ✅ (backend) · E10 Notifications · E11 Analytics ✅ (backend) ·
 E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening.
 
 *Notes:*
@@ -215,4 +220,5 @@ E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Aut
 - *E7-S5 Generate-plan UI (request form + job polling) is deferred to E13 (web app frontend).*
 - *E7 Cloud Tasks enqueuer (real job queuing for long-running plans) + FCM notify integration are deferred to E10 (Notifications).*
 - *E9-S3 Meal planner UI (plan view + history) is deferred to E13 (web app frontend).*
+- *E11-S3 Statistics UI is deferred to E13 (web app frontend).*
 - *Frontend auth (anonymous sign-in, Google/password sign-in/link, account upgrade UI) is deferred to E13, after the web app is scaffolded.*
