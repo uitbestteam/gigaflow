@@ -125,12 +125,14 @@ export function ActiveSessionPage() {
   const finishMutation = useMutation({
     mutationFn: async () => {
       if (!id) throw new Error('missing session id');
-      await logSets(id, toLogSetInput());
-      return finishSession(id);
+      const setLogs = await logSets(id, toLogSetInput());
+      const finished = await finishSession(id);
+      return { finished, setLogs };
     },
-    onSuccess: (finished) => {
+    onSuccess: ({ finished, setLogs }) => {
       if (!id) return;
       queryClient.setQueryData(['session', id], finished);
+      queryClient.setQueryData(['session', id, 'sets'], setLogs);
       reset();
       navigate(sessionSummaryPath(id));
     },

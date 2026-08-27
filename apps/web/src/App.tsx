@@ -7,12 +7,7 @@ import { MainLayout } from './components/MainLayout';
 import { ROUTES } from './routes';
 import { HomePage } from './features/home/HomePage';
 import { ActiveSessionPage } from './features/session/ActiveSessionPage';
-
-// Placeholder route element — the real SummaryPage lands in F1 task 10.
-// Kept minimal on purpose.
-function SessionSummaryPlaceholder() {
-  return <div>Session summary</div>;
-}
+import { SummaryPage } from './features/session/SummaryPage';
 
 export function App() {
   return (
@@ -23,7 +18,7 @@ export function App() {
             <Routes>
               <Route path={ROUTES.home} element={<HomePage />} />
               <Route path={ROUTES.session} element={<ActiveSessionPage />} />
-              <Route path={ROUTES.sessionSummary} element={<SessionSummaryPlaceholder />} />
+              <Route path={ROUTES.sessionSummary} element={<SummaryPage />} />
               <Route path={ROUTES.account} element={<UpgradePrompt />} />
             </Routes>
           </MainLayout>
