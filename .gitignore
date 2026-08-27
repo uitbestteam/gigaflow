@@ -6,6 +6,7 @@ node_modules/
 dist/
 coverage/
 .turbo/
+*.tsbuildinfo
 *.tfstate
 *.tfstate.*
 .terraform/
