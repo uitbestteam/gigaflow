@@ -126,3 +126,9 @@ export enum ImageMimeType {
   JPEG = 'image/jpeg',
   PNG = 'image/png',
 }
+
+export enum DevicePlatform {
+  IOS = 'ios',
+  ANDROID = 'android',
+  WEB = 'web',
+}

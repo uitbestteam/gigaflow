@@ -10,4 +10,5 @@ export * from './schemas/meal.js';
 export * from './schemas/stats.js';
 export * from './schemas/inbody.js';
 export * from './schemas/weight.js';
+export * from './schemas/notification.js';
 export * from './types.js';
