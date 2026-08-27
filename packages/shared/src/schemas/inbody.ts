@@ -11,7 +11,7 @@ export const zInbodyMetrics = z.object({
 });
 
 export const zAnalyzeInbodyInput = z.object({
-  imageBase64: z.string().min(1),
+  imageBase64: z.string().min(1).max(10_000_000, 'imageBase64 exceeds the 10,000,000 character limit'),
   mimeType: z.nativeEnum(ImageMimeType),
 });
 

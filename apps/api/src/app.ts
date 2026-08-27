@@ -37,7 +37,7 @@ export function createApp(): Hono {
     engine,
     enqueue: notifyingEnqueuer(inlineEnqueuer({ engine }), 'workout', { sender: pushSender }),
   }));
-  app.route('/internal/tasks', makeInternalTaskRoutes({ engine }));
+  app.route('/internal/tasks', makeInternalTaskRoutes({ engine, mealEngine }));
   app.route('/meal', makeMealGenRoutes({
     verify: firebaseVerifier,
     engine: mealEngine,

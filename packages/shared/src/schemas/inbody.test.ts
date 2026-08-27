@@ -17,4 +17,8 @@ describe('inbody schemas', () => {
   it('rejects an unsupported mime type', () => {
     expect(zAnalyzeInbodyInput.safeParse({ imageBase64: 'abc', mimeType: 'image/gif' }).success).toBe(false);
   });
+  it('rejects an over-limit imageBase64 string', () => {
+    const oversized = 'a'.repeat(10_000_001);
+    expect(zAnalyzeInbodyInput.safeParse({ imageBase64: oversized, mimeType: ImageMimeType.PNG }).success).toBe(false);
+  });
 });

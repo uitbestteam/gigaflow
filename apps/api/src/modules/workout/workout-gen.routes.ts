@@ -50,9 +50,13 @@ export function makeWorkoutGenRoutes(deps: {
   return app;
 }
 
-export function makeInternalTaskRoutes(deps: { engine: InternalTaskEngine }): Hono {
+export function makeInternalTaskRoutes(deps: {
+  engine: InternalTaskEngine;
+  mealEngine?: MealGenDeps['engine'];
+}): Hono {
   const app = new Hono();
   app.use('*', internalAuth());
+  const mealEngine = deps.mealEngine ?? deps.engine;
 
   app.get('/ping', (c) => c.json(apiSuccess({ pong: true })));
 
@@ -64,7 +68,7 @@ export function makeInternalTaskRoutes(deps: { engine: InternalTaskEngine }): Ho
 
   app.post('/generate-meal', zValidator('json', generateMealTaskBody), async (c) => {
     const { jobId } = c.req.valid('json');
-    await processGenerateMeal(jobId, { engine: deps.engine });
+    await processGenerateMeal(jobId, { engine: mealEngine });
     return c.json(apiSuccess({ ok: true }));
   });
 
