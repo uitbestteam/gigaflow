@@ -31,3 +31,18 @@ export function buildAiEngine(): AiEngine {
 
   return new AiEngine(providers);
 }
+
+export function buildMealAiEngine(): AiEngine {
+  const providers: AiProvider[] = [];
+
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (geminiKey) {
+    providers.push(new GeminiProvider(geminiKey, process.env.GEMINI_MODEL));
+  }
+
+  if (providers.length === 0) {
+    providers.push(new UnconfiguredAiProvider());
+  }
+
+  return new AiEngine(providers);
+}
