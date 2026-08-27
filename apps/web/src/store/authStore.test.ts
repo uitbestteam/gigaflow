@@ -66,4 +66,76 @@ describe('authStore', () => {
     expect(s.isGuest).toBe(false);
     expect(s.token).toBe('tok_2');
   });
+
+  it('refreshToken updates the token without re-hitting postAuthSession', async () => {
+    await useAuthStore.getState().bootstrap(deps);
+
+    let postAuthSessionCalled = false;
+    await useAuthStore.getState().refreshToken({
+      ...deps,
+      getIdToken: async () => 'tok_refreshed',
+      postAuthSession: async () => {
+        postAuthSessionCalled = true;
+        return baseUser;
+      },
+    });
+
+    const s = useAuthStore.getState();
+    expect(s.token).toBe('tok_refreshed');
+    expect(postAuthSessionCalled).toBe(false);
+    expect(getAuthToken()).toBe('tok_refreshed');
+  });
+
+  it('refreshToken error sets error status', async () => {
+    await useAuthStore.getState().bootstrap(deps);
+
+    await useAuthStore.getState().refreshToken({
+      ...deps,
+      getIdToken: async () => {
+        throw new Error('token fetch failed');
+      },
+    });
+
+    expect(useAuthStore.getState().status).toBe('error');
+  });
+
+  it('upgradeEmail links email/password, refreshes session, and updates user to non-guest', async () => {
+    await useAuthStore.getState().bootstrap(deps);
+
+    let linkedEmail: string | undefined;
+    let linkedPassword: string | undefined;
+    await useAuthStore.getState().upgradeEmail('a@b.com', 'secret123', {
+      ...deps,
+      linkEmailPassword: async (email, password) => {
+        linkedEmail = email;
+        linkedPassword = password;
+      },
+      getIdToken: async () => 'tok_3',
+      postAuthSession: async () => ({
+        ...baseUser,
+        authProvider: AuthProvider.PASSWORD,
+        isGuest: false,
+      }),
+    });
+
+    const s = useAuthStore.getState();
+    expect(linkedEmail).toBe('a@b.com');
+    expect(linkedPassword).toBe('secret123');
+    expect(s.status).toBe('user');
+    expect(s.isGuest).toBe(false);
+    expect(s.token).toBe('tok_3');
+  });
+
+  it('upgradeEmail error sets error status', async () => {
+    await useAuthStore.getState().bootstrap(deps);
+
+    await useAuthStore.getState().upgradeEmail('a@b.com', 'secret123', {
+      ...deps,
+      linkEmailPassword: async () => {
+        throw new Error('link failed');
+      },
+    });
+
+    expect(useAuthStore.getState().status).toBe('error');
+  });
 });

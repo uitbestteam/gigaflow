@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type { User } from '@gigaflow/shared';
 import { postAuthSession } from '../lib/api';
-import { ensureSignedIn, getIdToken, linkGoogle, linkEmailPassword } from '../lib/firebase';
 
 export type AuthStatus = 'loading' | 'guest' | 'user' | 'error';
 
@@ -13,12 +12,17 @@ export interface AuthDeps {
   linkEmailPassword: (email: string, password: string) => Promise<void>;
 }
 
+// Firebase-backed defaults are resolved lazily via dynamic import, so that
+// merely importing this module (e.g. from a test) never loads/evaluates the
+// real `firebase/app` + `firebase/auth` SDK. `../lib/api`'s postAuthSession
+// is safe to import statically — api.ts never initializes firebase.
 const defaultDeps: AuthDeps = {
-  ensureSignedIn,
-  getIdToken,
+  ensureSignedIn: async () => (await import('../lib/firebase')).ensureSignedIn(),
+  getIdToken: async () => (await import('../lib/firebase')).getIdToken(),
   postAuthSession,
-  linkGoogle,
-  linkEmailPassword,
+  linkGoogle: async () => (await import('../lib/firebase')).linkGoogle(),
+  linkEmailPassword: async (email: string, password: string) =>
+    (await import('../lib/firebase')).linkEmailPassword(email, password),
 };
 
 export interface AuthState {
