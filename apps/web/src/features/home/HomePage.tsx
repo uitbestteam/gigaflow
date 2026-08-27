@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { PlanTemplateType, type WorkoutTemplate } from '@gigaflow/shared';
 import { createPlanFromTemplate, getActivePlan, startSession } from '../../lib/api';
+import { resolveTranslatable } from '../../lib/i18n';
 import { Spinner } from '../../components/Spinner';
 import { Button } from '../../components/Button';
 import { SessionQueueItem, type SessionQueueStatus } from '../../components/SessionQueueItem';
@@ -13,15 +14,6 @@ const PRESETS: { type: PlanTemplateType; labelKey: 'presetPpl' | 'presetUpperLow
   { type: PlanTemplateType.UPPER_LOWER, labelKey: 'presetUpperLower' },
   { type: PlanTemplateType.FULL_BODY, labelKey: 'presetFullBody' },
 ];
-
-interface Translatable {
-  en: string;
-  vi: string;
-}
-
-function resolveTranslatable(value: Translatable, language: string): string {
-  return language.startsWith('vi') ? value.vi : value.en;
-}
 
 export function HomePage() {
   const { t, i18n } = useTranslation();

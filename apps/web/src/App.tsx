@@ -6,13 +6,10 @@ import { UpgradePrompt } from './features/auth/UpgradePrompt';
 import { MainLayout } from './components/MainLayout';
 import { ROUTES } from './routes';
 import { HomePage } from './features/home/HomePage';
+import { ActiveSessionPage } from './features/session/ActiveSessionPage';
 
-// Placeholder route elements — the real ActiveSessionPage / SummaryPage
-// land in F1 tasks 9–10. Kept minimal on purpose.
-function ActiveSessionPlaceholder() {
-  return <div>Active session</div>;
-}
-
+// Placeholder route element — the real SummaryPage lands in F1 task 10.
+// Kept minimal on purpose.
 function SessionSummaryPlaceholder() {
   return <div>Session summary</div>;
 }
@@ -25,7 +22,7 @@ export function App() {
           <MainLayout>
             <Routes>
               <Route path={ROUTES.home} element={<HomePage />} />
-              <Route path={ROUTES.session} element={<ActiveSessionPlaceholder />} />
+              <Route path={ROUTES.session} element={<ActiveSessionPage />} />
               <Route path={ROUTES.sessionSummary} element={<SessionSummaryPlaceholder />} />
               <Route path={ROUTES.account} element={<UpgradePrompt />} />
             </Routes>
