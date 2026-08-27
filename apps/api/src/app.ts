@@ -8,6 +8,7 @@ import { makeWorkoutRoutes } from './modules/workout/workout.routes.js';
 import { makeWorkoutGenRoutes, makeInternalTaskRoutes, inlineEnqueuer } from './modules/workout/workout-gen.routes.js';
 import { makeMealGenRoutes, inlineMealEnqueuer } from './modules/nutrition/meal-gen.routes.js';
 import { makeSessionRoutes, makeLastPerfRoutes } from './modules/training/session.routes.js';
+import { makeStatsRoutes } from './modules/stats/stats.routes.js';
 import { firebaseVerifier } from './lib/firebase.js';
 import { buildAiEngine, buildMealAiEngine } from './modules/ai/ai.factory.js';
 
@@ -33,6 +34,7 @@ export function createApp(): Hono {
     engine: mealEngine,
     enqueue: inlineMealEnqueuer({ engine: mealEngine }),
   }));
+  app.route('/stats', makeStatsRoutes({ verify: firebaseVerifier }));
   app.notFound(notFound);
   app.onError(onError);
   return app;
