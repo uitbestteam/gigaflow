@@ -13,6 +13,7 @@ import { makeInbodyRoutes, inlineInbodyEnqueuer } from './modules/inbody/inbody.
 import { buildInbodyAnalyzer } from './modules/inbody/vision.factory.js';
 import { makeWeightRoutes } from './modules/weight/weight.routes.js';
 import { makeDeviceTokenRoutes } from './modules/notification/device-token.routes.js';
+import { makeCronRoutes } from './modules/notification/cron.routes.js';
 import { firebaseVerifier } from './lib/firebase.js';
 import { buildAiEngine, buildMealAiEngine } from './modules/ai/ai.factory.js';
 import { buildPushSender } from './modules/notification/push-sender.factory.js';
@@ -50,6 +51,7 @@ export function createApp(): Hono {
   }));
   app.route('/weight', makeWeightRoutes({ verify: firebaseVerifier }));
   app.route('/notifications', makeDeviceTokenRoutes({ verify: firebaseVerifier }));
+  app.route('/internal/cron', makeCronRoutes({ sender: pushSender }));
   app.notFound(notFound);
   app.onError(onError);
   return app;
