@@ -4,7 +4,7 @@ AI-powered fitness app — workout planning with automatic progressive-overload
 suggestions, meal planning, InBody OCR, and analytics. Backend-first with cloud
 sync; guest mode works with no sign-up.
 
-> **Status:** E12 — Subscription & Quota ✅, E8 InBody OCR + Weight Log backend ✅ complete. Building toward the full app;
+> **Status:** E12 — Subscription & Quota ✅, E10 Notifications ✅ (backend), E8 InBody OCR + Weight Log backend ✅ complete. Building toward the full app;
 > see the [feature roadmap](docs/superpowers/specs/2026-08-26-gigaflow-features-spec.md).
 
 ## Tech stack
@@ -182,6 +182,13 @@ AI generation is limited per 30-day period per user. FREE plan limits: workout 1
 - `POST /api/weight` — Log a weight entry. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ weightKg: number, loggedAt?: ISO8601 timestamp }`. Returns **201** with the created weight log entry. `loggedAt` defaults to now if omitted.
 - `GET /api/weight/history` — Retrieve the user's weight log history. Requires `Authorization: Bearer <Firebase ID token>` header. Returns array of weight entries sorted by date descending.
 
+**Notifications:**
+- `POST /api/notifications/device-token` — Register an FCM device token for push notifications. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ token: string, platform?: "android" | "ios" }`. Returns **201** on success. A bilingual (en/vi) push notification is automatically sent to registered devices when a workout, meal, or InBody generation job completes or fails (internal flow, does not block the job). Notifications are never blocking — failures are swallowed and logged.
+- `DELETE /api/notifications/device-token/:token` — Unregister a device token (owner-scoped). Requires `Authorization: Bearer <Firebase ID token>` header. Returns **204** on success.
+- `POST /internal/cron/workout-reminders` — Internal endpoint triggered by Cloud Scheduler at deploy to push "time to train" reminders to inactive users. Requires `X-Cloud-Scheduler` internal auth header. Queries recent inactivity and broadcasts reminders to opted-in devices. Returns **200** on completion.
+
+*Implementation notes:* FCM push delivery uses `firebase-admin` SDK (same credentials as auth). Notifications never block request/job flows and are tested via `pnpm test` with a fake sender (no Firebase required for unit tests).
+
 **Stats:**
 - `GET /api/stats/summary` — Retrieve aggregated statistics: total completed sessions, total volume, personal records count, and exercise count. Requires `Authorization: Bearer <Firebase ID token>` header. Returns aggregated session and exercise data.
 - `GET /api/stats/prs` — Retrieve personal records (best e1RM) per exercise, sorted by e1RM descending. Requires `Authorization: Bearer <Firebase ID token>` header. Returns array of performance records with exercise, weight, and e1RM estimate.
@@ -218,7 +225,7 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 
 E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
 E5 Session Logging & Progression ✅ · E6 Rest Timer & RIR · E7 AI Workout Planner ✅ (backend) ·
-E8 InBody OCR ✅ (backend + weight log) · E9 Meal Planner ✅ (backend) · E10 Notifications · E11 Analytics ✅ (backend) ·
+E8 InBody OCR ✅ (backend + weight log) · E9 Meal Planner ✅ (backend) · E10 Notifications ✅ (backend) · E11 Analytics ✅ (backend) ·
 E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening.
 
 *Notes:*
@@ -226,7 +233,9 @@ E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Aut
 - *E4-S3 Custom plan builder UI and E4-S5 Home/Today queue UI are deferred to E13 (web app frontend).*
 - *E5-S6 Active Session UI and E5-S7 Session Summary UI are deferred to E13 (web app frontend).*
 - *E7-S5 Generate-plan UI (request form + job polling) is deferred to E13 (web app frontend).*
-- *E7 Cloud Tasks enqueuer (real job queuing for long-running plans) + FCM notify integration are deferred to E10 (Notifications).*
+- *E7 Cloud Tasks enqueuer (real job queuing for long-running plans) is deferred to future backend work.*
+- *E10-S3 Frontend FCM setup (web app push notification registration UI) is deferred to E13 (web app frontend).*
+- *E10 Cloud Scheduler trigger setup for workout reminders is deferred to deploy (Terraform + Cloud Build).*
 - *E8-S1 Cloud Storage signed-URL upload for images is deferred to deploy (E8 backend uses inline base64).*
 - *E8-S3 InBody UI (scan upload + history view) is deferred to E13 (web app frontend).*
 - *E9-S3 Meal planner UI (plan view + history) is deferred to E13 (web app frontend).*
