@@ -108,6 +108,17 @@ export async function findById(id: string): Promise<Exercise | null> {
   return doc ? toExercise(doc) : null;
 }
 
+export async function findByIds(ids: string[]): Promise<Map<string, Exercise>> {
+  const objectIds = ids.filter((id) => ObjectId.isValid(id)).map((id) => new ObjectId(id));
+  const docs = await collection().find({ _id: { $in: objectIds } }).toArray();
+  const map = new Map<string, Exercise>();
+  for (const doc of docs) {
+    const ex = toExercise(doc);
+    map.set(ex.id, ex);
+  }
+  return map;
+}
+
 export async function findBySlugs(slugs: string[]): Promise<Map<string, Exercise>> {
   const docs = await collection().find({ slug: { $in: slugs }, ownerUserId: null }).toArray();
   const map = new Map<string, Exercise>();
