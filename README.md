@@ -4,7 +4,7 @@ AI-powered fitness app — workout planning with automatic progressive-overload
 suggestions, meal planning, InBody OCR, and analytics. Backend-first with cloud
 sync; guest mode works with no sign-up.
 
-> **Status:** E7 — AI Workout Planner backend ✅ complete. Building toward the full app;
+> **Status:** E9 — Meal Planner backend ✅ complete. Building toward the full app;
 > see the [feature roadmap](docs/superpowers/specs/2026-08-26-gigaflow-features-spec.md).
 
 ## Tech stack
@@ -115,19 +115,19 @@ pnpm --filter @gigaflow/api dev
 On startup the server ensures indexes (and, from E3 on, seeds the exercise
 catalog). DB-backed reads/writes now work.
 
-### AI Generation (E7)
+### AI Generation (E7 Workout, E9 Meal)
 
-Workout plan generation runs **inline in-process** by default (no Cloud Tasks
-or external job queue needed). To call a real AI model (Gemini-first, OpenAI
-fallback), set `GEMINI_API_KEY` (and optionally `OPENAI_API_KEY`) in your
-`.env`. Without a key configured, generation jobs fail with a clear error
-message "no AI provider configured". Optionally override model names with
-`GEMINI_MODEL` or `OPENAI_MODEL` (defaults: `gemini-2.0-flash` and
-`gpt-4o-mini`).
+Plan generation (workout and meal) runs **inline in-process** by default (no
+Cloud Tasks or external job queue needed). Workouts support Gemini-first with
+OpenAI fallback; meals use **Gemini only**. Set `GEMINI_API_KEY` in your `.env`
+to enable real generation. Optionally set `OPENAI_API_KEY` for workout
+fallback. Optionally override model names with `GEMINI_MODEL` or
+`OPENAI_MODEL` (defaults: `gemini-2.0-flash` and `gpt-4o-mini`).
 
-The entire `POST /api/workout/generate` → `GET /api/workout/jobs/:id` flow is
-covered by `pnpm test` with a fake engine (no real API calls), so you can
-verify the endpoints without keys.
+The entire `POST /api/workout/generate` → `GET /api/workout/jobs/:id` and
+`POST /api/meal/generate` → `GET /api/meal/jobs/:id` flows are covered by
+`pnpm test` with a fake engine (no real API calls), so you can verify the
+endpoints without keys.
 
 ### Calling auth-protected endpoints
 
@@ -162,9 +162,14 @@ logic through **Level 1 tests** (which inject a fake verifier) rather than curl.
 - `POST /api/sessions/:id/cancel` — Cancel a session. Requires `Authorization: Bearer <Firebase ID token>` header.
 - `GET /api/exercises/:id/last` — Retrieve the last performance for an exercise (used as the progression source for prefill). Requires `Authorization: Bearer <Firebase ID token>` header.
 
-**AI Generation:**
+**AI Generation — Workout:**
 - `POST /api/workout/generate` — Enqueue a background AI job to generate a workout plan. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ goal: string, experienceLevel: "beginner" | "intermediate" | "advanced", daysPerWeek: number }`. Returns **202** with `{ jobId: string }` on success. Returns **429** if quota exceeded (workout limit: 10 per 30 days). Returns **400** for invalid body. Generation runs inline in-process (no Cloud Tasks by default) and uses Gemini (or OpenAI fallback) via `GEMINI_API_KEY` / `OPENAI_API_KEY` environment variables. The plan is created using the same E4 slot model and set as the user's active plan when generation completes.
 - `GET /api/workout/jobs/:id` — Poll job status. Requires `Authorization: Bearer <Firebase ID token>` header. Returns `{ status: "queued" | "processing" | "done" | "failed", resultId?: string }`. When `status === "done"`, `resultId` is the created plan's ID.
+
+**AI Generation — Meal:**
+- `POST /api/meal/generate` — Enqueue a background AI job to generate a 7-day meal plan. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ goal: string, gender: "male" | "female" | "other", age: number, heightCm: number, weightKg: number, activityLevel: "sedentary" | "lightly_active" | "moderately_active" | "very_active" | "extra_active" }`. Computes TDEE and macronutrient targets, then generates meals via **Gemini only** (no OpenAI fallback). Returns **202** with `{ jobId: string }` on success. Returns **429** if quota exceeded (meal limit: 10 per 30 days). Returns **400** for invalid body. Generation runs inline in-process and requires `GEMINI_API_KEY` to be configured for real generation. The meal plan is created and set as the user's active plan when generation completes.
+- `GET /api/meal/jobs/:id` — Poll meal generation job status. Requires `Authorization: Bearer <Firebase ID token>` header. Returns `{ status: "queued" | "processing" | "done" | "failed", resultId?: string }`. When `status === "done"`, `resultId` is the created meal plan's ID.
+- `GET /api/meal/active` — Retrieve the caller's active meal plan, or null if none exists. Requires `Authorization: Bearer <Firebase ID token>` header. Returns `{ data: MealPlan | null }`.
 
 **Quota:**
 AI generation is limited per 30-day period per user. FREE plan limits: workout 10 / meal 10 / inbody 5. Guests and registered users share the same basic limits. The `quotaGuard(type)` middleware returns **429** when exceeded and is applied to the AI-generation routes in E7. Usage is incremented on job enqueue and rolled back on job failure.
@@ -200,7 +205,7 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 
 E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
 E5 Session Logging & Progression ✅ · E6 Rest Timer & RIR · E7 AI Workout Planner ✅ (backend) ·
-E8 InBody OCR · E9 Meal Planner · E10 Notifications · E11 Analytics ·
+E8 InBody OCR · E9 Meal Planner ✅ (backend) · E10 Notifications · E11 Analytics ·
 E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening.
 
 *Notes:*
@@ -209,4 +214,5 @@ E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Aut
 - *E5-S6 Active Session UI and E5-S7 Session Summary UI are deferred to E13 (web app frontend).*
 - *E7-S5 Generate-plan UI (request form + job polling) is deferred to E13 (web app frontend).*
 - *E7 Cloud Tasks enqueuer (real job queuing for long-running plans) + FCM notify integration are deferred to E10 (Notifications).*
+- *E9-S3 Meal planner UI (plan view + history) is deferred to E13 (web app frontend).*
 - *Frontend auth (anonymous sign-in, Google/password sign-in/link, account upgrade UI) is deferred to E13, after the web app is scaffolded.*
