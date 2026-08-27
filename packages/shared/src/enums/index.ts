@@ -121,3 +121,8 @@ export enum AwardKey {
   TEN_EXERCISES = 'ten_exercises',
   VOLUME_50K = 'volume_50k',
 }
+
+export enum ImageMimeType {
+  JPEG = 'image/jpeg',
+  PNG = 'image/png',
+}
