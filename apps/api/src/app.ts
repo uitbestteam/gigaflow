@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { onError, notFound } from './middleware/error.js';
+import { requestId } from './middleware/request-id.js';
 import { health } from './modules/health/health.routes.js';
 import { makeAuthRoutes } from './modules/auth/auth.routes.js';
 import { makeExerciseRoutes } from './modules/exercise/exercise.routes.js';
@@ -25,6 +26,7 @@ export function createApp(): Hono {
   const mealEngine = buildMealAiEngine();
   const inbodyAnalyzer = buildInbodyAnalyzer();
   const pushSender = buildPushSender();
+  app.use('*', requestId());
   app.use('*', logger());
   app.route('/health', health);
   app.route('/auth', makeAuthRoutes({ verify: firebaseVerifier }));
