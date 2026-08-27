@@ -23,16 +23,25 @@ const STATUS_CLASSES: Record<SetBoxStatus, string> = {
 };
 
 const LONG_PRESS_MS = 500;
+const CLICK_DEBOUNCE_MS = 220;
 
 /**
  * A single loggable set. Pending shows the target (weight × reps) in blue;
  * done shows the actual value with a success tint; edited additionally
  * shows an amber dot to flag a manually adjusted value. Tap logs the set;
  * double-click or a long press (≥500ms) opens the editor.
+ *
+ * A plain click doesn't fire `onTap` immediately: the browser (and jsdom)
+ * always dispatches two `click` events before `dblclick`, so a genuine
+ * double-click would otherwise call `onTap` twice before `onEdit`. Instead
+ * the first click starts a short debounce timer; a second click (or the
+ * `dblclick` event) arriving inside that window cancels the pending tap and
+ * routes to `onEdit` only.
  */
 export function SetBox({ target, actual, status, onTap, onEdit, className = '' }: SetBoxProps) {
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressFired = useRef(false);
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const display = actual ?? target;
 
@@ -61,6 +70,15 @@ export function SetBox({ target, actual, status, onTap, onEdit, className = '' }
     }
   };
 
+  const cancelPendingTap = () => {
+    if (clickTimer.current) {
+      clearTimeout(clickTimer.current);
+      clickTimer.current = null;
+      return true;
+    }
+    return false;
+  };
+
   return (
     <button
       type="button"
@@ -70,9 +88,19 @@ export function SetBox({ target, actual, status, onTap, onEdit, className = '' }
           longPressFired.current = false;
           return;
         }
-        onTap();
+        // A second click arriving before the debounce fires means this is
+        // (the start of) a double-click: cancel the pending single-tap and
+        // let onDoubleClick drive onEdit instead of firing onTap here.
+        if (cancelPendingTap()) return;
+        clickTimer.current = setTimeout(() => {
+          clickTimer.current = null;
+          onTap();
+        }, CLICK_DEBOUNCE_MS);
       }}
-      onDoubleClick={() => onEdit?.()}
+      onDoubleClick={() => {
+        cancelPendingTap();
+        onEdit?.();
+      }}
       onPointerDown={startLongPress}
       onPointerUp={clearLongPress}
       onPointerLeave={clearLongPress}

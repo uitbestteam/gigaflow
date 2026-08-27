@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ColorTag, MuscleGroup, EquipmentType } from '@gigaflow/shared';
 import { SetBox } from './SetBox';
@@ -10,8 +10,15 @@ import { RestTimer } from './RestTimer';
 import { RirPicker } from './RirPicker';
 
 describe('SetBox', () => {
-  it('done state has success class and calls onTap', async () => {
-    const user = userEvent.setup();
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('done state has success class and calls onTap on a single click (after the debounce)', () => {
     const onTap = vi.fn();
     render(
       <SetBox
@@ -23,7 +30,11 @@ describe('SetBox', () => {
     );
     const box = screen.getByRole('button');
     expect(box.className).toMatch(/success/);
-    await user.click(box);
+    fireEvent.click(box);
+    // onTap is debounced briefly so a following click can still be
+    // recognized as the start of a double-click.
+    expect(onTap).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(250);
     expect(onTap).toHaveBeenCalledTimes(1);
   });
 
@@ -44,14 +55,24 @@ describe('SetBox', () => {
     expect(screen.getByTestId('set-box-edited-dot')).toBeInTheDocument();
   });
 
-  it('double click calls onEdit', async () => {
-    const user = userEvent.setup();
+  it('double click calls onEdit and does NOT call onTap', () => {
+    const onTap = vi.fn();
     const onEdit = vi.fn();
     render(
-      <SetBox target={{ weightKg: 60, repsDone: 10 }} status="pending" onTap={() => {}} onEdit={onEdit} />,
+      <SetBox target={{ weightKg: 60, repsDone: 10 }} status="pending" onTap={onTap} onEdit={onEdit} />,
     );
-    await user.dblClick(screen.getByRole('button'));
+    const box = screen.getByRole('button');
+    // Real browsers (and jsdom via userEvent) always dispatch click, click,
+    // dblclick in that order for a double-click; replicate that sequence
+    // deterministically under fake timers.
+    fireEvent.click(box);
+    fireEvent.click(box);
+    fireEvent.doubleClick(box);
+    // Flush past the single-click debounce window to prove the pending tap
+    // was cancelled, not merely delayed.
+    vi.advanceTimersByTime(250);
     expect(onEdit).toHaveBeenCalledTimes(1);
+    expect(onTap).not.toHaveBeenCalled();
   });
 });
 
