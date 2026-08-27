@@ -10,11 +10,12 @@ export function notifyingEnqueuer(inner: TaskEnqueuer, kind: JobKind, deps: Noti
     } finally {
       try {
         const job = await findJobById(jobId);
-        if (!job) return;
-        if (job.status === JobStatus.DONE) {
-          await notifyJobComplete(job.userId, kind, deps);
-        } else if (job.status === JobStatus.FAILED) {
-          await notifyJobError(job.userId, kind, deps);
+        if (job) {
+          if (job.status === JobStatus.DONE) {
+            await notifyJobComplete(job.userId, kind, deps);
+          } else if (job.status === JobStatus.FAILED) {
+            await notifyJobError(job.userId, kind, deps);
+          }
         }
       } catch {
         // swallow — notification failures must never affect job processing

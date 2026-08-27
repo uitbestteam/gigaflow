@@ -184,8 +184,8 @@ AI generation is limited per 30-day period per user. FREE plan limits: workout 1
 
 **Notifications:**
 - `POST /api/notifications/device-token` — Register an FCM device token for push notifications. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ token: string, platform?: "android" | "ios" }`. Returns **201** on success. A bilingual (en/vi) push notification is automatically sent to registered devices when a workout, meal, or InBody generation job completes or fails (internal flow, does not block the job). Notifications are never blocking — failures are swallowed and logged.
-- `DELETE /api/notifications/device-token/:token` — Unregister a device token (owner-scoped). Requires `Authorization: Bearer <Firebase ID token>` header. Returns **204** on success.
-- `POST /internal/cron/workout-reminders` — Internal endpoint triggered by Cloud Scheduler at deploy to push "time to train" reminders to inactive users. Requires `X-Cloud-Scheduler` internal auth header. Queries recent inactivity and broadcasts reminders to opted-in devices. Returns **200** on completion.
+- `DELETE /api/notifications/device-token/:token` — Unregister a device token (owner-scoped). Requires `Authorization: Bearer <Firebase ID token>` header. Returns **200** with `apiSuccess({ deleted })` on success.
+- `POST /internal/cron/workout-reminders` — Internal endpoint triggered by Cloud Scheduler at deploy to push "time to train" reminders to inactive users. Requires `X-CloudTasks-QueueName` internal auth header. Queries recent inactivity and broadcasts reminders to opted-in devices. Returns **200** on completion.
 
 *Implementation notes:* FCM push delivery uses `firebase-admin` SDK (same credentials as auth). Notifications never block request/job flows and are tested via `pnpm test` with a fake sender (no Firebase required for unit tests).
 
