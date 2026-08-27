@@ -1,0 +1,2 @@
+project_id = "gigaflow-prod"
+image      = "asia-southeast1-docker.pkg.dev/gigaflow-prod/gigaflow/api:latest"

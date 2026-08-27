@@ -113,6 +113,39 @@ to main for fast local test feedback (no GCP resources needed). Cloud Build
 (`cloudbuild.yaml`) runs on main branch merges to build, push image to Artifact
 Registry, deploy to Cloud Run, and deploy Firebase Hosting.
 
+## Remaining before production
+
+The following are explicitly deferred, with the blocker for each:
+
+1. **Multi-document transactions** — `plan`/`meal`/`inbody` active-toggle
+   (deactivating the previous active record while activating the new one),
+   `replaceSetLogs`, and session `finish` + progression-cache refresh each
+   touch more than one document and are **not yet wrapped in a MongoDB
+   transaction**. This needs a **replica set** (or MongoDB Atlas, which is
+   always a replica set) — the standalone/`mongodb-memory-server` instance
+   used for local dev and unit tests does not support transactions. Wrap
+   these multi-document writes in `withTransaction` once the target
+   deployment is on a replica set / Atlas.
+2. **Terraform prod `apply`** — `infra/envs/prod/` is a files-only skeleton
+   (mirrors `infra/envs/dev/`, `terraform fmt`'d, never `init`'d or
+   `apply`'d). Provisioning the real `gigaflow-prod` project, state bucket,
+   and resources is deferred to a human following the same steps as dev
+   (see above), against the prod project/bucket.
+3. **Cloud Tasks + Cloud Scheduler switch-over** — AI generation
+   (workout/meal/InBody) currently runs **inline in-process** rather than
+   through the provisioned Cloud Tasks queues (`workout-gen`, `meal-gen`,
+   `inbody-ocr`), and the workout-reminder cron is not yet wired to Cloud
+   Scheduler. Before production traffic: replace the inline enqueuers with
+   real Cloud Tasks task creation calling an internal HTTP handler, add the
+   missing **InBody internal task handler** (workout and meal already have
+   internal routes; InBody's analysis currently only runs inline), and
+   point Cloud Scheduler at `POST /internal/cron/workout-reminders`.
+4. **Rotate any exposed secrets** — any Atlas connection string / password
+   used during development or shared in chat, docs, or `.env` files should
+   be rotated before go-live, since local `.env` values are not treated as
+   production secrets. Only `gcloud secrets versions add` into Secret
+   Manager (per the steps above) should hold the production credentials.
+
 ## Firebase auth (deferred)
 
 The backend API implements Firebase ID token verification for the `/api/auth/session` endpoint. Setup steps:

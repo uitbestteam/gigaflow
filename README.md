@@ -4,7 +4,7 @@ AI-powered fitness app — workout planning with automatic progressive-overload
 suggestions, meal planning, InBody OCR, and analytics. Backend-first with cloud
 sync; guest mode works with no sign-up.
 
-> **Status:** E12 — Subscription & Quota ✅, E10 Notifications ✅ (backend), E8 InBody OCR + Weight Log backend ✅ complete. Building toward the full app;
+> **Status:** E14 — Testing & Hardening ✅ (backend), E12 — Subscription & Quota ✅, E10 Notifications ✅ (backend), E8 InBody OCR + Weight Log backend ✅ complete. Building toward the full app;
 > see the [feature roadmap](docs/superpowers/specs/2026-08-26-gigaflow-features-spec.md).
 
 ## Tech stack
@@ -206,6 +206,30 @@ pnpm --filter @gigaflow/api test   # api only
 pnpm --filter @gigaflow/shared test
 ```
 
+## Hardening
+
+E14 closed out the following backend hardening gaps found during testing:
+
+- **Atomic quota consume** — quota check-and-increment is a single atomic
+  `findOneAndUpdate` (no more read-then-write TOCTOU window between checking
+  and incrementing usage).
+- **Atomic session numbering** — session numbers are assigned via an atomic
+  counter increment instead of a read-max-then-write-next pattern, avoiding
+  duplicate session numbers under concurrent starts.
+- **InBody image size bound** — `POST /api/inbody/analyze` rejects
+  oversized `imageBase64` payloads before they reach the Gemini vision call.
+- **Gemini-only internal meal jobs** — the internal meal-generation job path
+  is Gemini-only (no OpenAI fallback), matching the public API contract.
+- **FCM stale-token pruning + reminder batching** — push delivery removes
+  device tokens that Firebase reports as invalid/unregistered, and the
+  workout-reminder broadcast sends in batches instead of one-by-one.
+- **Request-id + structured JSON logging** — every request gets a
+  `request-id` (generated or propagated from `X-Request-Id`), included in
+  structured JSON logs and error responses for traceability.
+- **End-to-end integration test** — an additional integration test exercises
+  a full user flow (session → plan → sessions → stats) against the
+  in-memory MongoDB to catch cross-route regressions the unit suite misses.
+
 ## Deployment
 
 All cloud provisioning is Terraform-managed (except the Atlas cluster) and is
@@ -226,7 +250,7 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
 E5 Session Logging & Progression ✅ · E6 Rest Timer & RIR · E7 AI Workout Planner ✅ (backend) ·
 E8 InBody OCR ✅ (backend + weight log) · E9 Meal Planner ✅ (backend) · E10 Notifications ✅ (backend) · E11 Analytics ✅ (backend) ·
-E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening.
+E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening ✅ (backend).
 
 *Notes:*
 - *E3-S4 Exercise library UI is deferred to E13 (web app frontend).*
