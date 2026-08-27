@@ -31,10 +31,11 @@ export interface TranslationSchema {
     queueEmpty: string;
     emptyStateTitle: string;
     emptyStateBody: string;
-    presetPush: string;
-    presetPull: string;
-    presetLegs: string;
+    presetPpl: string;
+    presetUpperLower: string;
+    presetFullBody: string;
     startSession: string;
+    loadError: string;
   };
   session: {
     title: string;
@@ -89,10 +90,11 @@ const en: TranslationSchema = {
     queueEmpty: 'No sessions queued yet.',
     emptyStateTitle: 'Start your first plan',
     emptyStateBody: 'Pick a preset to get going in seconds.',
-    presetPush: 'Push',
-    presetPull: 'Pull',
-    presetLegs: 'Legs',
+    presetPpl: 'Push / Pull / Legs',
+    presetUpperLower: 'Upper / Lower',
+    presetFullBody: 'Full body',
     startSession: 'Start session',
+    loadError: 'Could not load your plan.',
   },
   session: {
     title: 'Active session',

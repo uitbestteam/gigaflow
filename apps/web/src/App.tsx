@@ -5,13 +5,10 @@ import { AuthGate } from './features/auth/AuthGate';
 import { UpgradePrompt } from './features/auth/UpgradePrompt';
 import { MainLayout } from './components/MainLayout';
 import { ROUTES } from './routes';
+import { HomePage } from './features/home/HomePage';
 
-// Placeholder route elements — the real HomePage / ActiveSessionPage /
-// SummaryPage land in F1 tasks 8–10. Kept minimal on purpose.
-function HomePlaceholder() {
-  return <div>Home</div>;
-}
-
+// Placeholder route elements — the real ActiveSessionPage / SummaryPage
+// land in F1 tasks 9–10. Kept minimal on purpose.
 function ActiveSessionPlaceholder() {
   return <div>Active session</div>;
 }
@@ -27,7 +24,7 @@ export function App() {
         <AuthGate>
           <MainLayout>
             <Routes>
-              <Route path={ROUTES.home} element={<HomePlaceholder />} />
+              <Route path={ROUTES.home} element={<HomePage />} />
               <Route path={ROUTES.session} element={<ActiveSessionPlaceholder />} />
               <Route path={ROUTES.sessionSummary} element={<SessionSummaryPlaceholder />} />
               <Route path={ROUTES.account} element={<UpgradePrompt />} />
