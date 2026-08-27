@@ -43,6 +43,16 @@ describe('quota.service', () => {
     expect(s.allowed).toBe(true);
   });
 
+  it('concurrent rollbacks from used=1 leave used=0, not negative', async () => {
+    await makeUser('u6');
+    await incrementUsage('u6', GenerationType.MEAL, NOW);
+    await Promise.all([
+      rollbackUsage('u6', GenerationType.MEAL),
+      rollbackUsage('u6', GenerationType.MEAL),
+    ]);
+    expect((await checkQuota('u6', GenerationType.MEAL, NOW)).used).toBe(0);
+  });
+
   it('tryConsume under concurrency allows exactly the limit and denies the rest', async () => {
     await makeUser('u5');
     const limit = PLAN_LIMITS[SubscriptionPlan.FREE][GenerationType.WORKOUT];

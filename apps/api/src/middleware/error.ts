@@ -9,7 +9,7 @@ export function errorBody(message: string): ApiResponse<never> {
 export function onError(err: Error, c: Context): Response {
   const status = 'status' in err && typeof err.status === 'number' ? err.status : 500;
   const message = status === 500 ? 'Internal server error' : err.message;
-  log('error', err.message, { requestId: c.get('requestId'), path: c.req.path, status });
+  log(status >= 500 ? 'error' : 'warn', err.message, { requestId: c.get('requestId'), path: c.req.path, status });
   return c.json(errorBody(message), status as 500);
 }
 

@@ -115,15 +115,9 @@ export async function incrementUsage(
 }
 
 export async function rollbackUsage(userId: string, type: GenerationType): Promise<void> {
-  const user = await collection().findOne({ authId: userId }, { projection: { _id: 0 } });
-  if (!user) throw new Error('User not found');
-  const sub = user.subscription;
-  if (!sub) return;
-
-  const current = sub.aiUsage[type];
-  const next = Math.max(0, current - 1);
-  await collection().updateOne(
-    { authId: userId },
-    { $set: { [`subscription.aiUsage.${type}`]: next } },
+  const field = `subscription.aiUsage.${type}`;
+  await collection().findOneAndUpdate(
+    { authId: userId, [field]: { $gt: 0 } },
+    { $inc: { [field]: -1 } },
   );
 }
