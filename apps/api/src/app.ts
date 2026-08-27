@@ -9,6 +9,8 @@ import { makeWorkoutGenRoutes, makeInternalTaskRoutes, inlineEnqueuer } from './
 import { makeMealGenRoutes, inlineMealEnqueuer } from './modules/nutrition/meal-gen.routes.js';
 import { makeSessionRoutes, makeLastPerfRoutes } from './modules/training/session.routes.js';
 import { makeStatsRoutes } from './modules/stats/stats.routes.js';
+import { makeInbodyRoutes, inlineInbodyEnqueuer } from './modules/inbody/inbody.routes.js';
+import { buildInbodyAnalyzer } from './modules/inbody/vision.factory.js';
 import { firebaseVerifier } from './lib/firebase.js';
 import { buildAiEngine, buildMealAiEngine } from './modules/ai/ai.factory.js';
 
@@ -16,6 +18,7 @@ export function createApp(): Hono {
   const app = new Hono().basePath('/api');
   const engine = buildAiEngine();
   const mealEngine = buildMealAiEngine();
+  const inbodyAnalyzer = buildInbodyAnalyzer();
   app.use('*', logger());
   app.route('/health', health);
   app.route('/auth', makeAuthRoutes({ verify: firebaseVerifier }));
@@ -35,6 +38,11 @@ export function createApp(): Hono {
     enqueue: inlineMealEnqueuer({ engine: mealEngine }),
   }));
   app.route('/stats', makeStatsRoutes({ verify: firebaseVerifier }));
+  app.route('/inbody', makeInbodyRoutes({
+    verify: firebaseVerifier,
+    analyzer: inbodyAnalyzer,
+    enqueue: inlineInbodyEnqueuer({ analyzer: inbodyAnalyzer }),
+  }));
   app.notFound(notFound);
   app.onError(onError);
   return app;

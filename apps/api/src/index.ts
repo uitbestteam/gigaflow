@@ -22,6 +22,8 @@ async function main(): Promise<void> {
     await ensureGenerationJobIndexes();
     const { ensureMealPlanIndexes } = await import('./modules/nutrition/meal-plan.repo.js');
     await ensureMealPlanIndexes();
+    const { ensureInbodyIndexes } = await import('./modules/inbody/inbody.repo.js');
+    await ensureInbodyIndexes();
   }
   const app = createApp();
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });
