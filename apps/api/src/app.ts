@@ -11,6 +11,7 @@ import { makeSessionRoutes, makeLastPerfRoutes } from './modules/training/sessio
 import { makeStatsRoutes } from './modules/stats/stats.routes.js';
 import { makeInbodyRoutes, inlineInbodyEnqueuer } from './modules/inbody/inbody.routes.js';
 import { buildInbodyAnalyzer } from './modules/inbody/vision.factory.js';
+import { makeWeightRoutes } from './modules/weight/weight.routes.js';
 import { firebaseVerifier } from './lib/firebase.js';
 import { buildAiEngine, buildMealAiEngine } from './modules/ai/ai.factory.js';
 
@@ -43,6 +44,7 @@ export function createApp(): Hono {
     analyzer: inbodyAnalyzer,
     enqueue: inlineInbodyEnqueuer({ analyzer: inbodyAnalyzer }),
   }));
+  app.route('/weight', makeWeightRoutes({ verify: firebaseVerifier }));
   app.notFound(notFound);
   app.onError(onError);
   return app;
