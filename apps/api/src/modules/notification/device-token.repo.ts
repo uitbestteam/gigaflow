@@ -50,3 +50,9 @@ export async function listTokens(userId: string): Promise<DeviceToken[]> {
   const docs = await collection().find({ userId }).toArray();
   return docs.map(mapId);
 }
+
+export async function deleteTokens(tokens: string[]): Promise<number> {
+  if (tokens.length === 0) return 0;
+  const res = await collection().deleteMany({ token: { $in: tokens } });
+  return res.deletedCount;
+}

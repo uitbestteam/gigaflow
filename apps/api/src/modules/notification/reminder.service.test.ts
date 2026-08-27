@@ -3,17 +3,20 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { connectDb, closeDb, getDb } from '../../lib/db.js';
 import { AuthProvider, SessionStatus } from '@gigaflow/shared';
 import { ensureUserIndexes, upsertByAuthId } from '../auth/user.repo.js';
-import { ensureDeviceTokenIndexes, upsertDeviceToken } from './device-token.repo.js';
+import { ensureDeviceTokenIndexes, upsertDeviceToken, listTokens } from './device-token.repo.js';
 import { ensureTrainingIndexes } from '../training/session.repo.js';
 import { findUsersDueForWorkoutReminder, sendWorkoutReminders } from './reminder.service.js';
-import type { PushSender, PushMessage } from './push-sender.js';
+import type { PushSender, PushMessage, PushSendResult } from './push-sender.js';
 
 let mongod: MongoMemoryServer;
 
 class FakePushSender implements PushSender {
   calls: { tokens: string[]; message: PushMessage }[] = [];
-  send = async (tokens: string[], message: PushMessage): Promise<void> => {
+  invalidTokensByToken: Record<string, string[]> = {};
+  send = async (tokens: string[], message: PushMessage): Promise<PushSendResult> => {
     this.calls.push({ tokens, message });
+    const invalidTokens = tokens.flatMap((t) => this.invalidTokensByToken[t] ?? []);
+    return { invalidTokens };
   };
 }
 
@@ -111,5 +114,44 @@ describe('sendWorkoutReminders', () => {
     expect(result.notified).toBeGreaterThanOrEqual(1);
     const call = sender.calls.find((c) => c.tokens.includes('tok-notify'));
     expect(call).toBeDefined();
+  });
+
+  it('deletes tokens the sender reports as invalid', async () => {
+    await upsertByAuthId({ authId: 'user-dead-reminder', authProvider: AuthProvider.PASSWORD, isGuest: false });
+    await upsertDeviceToken('user-dead-reminder', 'tok-dead-reminder');
+    await insertSession('user-dead-reminder', {
+      status: SessionStatus.COMPLETED,
+      startedAt: daysAgo(now, 8),
+      finishedAt: daysAgo(now, 8),
+    });
+    const sender = new FakePushSender();
+    sender.invalidTokensByToken['tok-dead-reminder'] = ['tok-dead-reminder'];
+
+    await sendWorkoutReminders(now, { sender });
+
+    const remaining = await listTokens('user-dead-reminder');
+    expect(remaining.find((t) => t.token === 'tok-dead-reminder')).toBeUndefined();
+  });
+
+  it('notifies every due user across multiple batches (batching does not drop anyone)', async () => {
+    const userIds = Array.from({ length: 45 }, (_, i) => `user-batch-${i}`);
+    for (const userId of userIds) {
+      await upsertByAuthId({ authId: userId, authProvider: AuthProvider.PASSWORD, isGuest: false });
+      await upsertDeviceToken(userId, `tok-${userId}`);
+      await insertSession(userId, {
+        status: SessionStatus.COMPLETED,
+        startedAt: daysAgo(now, 6),
+        finishedAt: daysAgo(now, 6),
+      });
+    }
+    const sender = new FakePushSender();
+
+    const result = await sendWorkoutReminders(now, { sender });
+
+    for (const userId of userIds) {
+      const call = sender.calls.find((c) => c.tokens.includes(`tok-${userId}`));
+      expect(call).toBeDefined();
+    }
+    expect(result.notified).toBeGreaterThanOrEqual(userIds.length);
   });
 });

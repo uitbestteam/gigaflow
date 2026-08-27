@@ -3,16 +3,18 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { connectDb, closeDb } from '../../lib/db.js';
 import { AuthProvider, Language } from '@gigaflow/shared';
 import { ensureUserIndexes, upsertByAuthId } from '../auth/user.repo.js';
-import { ensureDeviceTokenIndexes, upsertDeviceToken } from './device-token.repo.js';
+import { ensureDeviceTokenIndexes, upsertDeviceToken, listTokens } from './device-token.repo.js';
 import { notifyJobComplete, notifyJobError } from './notification.service.js';
-import type { PushSender, PushMessage } from './push-sender.js';
+import type { PushSender, PushMessage, PushSendResult } from './push-sender.js';
 
 let mongod: MongoMemoryServer;
 
 class FakePushSender implements PushSender {
   calls: { tokens: string[]; message: PushMessage }[] = [];
-  send = async (tokens: string[], message: PushMessage): Promise<void> => {
+  invalidTokens: string[] = [];
+  send = async (tokens: string[], message: PushMessage): Promise<PushSendResult> => {
     this.calls.push({ tokens, message });
+    return { invalidTokens: this.invalidTokens };
   };
 }
 
@@ -74,5 +76,18 @@ describe('notification.service', () => {
     };
 
     await expect(notifyJobComplete('user-throw', 'workout', { sender })).resolves.toBeUndefined();
+  });
+
+  it('deletes tokens reported as invalid by the sender', async () => {
+    await upsertByAuthId({ authId: 'user-dead-token', authProvider: AuthProvider.PASSWORD, isGuest: false });
+    await upsertDeviceToken('user-dead-token', 'dead');
+    await upsertDeviceToken('user-dead-token', 'alive');
+    const sender = new FakePushSender();
+    sender.invalidTokens = ['dead'];
+
+    await notifyJobComplete('user-dead-token', 'workout', { sender });
+
+    const remaining = await listTokens('user-dead-token');
+    expect(remaining.map((t) => t.token).sort()).toEqual(['alive']);
   });
 });

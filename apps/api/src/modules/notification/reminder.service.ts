@@ -1,12 +1,21 @@
 import { getDb } from '../../lib/db.js';
 import { Language, SessionStatus } from '@gigaflow/shared';
-import { listTokens } from './device-token.repo.js';
+import { listTokens, deleteTokens } from './device-token.repo.js';
 import { findByAuthId } from '../auth/user.repo.js';
 import type { PushSender, PushMessage } from './push-sender.js';
 
 const DEVICE_TOKENS = 'device_tokens';
 const TRAINING_SESSIONS = 'training_sessions';
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const REMINDER_BATCH_SIZE = 20;
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
 
 const REMINDER_MESSAGES: Record<Language, PushMessage> = {
   [Language.EN]: {
@@ -59,20 +68,25 @@ export async function sendWorkoutReminders(
 ): Promise<{ notified: number }> {
   const userIds = await findUsersDueForWorkoutReminder(now);
 
-  await Promise.all(
-    userIds.map(async (userId) => {
-      try {
-        const tokens = await listTokens(userId);
-        if (tokens.length === 0) return;
-        const user = await findByAuthId(userId);
-        const lang = user?.language ?? Language.EN;
-        const message = REMINDER_MESSAGES[lang];
-        await deps.sender.send(tokens.map((t) => t.token), message);
-      } catch (err) {
-        console.error('reminder.service: failed to send workout reminder', { userId, err });
-      }
-    }),
-  );
+  for (const batch of chunk(userIds, REMINDER_BATCH_SIZE)) {
+    await Promise.all(
+      batch.map(async (userId) => {
+        try {
+          const tokens = await listTokens(userId);
+          if (tokens.length === 0) return;
+          const user = await findByAuthId(userId);
+          const lang = user?.language ?? Language.EN;
+          const message = REMINDER_MESSAGES[lang];
+          const { invalidTokens } = await deps.sender.send(tokens.map((t) => t.token), message);
+          if (invalidTokens.length > 0) {
+            await deleteTokens(invalidTokens);
+          }
+        } catch (err) {
+          console.error('reminder.service: failed to send workout reminder', { userId, err });
+        }
+      }),
+    );
+  }
 
   return { notified: userIds.length };
 }

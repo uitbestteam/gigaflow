@@ -5,14 +5,15 @@ import { GenerationType, JobStatus } from '@gigaflow/shared';
 import { ensureGenerationJobIndexes, createJob, setJobStatus } from '../workout/generation-job.repo.js';
 import type { TaskEnqueuer } from '../workout/workout-gen.routes.js';
 import { notifyingEnqueuer } from './notifying-enqueuer.js';
-import type { PushSender, PushMessage } from './push-sender.js';
+import type { PushSender, PushMessage, PushSendResult } from './push-sender.js';
 
 let mongod: MongoMemoryServer;
 
 class FakePushSender implements PushSender {
   calls: { tokens: string[]; message: PushMessage }[] = [];
-  send = async (tokens: string[], message: PushMessage): Promise<void> => {
+  send = async (tokens: string[], message: PushMessage): Promise<PushSendResult> => {
     this.calls.push({ tokens, message });
+    return { invalidTokens: [] };
   };
 }
 

@@ -1,5 +1,5 @@
 import { Language } from '@gigaflow/shared';
-import { listTokens } from './device-token.repo.js';
+import { listTokens, deleteTokens } from './device-token.repo.js';
 import { findByAuthId } from '../auth/user.repo.js';
 import type { PushSender, PushMessage } from './push-sender.js';
 
@@ -56,7 +56,10 @@ async function notify(
     const user = await findByAuthId(userId);
     const lang = user?.language ?? Language.EN;
     const message = MESSAGES[kind][outcome][lang];
-    await deps.sender.send(tokens.map((t) => t.token), message);
+    const { invalidTokens } = await deps.sender.send(tokens.map((t) => t.token), message);
+    if (invalidTokens.length > 0) {
+      await deleteTokens(invalidTokens);
+    }
   } catch (err) {
     console.error('notification.service: failed to notify', { userId, kind, outcome, err });
   }

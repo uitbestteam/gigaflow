@@ -5,14 +5,15 @@ import { ensureUserIndexes } from '../auth/user.repo.js';
 import { ensureDeviceTokenIndexes } from './device-token.repo.js';
 import { ensureTrainingIndexes } from '../training/session.repo.js';
 import { makeCronRoutes } from './cron.routes.js';
-import type { PushSender, PushMessage } from './push-sender.js';
+import type { PushSender, PushMessage, PushSendResult } from './push-sender.js';
 
 let mongod: MongoMemoryServer;
 
 class FakePushSender implements PushSender {
   calls: { tokens: string[]; message: PushMessage }[] = [];
-  send = async (tokens: string[], message: PushMessage): Promise<void> => {
+  send = async (tokens: string[], message: PushMessage): Promise<PushSendResult> => {
     this.calls.push({ tokens, message });
+    return { invalidTokens: [] };
   };
 }
 
