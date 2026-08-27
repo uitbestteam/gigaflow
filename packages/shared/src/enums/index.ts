@@ -113,3 +113,11 @@ export enum MealType {
   DINNER = 'dinner',
   SNACK = 'snack',
 }
+
+export enum AwardKey {
+  FIRST_WORKOUT = 'first_workout',
+  CONSISTENT_10 = 'consistent_10',
+  FIRST_PR = 'first_pr',
+  TEN_EXERCISES = 'ten_exercises',
+  VOLUME_50K = 'volume_50k',
+}
