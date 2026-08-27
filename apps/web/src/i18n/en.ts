@@ -44,6 +44,12 @@ export interface TranslationSchema {
     finish: string;
     cancel: string;
     logSet: string;
+    prevSet: string;
+    pause: string;
+    resume: string;
+    rirEasy: string;
+    rirModerate: string;
+    rirHard: string;
   };
   summary: {
     title: string;
@@ -51,6 +57,8 @@ export interface TranslationSchema {
     totalVolume: string;
     newPr: string;
     backHome: string;
+    prBadge: string;
+    setsAvg: string;
   };
 }
 
@@ -94,6 +102,12 @@ const en: TranslationSchema = {
     finish: 'Finish session',
     cancel: 'Cancel session',
     logSet: 'Log set',
+    prevSet: 'prev: {{weight}} × {{reps}}',
+    pause: 'Pause',
+    resume: 'Resume',
+    rirEasy: 'Easy (3 RIR)',
+    rirModerate: 'Moderate (1 RIR)',
+    rirHard: 'Hard (0 RIR)',
   },
   summary: {
     title: 'Session summary',
@@ -101,6 +115,8 @@ const en: TranslationSchema = {
     totalVolume: 'Total volume',
     newPr: 'New PR',
     backHome: 'Back to home',
+    prBadge: 'PR',
+    setsAvg: '{{count}} sets · avg {{avg}}kg',
   },
 };
 

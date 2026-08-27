@@ -44,6 +44,12 @@ const vi: TranslationSchema = {
     finish: 'Kết thúc buổi tập',
     cancel: 'Hủy buổi tập',
     logSet: 'Ghi set',
+    prevSet: 'trước: {{weight}} × {{reps}}',
+    pause: 'Tạm dừng',
+    resume: 'Tiếp tục',
+    rirEasy: 'Dễ (3 RIR)',
+    rirModerate: 'Vừa (1 RIR)',
+    rirHard: 'Khó (0 RIR)',
   },
   summary: {
     title: 'Tổng kết buổi tập',
@@ -51,6 +57,8 @@ const vi: TranslationSchema = {
     totalVolume: 'Tổng khối lượng',
     newPr: 'Kỷ lục mới',
     backHome: 'Về trang chủ',
+    prBadge: 'PR',
+    setsAvg: '{{count}} set · TB {{avg}}kg',
   },
 };
 
