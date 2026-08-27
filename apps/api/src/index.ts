@@ -26,6 +26,8 @@ async function main(): Promise<void> {
     await ensureInbodyIndexes();
     const { ensureWeightIndexes } = await import('./modules/weight/weight.repo.js');
     await ensureWeightIndexes();
+    const { ensureDeviceTokenIndexes } = await import('./modules/notification/device-token.repo.js');
+    await ensureDeviceTokenIndexes();
   }
   const app = createApp();
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });

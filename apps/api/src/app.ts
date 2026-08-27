@@ -12,6 +12,7 @@ import { makeStatsRoutes } from './modules/stats/stats.routes.js';
 import { makeInbodyRoutes, inlineInbodyEnqueuer } from './modules/inbody/inbody.routes.js';
 import { buildInbodyAnalyzer } from './modules/inbody/vision.factory.js';
 import { makeWeightRoutes } from './modules/weight/weight.routes.js';
+import { makeDeviceTokenRoutes } from './modules/notification/device-token.routes.js';
 import { firebaseVerifier } from './lib/firebase.js';
 import { buildAiEngine, buildMealAiEngine } from './modules/ai/ai.factory.js';
 
@@ -45,6 +46,7 @@ export function createApp(): Hono {
     enqueue: inlineInbodyEnqueuer({ analyzer: inbodyAnalyzer }),
   }));
   app.route('/weight', makeWeightRoutes({ verify: firebaseVerifier }));
+  app.route('/notifications', makeDeviceTokenRoutes({ verify: firebaseVerifier }));
   app.notFound(notFound);
   app.onError(onError);
   return app;
