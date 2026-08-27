@@ -4,7 +4,7 @@ AI-powered fitness app — workout planning with automatic progressive-overload
 suggestions, meal planning, InBody OCR, and analytics. Backend-first with cloud
 sync; guest mode works with no sign-up.
 
-> **Status:** E14 — Testing & Hardening ✅ (backend), E12 — Subscription & Quota ✅, E10 Notifications ✅ (backend), E8 InBody OCR + Weight Log backend ✅ complete. Building toward the full app;
+> **Status:** E14 — Testing & Hardening ✅ (backend), E12 — Subscription & Quota ✅, E10 Notifications ✅ (backend), E8 InBody OCR + Weight Log backend ✅ complete, E13 — Web app F0 (foundation) + F1 (core training loop) ✅. Building toward the full app;
 > see the [feature roadmap](docs/superpowers/specs/2026-08-26-gigaflow-features-spec.md).
 
 ## Tech stack
@@ -15,7 +15,7 @@ sync; guest mode works with no sign-up.
 | Backend | [Hono](https://hono.dev) on Cloud Run (Node 22) |
 | Data access | MongoDB Atlas via the native driver + Zod validation |
 | Shared types | `@gigaflow/shared` — Zod schemas as the single source of truth |
-| Frontend | React + Vite PWA (shadcn/ui + Tailwind) — *coming in a later epic* |
+| Frontend | React + Vite PWA (Tailwind) — F0+F1 shipped, see [Web app](#web-app) below |
 | Auth | Firebase Auth — Google + email/password + anonymous (guest → link) |
 | Jobs | Cloud Tasks (no Redis) |
 | Files | Cloud Storage |
@@ -29,7 +29,7 @@ sync; guest mode works with no sign-up.
 ```
 apps/
   api/          Hono backend → Cloud Run (routes under /api)
-  web/          React + Vite PWA (placeholder for now)
+  web/          React + Vite PWA — F0 (foundation) + F1 (core training loop) shipped
 packages/
   shared/       Zod schemas + inferred types + enums (shared by api & web)
 infra/          Terraform (Cloud Run, Secret Manager, Cloud Tasks, IAM) — see infra/README.md
@@ -135,8 +135,9 @@ endpoints without keys.
 The running server verifies **real Firebase ID tokens**, so `POST /api/auth/session`
 and the exercise routes need both `GOOGLE_APPLICATION_CREDENTIALS` (a Firebase
 service-account JSON) **and** a client-issued Firebase ID token sent as
-`Authorization: Bearer <token>`. Until the web app (E13) exists, exercise this
-logic through **Level 1 tests** (which inject a fake verifier) rather than curl.
+`Authorization: Bearer <token>`. You can exercise this logic through the
+[web app](#web-app) (real Firebase ID tokens) or through **Level 1 tests**
+(which inject a fake verifier) rather than curl.
 
 ## API Endpoints
 
@@ -194,6 +195,49 @@ AI generation is limited per 30-day period per user. FREE plan limits: workout 1
 - `GET /api/stats/prs` — Retrieve personal records (best e1RM) per exercise, sorted by e1RM descending. Requires `Authorization: Bearer <Firebase ID token>` header. Returns array of performance records with exercise, weight, and e1RM estimate.
 - `GET /api/stats/awards` — Retrieve the badge catalog with earned awards and progress toward unearned awards. Requires `Authorization: Bearer <Firebase ID token>` header. Returns earned and in-progress awards with target metrics.
 
+## Web app
+
+`apps/web` is a React + Vite PWA. **F0 (foundation)** and **F1 (core training
+loop)** have shipped:
+
+- Dark-themed, installable PWA shell (app-shell precache via `vite-plugin-pwa`)
+  with English/Vietnamese i18n
+- Firebase anonymous guest auth on first load, with an upgrade path to
+  Google sign-in or email/password
+- A typed fetch client (`src/lib/api.ts`) that validates every API response
+  against the `@gigaflow/shared` Zod schemas
+- Home/Today → start a session from the active plan → 2-tap set logging with
+  a rest timer and optional RIR entry → finish session → summary screen with
+  PR badges
+
+**Deferred:** F2 (plan builder + exercise library UI), F3 (AI generate / meal
+/ InBody / stats dashboards), a real Firebase project's config, browser/visual
+QA, and offline data sync (only the app shell is precached today).
+
+### Running it
+
+Needs the API running (see "Running locally" above) and an `apps/web/.env`
+populated from `.env.example` with your Firebase web app config and API base
+URL:
+
+```bash
+cp apps/web/.env.example apps/web/.env
+```
+
+```bash
+pnpm --filter @gigaflow/web dev
+```
+
+Build and test:
+
+```bash
+pnpm --filter @gigaflow/web build
+```
+
+```bash
+pnpm --filter @gigaflow/web test
+```
+
 ## Testing
 
 Vitest across the workspace. The `apps/api` DB test uses
@@ -250,18 +294,18 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
 E5 Session Logging & Progression ✅ · E6 Rest Timer & RIR · E7 AI Workout Planner ✅ (backend) ·
 E8 InBody OCR ✅ (backend + weight log) · E9 Meal Planner ✅ (backend) · E10 Notifications ✅ (backend) · E11 Analytics ✅ (backend) ·
-E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening ✅ (backend).
+E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth 🚧 (web app F0+F1 shipped; F2/F3 remaining) · E14 Testing & Hardening ✅ (backend).
 
 *Notes:*
-- *E3-S4 Exercise library UI is deferred to E13 (web app frontend).*
-- *E4-S3 Custom plan builder UI and E4-S5 Home/Today queue UI are deferred to E13 (web app frontend).*
-- *E5-S6 Active Session UI and E5-S7 Session Summary UI are deferred to E13 (web app frontend).*
-- *E7-S5 Generate-plan UI (request form + job polling) is deferred to E13 (web app frontend).*
+- *E3-S4 Exercise library UI is deferred to E13-F2 (web app plan builder).*
+- *E4-S3 Custom plan builder UI is deferred to E13-F2; E4-S5 Home/Today queue UI shipped in E13-F1.*
+- *E5-S6 Active Session UI and E5-S7 Session Summary UI shipped in E13-F1.*
+- *E7-S5 Generate-plan UI (request form + job polling) is deferred to E13-F3.*
 - *E7 Cloud Tasks enqueuer (real job queuing for long-running plans) is deferred to future backend work.*
-- *E10-S3 Frontend FCM setup (web app push notification registration UI) is deferred to E13 (web app frontend).*
+- *E10-S3 Frontend FCM setup (web app push notification registration UI) is deferred to E13-F3.*
 - *E10 Cloud Scheduler trigger setup for workout reminders is deferred to deploy (Terraform + Cloud Build).*
 - *E8-S1 Cloud Storage signed-URL upload for images is deferred to deploy (E8 backend uses inline base64).*
-- *E8-S3 InBody UI (scan upload + history view) is deferred to E13 (web app frontend).*
-- *E9-S3 Meal planner UI (plan view + history) is deferred to E13 (web app frontend).*
-- *E11-S3 Statistics UI is deferred to E13 (web app frontend).*
-- *Frontend auth (anonymous sign-in, Google/password sign-in/link, account upgrade UI) is deferred to E13, after the web app is scaffolded.*
+- *E8-S3 InBody UI (scan upload + history view) is deferred to E13-F3.*
+- *E9-S3 Meal planner UI (plan view + history) is deferred to E13-F3.*
+- *E11-S3 Statistics UI is deferred to E13-F3.*
+- *Frontend auth (anonymous sign-in, Google/password sign-in/link, account upgrade UI) shipped in E13-F0/F1.*
