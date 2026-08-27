@@ -4,7 +4,7 @@ AI-powered fitness app — workout planning with automatic progressive-overload
 suggestions, meal planning, InBody OCR, and analytics. Backend-first with cloud
 sync; guest mode works with no sign-up.
 
-> **Status:** E11 — Analytics/PR/Awards backend ✅ complete. Building toward the full app;
+> **Status:** E12 — Subscription & Quota ✅, E8 InBody OCR + Weight Log backend ✅ complete. Building toward the full app;
 > see the [feature roadmap](docs/superpowers/specs/2026-08-26-gigaflow-features-spec.md).
 
 ## Tech stack
@@ -115,18 +115,19 @@ pnpm --filter @gigaflow/api dev
 On startup the server ensures indexes (and, from E3 on, seeds the exercise
 catalog). DB-backed reads/writes now work.
 
-### AI Generation (E7 Workout, E9 Meal)
+### AI Generation (E7 Workout, E9 Meal, E8 InBody OCR)
 
-Plan generation (workout and meal) runs **inline in-process** by default (no
+Plan generation (workout and meal) and InBody OCR run **inline in-process** by default (no
 Cloud Tasks or external job queue needed). Workouts support Gemini-first with
-OpenAI fallback; meals use **Gemini only**. Set `GEMINI_API_KEY` in your `.env`
-to enable real generation. Optionally set `OPENAI_API_KEY` for workout
+OpenAI fallback; meals and InBody use **Gemini only** (vision for InBody). Set `GEMINI_API_KEY` in your `.env`
+to enable real generation and InBody image analysis. Optionally set `OPENAI_API_KEY` for workout
 fallback. Optionally override model names with `GEMINI_MODEL` or
 `OPENAI_MODEL` (defaults: `gemini-2.0-flash` and `gpt-4o-mini`).
 
-The entire `POST /api/workout/generate` → `GET /api/workout/jobs/:id` and
-`POST /api/meal/generate` → `GET /api/meal/jobs/:id` flows are covered by
-`pnpm test` with a fake engine (no real API calls), so you can verify the
+The entire `POST /api/workout/generate` → `GET /api/workout/jobs/:id`,
+`POST /api/meal/generate` → `GET /api/meal/jobs/:id`, and
+`POST /api/inbody/analyze` → `GET /api/inbody/jobs/:id` flows are covered by
+`pnpm test` with fake engines (no real API calls), so you can verify the
 endpoints without keys.
 
 ### Calling auth-protected endpoints
@@ -174,6 +175,13 @@ logic through **Level 1 tests** (which inject a fake verifier) rather than curl.
 **Quota:**
 AI generation is limited per 30-day period per user. FREE plan limits: workout 10 / meal 10 / inbody 5. Guests and registered users share the same basic limits. The `quotaGuard(type)` middleware returns **429** when exceeded and is applied to the AI-generation routes in E7. Usage is incremented on job enqueue and rolled back on job failure.
 
+**InBody & Weight:**
+- `POST /api/inbody/analyze` — Enqueue a background job to analyze an InBody scan image via Gemini vision. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ imageBase64: string, mimeType: string }`. Returns **202** with `{ jobId: string }` on success. Returns **429** if quota exceeded (inbody limit: 5 per 30 days). Returns **400** for invalid body. Image is passed inline as base64 to the Gemini vision API (no Cloud Storage upload needed to run); requires `GEMINI_API_KEY` configured. Fake analyzer is used in tests (no real API calls).
+- `GET /api/inbody/jobs/:id` — Poll InBody job status. Requires `Authorization: Bearer <Firebase ID token>` header. Returns `{ status: "queued" | "processing" | "done" | "failed", result?: InbodyResult }`. When `status === "done"`, `result` contains the parsed metrics (weight, body fat %, muscle mass %, etc.).
+- `GET /api/inbody/latest` — Retrieve the latest completed InBody analysis for the user. Requires `Authorization: Bearer <Firebase ID token>` header. Returns `{ data: InbodyResult | null }`.
+- `POST /api/weight` — Log a weight entry. Requires `Authorization: Bearer <Firebase ID token>` header. Request body: `{ weightKg: number, loggedAt?: ISO8601 timestamp }`. Returns **201** with the created weight log entry. `loggedAt` defaults to now if omitted.
+- `GET /api/weight/history` — Retrieve the user's weight log history. Requires `Authorization: Bearer <Firebase ID token>` header. Returns array of weight entries sorted by date descending.
+
 **Stats:**
 - `GET /api/stats/summary` — Retrieve aggregated statistics: total completed sessions, total volume, personal records count, and exercise count. Requires `Authorization: Bearer <Firebase ID token>` header. Returns aggregated session and exercise data.
 - `GET /api/stats/prs` — Retrieve personal records (best e1RM) per exercise, sorted by e1RM descending. Requires `Authorization: Bearer <Firebase ID token>` header. Returns array of performance records with exercise, weight, and e1RM estimate.
@@ -210,7 +218,7 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 
 E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
 E5 Session Logging & Progression ✅ · E6 Rest Timer & RIR · E7 AI Workout Planner ✅ (backend) ·
-E8 InBody OCR · E9 Meal Planner ✅ (backend) · E10 Notifications · E11 Analytics ✅ (backend) ·
+E8 InBody OCR ✅ (backend + weight log) · E9 Meal Planner ✅ (backend) · E10 Notifications · E11 Analytics ✅ (backend) ·
 E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth · E14 Testing & Hardening.
 
 *Notes:*
@@ -219,6 +227,8 @@ E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Aut
 - *E5-S6 Active Session UI and E5-S7 Session Summary UI are deferred to E13 (web app frontend).*
 - *E7-S5 Generate-plan UI (request form + job polling) is deferred to E13 (web app frontend).*
 - *E7 Cloud Tasks enqueuer (real job queuing for long-running plans) + FCM notify integration are deferred to E10 (Notifications).*
+- *E8-S1 Cloud Storage signed-URL upload for images is deferred to deploy (E8 backend uses inline base64).*
+- *E8-S3 InBody UI (scan upload + history view) is deferred to E13 (web app frontend).*
 - *E9-S3 Meal planner UI (plan view + history) is deferred to E13 (web app frontend).*
 - *E11-S3 Statistics UI is deferred to E13 (web app frontend).*
 - *Frontend auth (anonymous sign-in, Google/password sign-in/link, account upgrade UI) is deferred to E13, after the web app is scaffolded.*
