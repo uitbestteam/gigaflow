@@ -30,6 +30,13 @@ describe('SessionRepository', () => {
     expect(s2.sessionNumber).toBe(2);
     expect((await findActiveSession('u1'))).not.toBeNull();
   });
+  it('createSession assigns distinct sessionNumbers under concurrent calls', async () => {
+    const [s1, s2] = await Promise.all([
+      createSession('u-concurrent', templateId),
+      createSession('u-concurrent', templateId),
+    ]);
+    expect(new Set([s1.sessionNumber, s2.sessionNumber])).toEqual(new Set([1, 2]));
+  });
   it('replaceSetLogs then listSetLogs round-trips sorted', async () => {
     const s = await createSession('u1', templateId);
     await replaceSetLogs(s.id, [

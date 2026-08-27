@@ -7,10 +7,27 @@ import {
 const TRAINING_SESSIONS = 'training_sessions';
 const SET_LOGS = 'set_logs';
 const EXERCISE_PERFORMANCE = 'exercise_performance';
+const COUNTERS = 'counters';
+
+interface CounterDoc {
+  _id: string;
+  seq: number;
+}
 
 function trainingSessions() { return getDb().collection(TRAINING_SESSIONS); }
 function setLogs() { return getDb().collection(SET_LOGS); }
 function exercisePerformance() { return getDb().collection(EXERCISE_PERFORMANCE); }
+function counters() { return getDb().collection<CounterDoc>(COUNTERS); }
+
+async function nextSessionNumber(userId: string): Promise<number> {
+  const result = await counters().findOneAndUpdate(
+    { _id: `session:${userId}` },
+    { $inc: { seq: 1 } },
+    { upsert: true, returnDocument: 'after' },
+  );
+  if (!result) throw new Error(`Failed to increment session counter for user ${userId}`);
+  return result.seq;
+}
 
 function mapId<T extends Record<string, unknown>>(doc: WithId<Document>): T {
   const { _id, ...rest } = doc;
@@ -25,7 +42,7 @@ export async function ensureTrainingIndexes(): Promise<void> {
 }
 
 export async function createSession(userId: string, templateId: string): Promise<TrainingSession> {
-  const sessionNumber = (await trainingSessions().countDocuments({ userId })) + 1;
+  const sessionNumber = await nextSessionNumber(userId);
   const doc = {
     userId,
     templateId,
