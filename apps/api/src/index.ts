@@ -20,6 +20,8 @@ async function main(): Promise<void> {
     await ensureTrainingIndexes();
     const { ensureGenerationJobIndexes } = await import('./modules/workout/generation-job.repo.js');
     await ensureGenerationJobIndexes();
+    const { ensureMealPlanIndexes } = await import('./modules/nutrition/meal-plan.repo.js');
+    await ensureMealPlanIndexes();
   }
   const app = createApp();
   serve({ fetch: app.fetch, port, hostname: '0.0.0.0' });

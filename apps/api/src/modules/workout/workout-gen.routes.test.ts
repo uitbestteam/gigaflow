@@ -2,8 +2,8 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { connectDb, closeDb } from '../../lib/db.js';
 import {
-  ColorTag, ExperienceLevel, Goal, GenerationType, JobStatus,
-  PLAN_LIMITS, SubscriptionPlan, type GeneratedPlan,
+  ColorTag, ExperienceLevel, Goal, GenerationType, JobStatus, MealType,
+  PLAN_LIMITS, SubscriptionPlan, type GeneratedPlan, type MealPlan,
 } from '@gigaflow/shared';
 import { ensureExerciseIndexes } from '../exercise/exercise.repo.js';
 import { seedPresets } from '../exercise/seed-exercises.js';
@@ -41,7 +41,34 @@ const validPlan: GeneratedPlan = {
   ],
 };
 
-const FAKE_ENGINE = { generateWorkoutPlan: async () => validPlan };
+const validMealPlan: MealPlan = {
+  name: 'AI Meal Plan',
+  days: [
+    {
+      dayIndex: 1,
+      meals: [
+        {
+          name: { en: 'Oats', vi: 'Yến mạch' },
+          mealType: MealType.BREAKFAST,
+          calories: 500,
+          proteinG: 30,
+          carbsG: 60,
+          fatG: 15,
+          ingredients: ['oats', 'milk'],
+        },
+      ],
+      totalCalories: 500,
+      totalProteinG: 30,
+      totalCarbsG: 60,
+      totalFatG: 15,
+    },
+  ],
+};
+
+const FAKE_ENGINE = {
+  generateWorkoutPlan: async () => validPlan,
+  generateMealPlan: async () => validMealPlan,
+};
 const validBody = { goal: Goal.STRENGTH, experienceLevel: ExperienceLevel.BEGINNER, daysPerWeek: 3 };
 
 function makeApp() {

@@ -8,6 +8,9 @@ import { quotaGuard } from '../subscription/quota.guard.js';
 import { incrementUsage } from '../subscription/quota.service.js';
 import { createJob, findJobForUser } from './generation-job.repo.js';
 import { processGenerateWorkout, type WorkoutGenDeps } from './workout-generation.service.js';
+import { processGenerateMeal, type MealGenDeps } from '../nutrition/meal-generation.service.js';
+
+type InternalTaskEngine = WorkoutGenDeps['engine'] & MealGenDeps['engine'];
 
 export type TaskEnqueuer = (jobId: string) => Promise<void>;
 
@@ -16,6 +19,7 @@ export function inlineEnqueuer(deps: WorkoutGenDeps): TaskEnqueuer {
 }
 
 const generateWorkoutTaskBody = z.object({ jobId: z.string().min(1) });
+const generateMealTaskBody = z.object({ jobId: z.string().min(1) });
 
 export function makeWorkoutGenRoutes(deps: {
   verify: TokenVerifier;
@@ -48,7 +52,7 @@ export function makeWorkoutGenRoutes(deps: {
   return app;
 }
 
-export function makeInternalTaskRoutes(deps: { engine: WorkoutGenDeps['engine'] }): Hono {
+export function makeInternalTaskRoutes(deps: { engine: InternalTaskEngine }): Hono {
   const app = new Hono();
   app.use('*', internalAuth());
 
@@ -57,6 +61,12 @@ export function makeInternalTaskRoutes(deps: { engine: WorkoutGenDeps['engine'] 
   app.post('/generate-workout', zValidator('json', generateWorkoutTaskBody), async (c) => {
     const { jobId } = c.req.valid('json');
     await processGenerateWorkout(jobId, { engine: deps.engine });
+    return c.json(apiSuccess({ ok: true }));
+  });
+
+  app.post('/generate-meal', zValidator('json', generateMealTaskBody), async (c) => {
+    const { jobId } = c.req.valid('json');
+    await processGenerateMeal(jobId, { engine: deps.engine });
     return c.json(apiSuccess({ ok: true }));
   });
 
