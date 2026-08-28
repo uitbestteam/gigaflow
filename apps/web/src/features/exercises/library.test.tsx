@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -62,21 +62,43 @@ describe('ExerciseLibraryPage', () => {
     expect(screen.getByText('Squat')).toBeInTheDocument();
   });
 
-  it('calls getExercises with {q} after typing in the search input (debounced)', async () => {
+  it('coalesces rapid typing into a single debounced getExercises call with the final {q}', async () => {
     renderLibrary();
 
     const searchInput = await screen.findByPlaceholderText(/search/i);
 
+    // Let the initial mount-time query settle before measuring new calls
+    // triggered by typing.
+    await waitFor(() => {
+      expect(api.getExercises).toHaveBeenCalledTimes(1);
+    });
+    (api.getExercises as unknown as Mock).mockClear();
+
     vi.useFakeTimers();
+
+    fireEvent.change(searchInput, { target: { value: 'b' } });
+    fireEvent.change(searchInput, { target: { value: 'be' } });
+    fireEvent.change(searchInput, { target: { value: 'ben' } });
     fireEvent.change(searchInput, { target: { value: 'bench' } });
 
-    await vi.advanceTimersByTimeAsync(300);
+    // No call yet: each keystroke should reset the debounce timer rather
+    // than firing one call per keystroke.
+    expect(api.getExercises).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(249);
+    });
+    expect(api.getExercises).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
     vi.useRealTimers();
 
     await waitFor(() => {
-      const lastCall = (api.getExercises as unknown as Mock).mock.calls.at(-1);
-      expect(lastCall?.[0]).toEqual(expect.objectContaining({ q: 'bench' }));
+      expect(api.getExercises).toHaveBeenCalledTimes(1);
     });
+    expect(api.getExercises).toHaveBeenCalledWith(expect.objectContaining({ q: 'bench' }));
   });
 
   it('calls getExercises with the selected muscleGroup when a chip is clicked', async () => {

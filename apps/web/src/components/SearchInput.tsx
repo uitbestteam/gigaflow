@@ -20,6 +20,13 @@ export function SearchInput({ value, onChange, placeholder, className = '' }: Se
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
+    // External resync (e.g. a "clear filters" action): adopt the new value
+    // immediately and cancel any keystroke-driven debounce still pending,
+    // so a stale onChange(prevText) can't fire later and clobber this reset.
+    if (timerRef.current !== undefined) {
+      clearTimeout(timerRef.current);
+      timerRef.current = undefined;
+    }
     setText(value);
   }, [value]);
 
