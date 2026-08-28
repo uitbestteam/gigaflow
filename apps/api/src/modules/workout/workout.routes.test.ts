@@ -164,6 +164,21 @@ describe('workout routes', () => {
       expect(active2Body.data?.id).toBe(p2.id);
     });
 
+    it('POST /plans/:id/activate by a non-owner → 404 and leaves the target plan unchanged', async () => {
+      const app = makeWorkoutRoutes({ verify });
+      const create = await app.request('/', { method: 'POST', headers: H, body: JSON.stringify(makeCreateInput({ name: 'Activate NonOwner Plan' })) });
+      const { data: created } = (await create.json()) as { data: { id: string; isActive: boolean } };
+      expect(created.isActive).toBe(false);
+
+      const activateByOther = await app.request(`/${created.id}/activate`, { method: 'POST', headers: H2 });
+      expect(activateByOther.status).toBe(404);
+
+      const check = await app.request(`/${created.id}`, { headers: { Authorization: 'Bearer u1' } });
+      expect(check.status).toBe(200);
+      const checkBody = (await check.json()) as { data: { isActive: boolean } };
+      expect(checkBody.data.isActive).toBe(false);
+    });
+
     it('DELETE /plans/:id → {deleted:true}, then GET /plans/:id → 404; deleting again → 404', async () => {
       const app = makeWorkoutRoutes({ verify });
       const create = await app.request('/', { method: 'POST', headers: H, body: JSON.stringify(makeCreateInput({ name: 'Delete Plan' })) });
@@ -179,6 +194,18 @@ describe('workout routes', () => {
 
       const delAgain = await app.request(`/${created.id}`, { method: 'DELETE', headers: { Authorization: 'Bearer u1' } });
       expect(delAgain.status).toBe(404);
+    });
+
+    it('DELETE /plans/:id by a non-owner → 404 and leaves the plan intact', async () => {
+      const app = makeWorkoutRoutes({ verify });
+      const create = await app.request('/', { method: 'POST', headers: H, body: JSON.stringify(makeCreateInput({ name: 'Delete NonOwner Plan' })) });
+      const { data: created } = (await create.json()) as { data: { id: string } };
+
+      const delByOther = await app.request(`/${created.id}`, { method: 'DELETE', headers: H2 });
+      expect(delByOther.status).toBe(404);
+
+      const stillThere = await app.request(`/${created.id}`, { headers: { Authorization: 'Bearer u1' } });
+      expect(stillThere.status).toBe(200);
     });
 
     it('POST /plans with repRangeMax < repRangeMin → 400', async () => {
