@@ -95,6 +95,27 @@ const vi: TranslationSchema = {
       nameRequired: 'Cần nhập cả hai tên.',
     },
   },
+  plans: {
+    title: 'Kế hoạch',
+    activeBadge: 'Đang dùng',
+    activate: 'Kích hoạt',
+    edit: 'Sửa',
+    delete: 'Xóa',
+    confirmDelete: 'Xác nhận?',
+    newPlan: 'Kế hoạch mới',
+    fromPreset: 'Từ preset',
+    presetPpl: 'Đẩy / Kéo / Chân',
+    presetUpperLower: 'Thân trên / Thân dưới',
+    presetFullBody: 'Toàn thân',
+    empty: 'Chưa có kế hoạch nào. Tạo một kế hoạch để bắt đầu.',
+    loadError: 'Không thể tải danh sách kế hoạch.',
+    templateType: {
+      ppl: 'Đẩy / Kéo / Chân',
+      upper_lower: 'Thân trên / Thân dưới',
+      full_body: 'Toàn thân',
+      custom: 'Tùy chỉnh',
+    },
+  },
 };
 
 export default vi;

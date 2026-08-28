@@ -5,6 +5,9 @@ export const ROUTES = {
   sessionSummary: '/session/:id/summary',
   account: '/account',
   exercises: '/exercises',
+  plans: '/plans',
+  planNew: '/plans/new',
+  planEdit: '/plans/:id/edit',
 } as const;
 
 export function sessionPath(id: string): string {
@@ -13,4 +16,14 @@ export function sessionPath(id: string): string {
 
 export function sessionSummaryPath(id: string): string {
   return `/session/${id}/summary`;
+}
+
+/** Path to the plan builder in "create" mode. Consumed by the T7 builder route. */
+export function planNewPath(): string {
+  return '/plans/new';
+}
+
+/** Path to the plan builder in "edit" mode for an existing plan. Consumed by the T7 builder route. */
+export function planEditPath(id: string): string {
+  return `/plans/${id}/edit`;
 }

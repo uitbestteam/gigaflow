@@ -30,6 +30,12 @@ export function MainLayout({ children }: MainLayoutProps) {
             {t('exercises.title')}
           </Link>
           <Link
+            to={ROUTES.plans}
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[10px] px-3 text-text-secondary"
+          >
+            {t('plans.title')}
+          </Link>
+          <Link
             to={ROUTES.account}
             className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[10px] px-3 text-text-secondary"
           >

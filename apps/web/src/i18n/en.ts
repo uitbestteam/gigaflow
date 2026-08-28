@@ -95,6 +95,27 @@ export interface TranslationSchema {
       nameRequired: string;
     };
   };
+  plans: {
+    title: string;
+    activeBadge: string;
+    activate: string;
+    edit: string;
+    delete: string;
+    confirmDelete: string;
+    newPlan: string;
+    fromPreset: string;
+    presetPpl: string;
+    presetUpperLower: string;
+    presetFullBody: string;
+    empty: string;
+    loadError: string;
+    templateType: {
+      ppl: string;
+      upper_lower: string;
+      full_body: string;
+      custom: string;
+    };
+  };
 }
 
 const en: TranslationSchema = {
@@ -186,6 +207,27 @@ const en: TranslationSchema = {
       defaultIncrementLabel: 'Default increment (kg)',
       submit: 'Add exercise',
       nameRequired: 'Both names are required.',
+    },
+  },
+  plans: {
+    title: 'Plans',
+    activeBadge: 'Active',
+    activate: 'Activate',
+    edit: 'Edit',
+    delete: 'Delete',
+    confirmDelete: 'Confirm?',
+    newPlan: 'New plan',
+    fromPreset: 'From preset',
+    presetPpl: 'Push / Pull / Legs',
+    presetUpperLower: 'Upper / Lower',
+    presetFullBody: 'Full body',
+    empty: 'No plans yet. Create one to get started.',
+    loadError: 'Could not load your plans.',
+    templateType: {
+      ppl: 'Push / Pull / Legs',
+      upper_lower: 'Upper / Lower',
+      full_body: 'Full body',
+      custom: 'Custom',
     },
   },
 };
