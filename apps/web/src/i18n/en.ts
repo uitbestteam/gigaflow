@@ -62,6 +62,39 @@ export interface TranslationSchema {
     prBadge: string;
     setsAvg: string;
   };
+  exercises: {
+    title: string;
+    searchPlaceholder: string;
+    filterAll: string;
+    empty: string;
+    loadError: string;
+    addCustom: string;
+    muscle: {
+      chest: string;
+      back: string;
+      legs: string;
+      shoulders: string;
+      arms: string;
+      core: string;
+      cardio: string;
+    };
+    equipment: {
+      barbell: string;
+      dumbbell: string;
+      machine: string;
+      bodyweight: string;
+      cable: string;
+    };
+    form: {
+      nameEnLabel: string;
+      nameViLabel: string;
+      muscleGroupLabel: string;
+      equipmentTypeLabel: string;
+      defaultIncrementLabel: string;
+      submit: string;
+      nameRequired: string;
+    };
+  };
 }
 
 const en: TranslationSchema = {
@@ -121,6 +154,39 @@ const en: TranslationSchema = {
     backHome: 'Back to home',
     prBadge: 'PR',
     setsAvg: '{{count}} sets · avg {{avg}}kg',
+  },
+  exercises: {
+    title: 'Exercise library',
+    searchPlaceholder: 'Search exercises',
+    filterAll: 'All',
+    empty: 'No exercises found.',
+    loadError: 'Could not load exercises.',
+    addCustom: '＋ Custom',
+    muscle: {
+      chest: 'Chest',
+      back: 'Back',
+      legs: 'Legs',
+      shoulders: 'Shoulders',
+      arms: 'Arms',
+      core: 'Core',
+      cardio: 'Cardio',
+    },
+    equipment: {
+      barbell: 'Barbell',
+      dumbbell: 'Dumbbell',
+      machine: 'Machine',
+      bodyweight: 'Bodyweight',
+      cable: 'Cable',
+    },
+    form: {
+      nameEnLabel: 'Name (English)',
+      nameViLabel: 'Name (Vietnamese)',
+      muscleGroupLabel: 'Muscle group',
+      equipmentTypeLabel: 'Equipment type',
+      defaultIncrementLabel: 'Default increment (kg)',
+      submit: 'Add exercise',
+      nameRequired: 'Both names are required.',
+    },
   },
 };
 

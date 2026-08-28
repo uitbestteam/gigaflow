@@ -62,6 +62,39 @@ const vi: TranslationSchema = {
     prBadge: 'PR',
     setsAvg: '{{count}} set · TB {{avg}}kg',
   },
+  exercises: {
+    title: 'Thư viện bài tập',
+    searchPlaceholder: 'Tìm bài tập',
+    filterAll: 'Tất cả',
+    empty: 'Không tìm thấy bài tập nào.',
+    loadError: 'Không thể tải danh sách bài tập.',
+    addCustom: '＋ Tùy chỉnh',
+    muscle: {
+      chest: 'Ngực',
+      back: 'Lưng',
+      legs: 'Chân',
+      shoulders: 'Vai',
+      arms: 'Tay',
+      core: 'Bụng',
+      cardio: 'Cardio',
+    },
+    equipment: {
+      barbell: 'Tạ đòn',
+      dumbbell: 'Tạ đơn',
+      machine: 'Máy tập',
+      bodyweight: 'Trọng lượng cơ thể',
+      cable: 'Cáp',
+    },
+    form: {
+      nameEnLabel: 'Tên (Tiếng Anh)',
+      nameViLabel: 'Tên (Tiếng Việt)',
+      muscleGroupLabel: 'Nhóm cơ',
+      equipmentTypeLabel: 'Loại thiết bị',
+      defaultIncrementLabel: 'Mức tăng mặc định (kg)',
+      submit: 'Thêm bài tập',
+      nameRequired: 'Cần nhập cả hai tên.',
+    },
+  },
 };
 
 export default vi;

@@ -8,6 +8,7 @@ import { ROUTES } from './routes';
 import { HomePage } from './features/home/HomePage';
 import { ActiveSessionPage } from './features/session/ActiveSessionPage';
 import { SummaryPage } from './features/session/SummaryPage';
+import { ExerciseLibraryPage } from './features/exercises/ExerciseLibraryPage';
 
 export function App() {
   return (
@@ -20,6 +21,7 @@ export function App() {
               <Route path={ROUTES.session} element={<ActiveSessionPage />} />
               <Route path={ROUTES.sessionSummary} element={<SummaryPage />} />
               <Route path={ROUTES.account} element={<UpgradePrompt />} />
+              <Route path={ROUTES.exercises} element={<ExerciseLibraryPage />} />
             </Routes>
           </MainLayout>
         </AuthGate>

@@ -4,6 +4,7 @@ export const ROUTES = {
   session: '/session/:id',
   sessionSummary: '/session/:id/summary',
   account: '/account',
+  exercises: '/exercises',
 } as const;
 
 export function sessionPath(id: string): string {
