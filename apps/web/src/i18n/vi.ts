@@ -116,6 +116,23 @@ const vi: TranslationSchema = {
       custom: 'Tùy chỉnh',
     },
   },
+  builder: {
+    planNamePlaceholder: 'Tên kế hoạch',
+    templateNamePlaceholder: 'Tên ngày tập',
+    addDay: '＋ Thêm ngày',
+    removeDay: 'Xóa ngày',
+    moveUp: 'Di chuyển lên',
+    moveDown: 'Di chuyển xuống',
+    addExercise: '＋ Thêm bài tập',
+    pickExerciseTitle: 'Chọn bài tập',
+    removeExercise: 'Xóa',
+    sets: 'Số set',
+    repMin: 'Rep tối thiểu',
+    repMax: 'Rep tối đa',
+    increment: 'Mức tăng (kg)',
+    equipment: 'Thiết bị',
+    loadError: 'Không thể tải kế hoạch này.',
+  },
 };
 
 export default vi;

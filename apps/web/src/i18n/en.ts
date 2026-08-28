@@ -116,6 +116,23 @@ export interface TranslationSchema {
       custom: string;
     };
   };
+  builder: {
+    planNamePlaceholder: string;
+    templateNamePlaceholder: string;
+    addDay: string;
+    removeDay: string;
+    moveUp: string;
+    moveDown: string;
+    addExercise: string;
+    pickExerciseTitle: string;
+    removeExercise: string;
+    sets: string;
+    repMin: string;
+    repMax: string;
+    increment: string;
+    equipment: string;
+    loadError: string;
+  };
 }
 
 const en: TranslationSchema = {
@@ -229,6 +246,23 @@ const en: TranslationSchema = {
       full_body: 'Full body',
       custom: 'Custom',
     },
+  },
+  builder: {
+    planNamePlaceholder: 'Plan name',
+    templateNamePlaceholder: 'Day name',
+    addDay: '＋ Add day',
+    removeDay: 'Remove day',
+    moveUp: 'Move up',
+    moveDown: 'Move down',
+    addExercise: '＋ Add exercise',
+    pickExerciseTitle: 'Pick an exercise',
+    removeExercise: 'Remove',
+    sets: 'Sets',
+    repMin: 'Rep min',
+    repMax: 'Rep max',
+    increment: 'Increment (kg)',
+    equipment: 'Equipment',
+    loadError: 'Could not load this plan.',
   },
 };
 
