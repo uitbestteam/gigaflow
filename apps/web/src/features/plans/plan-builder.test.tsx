@@ -83,7 +83,7 @@ describe('PlanBuilderPage', () => {
     vi.clearAllMocks();
     vi.useFakeTimers({ shouldAdvanceTime: true });
     (api.getExercises as unknown as Mock).mockResolvedValue([makeExercise()]);
-    (api.getPlan as unknown as Mock).mockResolvedValue(makePlan());
+    (api.getPlan as unknown as Mock).mockImplementation(() => Promise.resolve(makePlan()));
     (api.createPlan as unknown as Mock).mockResolvedValue(makePlan());
     (api.updatePlan as unknown as Mock).mockResolvedValue(makePlan());
   });
@@ -175,9 +175,12 @@ describe('PlanBuilderPage', () => {
     expect(setsInput).toHaveValue(7);
 
     // Simulate a background refetch (window refocus, an invalidation fired
-    // from elsewhere in the app, etc.) that resolves to a fresh object with
-    // the *same* server data. Forcing it here bypasses `staleTime` so the
-    // regression is proven by the once-guard alone, not just by staleTime.
+    // from elsewhere in the app, etc.). `getPlan` is mocked to return a
+    // freshly-constructed object each call (same field values, new
+    // reference), so `planQuery.data` genuinely changes identity here --
+    // without the once-guard, the page's effect (keyed on `planQuery.data`)
+    // would re-run and reset the store. Forcing the refetch also bypasses
+    // `staleTime`, so this proves the once-guard itself, not staleTime.
     await act(async () => {
       await queryClient.refetchQueries({ queryKey: ['plan', 'p1'] });
     });
