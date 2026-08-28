@@ -54,7 +54,7 @@ export function SummaryPage() {
   const session = id ? queryClient.getQueryData<TrainingSession>(['session', id]) : undefined;
   const setLogs = id ? queryClient.getQueryData<SetLog[]>(['session', id, 'sets']) : undefined;
 
-  const exercisesQuery = useQuery({ queryKey: ['exercises'], queryFn: getExercises });
+  const exercisesQuery = useQuery({ queryKey: ['exercises'], queryFn: () => getExercises() });
   const prsQuery = useQuery<PersonalRecord[]>({ queryKey: ['prs'], queryFn: getPrs });
 
   const exercisesById = useMemo(() => {

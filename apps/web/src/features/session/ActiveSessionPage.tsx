@@ -43,7 +43,7 @@ export function ActiveSessionPage() {
 
   const startResult = id ? queryClient.getQueryData<SessionStartResult>(['session', id]) : undefined;
 
-  const exercisesQuery = useQuery({ queryKey: ['exercises'], queryFn: getExercises });
+  const exercisesQuery = useQuery({ queryKey: ['exercises'], queryFn: () => getExercises() });
   const exercisesById = useMemo(() => {
     const map = new Map<string, Exercise>();
     for (const exercise of exercisesQuery.data ?? []) {

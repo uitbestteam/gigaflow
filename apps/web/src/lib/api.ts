@@ -1,14 +1,19 @@
-import type { ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 import {
   zUser,
+  zPlan,
   zPlanWithTemplates,
   zSessionStartResult,
   zTrainingSession,
   zSetLog,
   zPersonalRecord,
   zExercise,
+  MuscleGroup,
   type User,
+  type Plan,
   type PlanWithTemplates,
+  type CreatePlanInput,
+  type UpdatePlanInput,
   type SessionStartResult,
   type TrainingSession,
   type SetLog,
@@ -16,6 +21,7 @@ import {
   type LogSetInput,
   type PlanTemplateType,
   type Exercise,
+  type CreateExerciseInput,
 } from '@gigaflow/shared';
 
 export class ApiError extends Error {
@@ -177,6 +183,49 @@ export async function getPrs(): Promise<PersonalRecord[]> {
   return apiFetch('/stats/prs', { schema: zPersonalRecord.array() });
 }
 
-export async function getExercises(): Promise<Exercise[]> {
-  return apiFetch('/exercises', { schema: zExercise.array() });
+export async function getExercises(
+  params?: { q?: string; muscleGroup?: MuscleGroup },
+  fetchImpl?: typeof fetch,
+): Promise<Exercise[]> {
+  const search = new URLSearchParams();
+  if (params?.q) search.set('q', params.q);
+  if (params?.muscleGroup) search.set('muscleGroup', params.muscleGroup);
+  const qs = search.toString();
+  return apiFetch(`/exercises${qs ? `?${qs}` : ''}`, { schema: zExercise.array(), fetchImpl });
+}
+
+export async function createExercise(input: CreateExerciseInput, fetchImpl?: typeof fetch): Promise<Exercise> {
+  return apiFetch('/exercises', { method: 'POST', body: input, schema: zExercise, fetchImpl });
+}
+
+export async function getPlans(fetchImpl?: typeof fetch): Promise<Plan[]> {
+  return apiFetch('/plans', { schema: zPlan.array(), fetchImpl });
+}
+
+export async function getPlan(id: string, fetchImpl?: typeof fetch): Promise<PlanWithTemplates> {
+  return apiFetch(`/plans/${id}`, { schema: zPlanWithTemplates, fetchImpl });
+}
+
+export async function createPlan(input: CreatePlanInput, fetchImpl?: typeof fetch): Promise<PlanWithTemplates> {
+  return apiFetch('/plans', { method: 'POST', body: input, schema: zPlanWithTemplates, fetchImpl });
+}
+
+export async function updatePlan(
+  id: string,
+  input: UpdatePlanInput,
+  fetchImpl?: typeof fetch,
+): Promise<PlanWithTemplates> {
+  return apiFetch(`/plans/${id}`, { method: 'PUT', body: input, schema: zPlanWithTemplates, fetchImpl });
+}
+
+export async function activatePlan(id: string, fetchImpl?: typeof fetch): Promise<PlanWithTemplates> {
+  return apiFetch(`/plans/${id}/activate`, { method: 'POST', schema: zPlanWithTemplates, fetchImpl });
+}
+
+export async function deletePlan(id: string, fetchImpl?: typeof fetch): Promise<{ deleted: boolean }> {
+  return apiFetch(`/plans/${id}`, {
+    method: 'DELETE',
+    schema: z.object({ deleted: z.boolean() }),
+    fetchImpl,
+  });
 }
