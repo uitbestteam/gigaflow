@@ -197,8 +197,8 @@ AI generation is limited per 30-day period per user. FREE plan limits: workout 1
 
 ## Web app
 
-`apps/web` is a React + Vite PWA. **F0 (foundation)** and **F1 (core training
-loop)** have shipped:
+`apps/web` is a React + Vite PWA. **F0 (foundation)**, **F1 (core training
+loop)**, and **F2 (plans builder + exercise library)** have shipped:
 
 - Dark-themed, installable PWA shell (app-shell precache via `vite-plugin-pwa`)
   with English/Vietnamese i18n
@@ -209,10 +209,20 @@ loop)** have shipped:
 - Home/Today → start a session from the active plan → 2-tap set logging with
   a rest timer and optional RIR entry → finish session → summary screen with
   PR badges
+- **Exercise Library** (`/exercises`): search exercises by name, filter by
+  muscle group, create custom exercises (name in English/Vietnamese, muscle
+  group, equipment type, default weight increment)
+- **Plans management** (`/plans`): list plans with Active badge, Activate,
+  Edit, Delete (inline two-step confirmation), create new plan, or start from
+  preset template
+- **Plan Builder** (`/plans/new`, `/plans/:id/edit`): edit plan name, manage
+  per-day workout templates (name and color per day), add/remove/reorder
+  exercises with exercise picker, edit sets, rep range, weight increment, and
+  equipment per exercise slot, save to create or update the plan
 
-**Deferred:** F2 (plan builder + exercise library UI), F3 (AI generate / meal
-/ InBody / stats dashboards), a real Firebase project's config, browser/visual
-QA, and offline data sync (only the app shell is precached today).
+**Deferred:** F3 (AI generate workout / meal planner / InBody capture / stats
+dashboards UI), a real Firebase project's config, browser/visual QA, and
+offline data sync (only the app shell is precached today).
 
 ### Running it
 
@@ -294,18 +304,14 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
 E5 Session Logging & Progression ✅ · E6 Rest Timer & RIR · E7 AI Workout Planner ✅ (backend) ·
 E8 InBody OCR ✅ (backend + weight log) · E9 Meal Planner ✅ (backend) · E10 Notifications ✅ (backend) · E11 Analytics ✅ (backend) ·
-E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth 🚧 (web app F0+F1 shipped; F2/F3 remaining) · E14 Testing & Hardening ✅ (backend).
+E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth ✅ (web app F0+F1+F2 shipped; F3 remaining) · E14 Testing & Hardening ✅ (backend).
 
 *Notes:*
-- *E3-S4 Exercise library UI is deferred to E13-F2 (web app plan builder).*
-- *E4-S3 Custom plan builder UI is deferred to E13-F2; E4-S5 Home/Today queue UI shipped in E13-F1.*
+- *E3-S4 Exercise library UI shipped in E13-F2.*
+- *E4-S3 Custom plan builder UI shipped in E13-F2; E4-S5 Home/Today queue UI shipped in E13-F1.*
 - *E5-S6 Active Session UI and E5-S7 Session Summary UI shipped in E13-F1.*
-- *E7-S5 Generate-plan UI (request form + job polling) is deferred to E13-F3.*
+- *E13-F3 deferred: E7-S5 Generate-plan UI (request form + job polling), E10-S3 Frontend FCM setup (push registration), E8-S3 InBody UI (scan upload + history), E9-S3 Meal planner UI (plan view + history), E11-S3 Statistics UI.*
 - *E7 Cloud Tasks enqueuer (real job queuing for long-running plans) is deferred to future backend work.*
-- *E10-S3 Frontend FCM setup (web app push notification registration UI) is deferred to E13-F3.*
 - *E10 Cloud Scheduler trigger setup for workout reminders is deferred to deploy (Terraform + Cloud Build).*
 - *E8-S1 Cloud Storage signed-URL upload for images is deferred to deploy (E8 backend uses inline base64).*
-- *E8-S3 InBody UI (scan upload + history view) is deferred to E13-F3.*
-- *E9-S3 Meal planner UI (plan view + history) is deferred to E13-F3.*
-- *E11-S3 Statistics UI is deferred to E13-F3.*
 - *Frontend auth (anonymous sign-in, Google/password sign-in/link, account upgrade UI) shipped in E13-F0/F1.*
