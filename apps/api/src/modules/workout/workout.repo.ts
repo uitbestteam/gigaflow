@@ -105,7 +105,7 @@ export async function getTemplateWithSlotsForUser(
 }
 
 export async function listPlans(userId: string): Promise<Plan[]> {
-  const docs = await plans().find({ userId }).sort({ createdAt: -1 }).toArray();
+  const docs = await plans().find({ userId }).sort({ createdAt: -1, _id: -1 }).toArray();
   return docs.map((d) => mapId<Plan>(d));
 }
 
