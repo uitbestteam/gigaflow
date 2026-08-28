@@ -81,7 +81,7 @@ export function TemplateEditor({
         </div>
       </div>
 
-      <div className="flex items-center gap-2" role="group" aria-label={t('builder.equipment')}>
+      <div className="flex items-center gap-2" role="group" aria-label={t('builder.colorLabel')}>
         {COLOR_TAGS.map((tag) => (
           <button
             key={tag}

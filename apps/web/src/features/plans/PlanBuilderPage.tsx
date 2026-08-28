@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -38,6 +38,11 @@ export function PlanBuilderPage() {
     queryKey: ['plan', id],
     queryFn: () => getPlan(id as string),
     enabled: Boolean(id),
+    // Defense-in-depth alongside the seeded-once guard below: a background
+    // refetch (window refocus, manual invalidation elsewhere) must never
+    // silently replace the user's in-progress edits.
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 
   const exercisesQuery = useQuery({
@@ -53,12 +58,25 @@ export function PlanBuilderPage() {
     return map;
   }, [exercisesQuery.data]);
 
+  // Seeds the builder store from the server copy exactly once per plan id
+  // (or once for a blank "/plans/new" builder). `planQuery.data` gets a new
+  // object reference on every refetch (window refocus, staleTime elapsing,
+  // an invalidation fired elsewhere) — re-running `init()` on every such
+  // emission would silently discard whatever the user has typed since the
+  // first load. `seededKeyRef` remembers what we've already seeded for and
+  // blocks re-seeding until the identity actually changes (a real
+  // navigation to a different plan, or new -> edit).
+  const seededKeyRef = useRef<string | null>(null);
   useEffect(() => {
+    const key = id ?? 'new';
+    if (seededKeyRef.current === key) return;
     if (id) {
-      if (planQuery.data) init(planQuery.data);
+      if (!planQuery.data) return;
+      init(planQuery.data);
     } else {
       init();
     }
+    seededKeyRef.current = key;
   }, [id, planQuery.data, init]);
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
@@ -148,5 +148,47 @@ describe('PlanBuilderPage', () => {
     expect(input.templates[0]?.slots[0]?.exerciseId).toBe('ex1');
 
     expect(await screen.findByText('Plans Page')).toBeInTheDocument();
+  });
+
+  it('does not clobber an unsaved edit when the plan query refetches with the same server data', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/plans/p1/edit']}>
+          <Routes>
+            <Route path="/plans/:id/edit" element={<PlanBuilderPage />} />
+            <Route path="/plans" element={<div>Plans Page</div>} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() => {
+      expect(api.getPlan).toHaveBeenCalledTimes(1);
+    });
+
+    const setsInput = await screen.findByLabelText(/sets/i);
+    await user.clear(setsInput);
+    await user.type(setsInput, '7');
+    expect(setsInput).toHaveValue(7);
+
+    // Simulate a background refetch (window refocus, an invalidation fired
+    // from elsewhere in the app, etc.) that resolves to a fresh object with
+    // the *same* server data. Forcing it here bypasses `staleTime` so the
+    // regression is proven by the once-guard alone, not just by staleTime.
+    await act(async () => {
+      await queryClient.refetchQueries({ queryKey: ['plan', 'p1'] });
+    });
+
+    await waitFor(() => {
+      expect(api.getPlan).toHaveBeenCalledTimes(2);
+    });
+
+    // The store must still hold the user's edit -- a naive effect that
+    // re-runs `init(plan)` on every `planQuery.data` change would have
+    // reset this back to the server's `setsTarget: 3`.
+    expect(screen.getByLabelText(/sets/i)).toHaveValue(7);
   });
 });

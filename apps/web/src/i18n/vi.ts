@@ -131,6 +131,7 @@ const vi: TranslationSchema = {
     repMax: 'Rep tối đa',
     increment: 'Mức tăng (kg)',
     equipment: 'Thiết bị',
+    colorLabel: 'Màu',
     loadError: 'Không thể tải kế hoạch này.',
   },
 };

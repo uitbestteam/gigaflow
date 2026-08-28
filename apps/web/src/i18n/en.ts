@@ -131,6 +131,7 @@ export interface TranslationSchema {
     repMax: string;
     increment: string;
     equipment: string;
+    colorLabel: string;
     loadError: string;
   };
 }
@@ -262,6 +263,7 @@ const en: TranslationSchema = {
     repMax: 'Rep max',
     increment: 'Increment (kg)',
     equipment: 'Equipment',
+    colorLabel: 'Color',
     loadError: 'Could not load this plan.',
   },
 };
