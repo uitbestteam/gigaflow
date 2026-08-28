@@ -133,6 +133,7 @@ export interface TranslationSchema {
     equipment: string;
     colorLabel: string;
     loadError: string;
+    saveError: string;
   };
 }
 
@@ -265,6 +266,7 @@ const en: TranslationSchema = {
     equipment: 'Equipment',
     colorLabel: 'Color',
     loadError: 'Could not load this plan.',
+    saveError: 'Could not save this plan. Please check your entries and try again.',
   },
 };
 

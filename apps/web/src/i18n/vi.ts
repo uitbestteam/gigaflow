@@ -133,6 +133,7 @@ const vi: TranslationSchema = {
     equipment: 'Thiết bị',
     colorLabel: 'Màu',
     loadError: 'Không thể tải kế hoạch này.',
+    saveError: 'Không thể lưu kế hoạch này. Vui lòng kiểm tra lại thông tin và thử lại.',
   },
 };
 

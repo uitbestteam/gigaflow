@@ -138,6 +138,7 @@ export function PlanBuilderPage() {
   }
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
+  const saveError = createMutation.isError || updateMutation.isError;
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -172,6 +173,8 @@ export function PlanBuilderPage() {
       <Button variant="ghost" className="self-start" onClick={() => addTemplate()}>
         {t('builder.addDay')}
       </Button>
+
+      {saveError && <p className="text-sm text-warning">{t('builder.saveError')}</p>}
 
       <div className="flex items-center gap-2">
         <Button onClick={handleSave} disabled={isSaving}>

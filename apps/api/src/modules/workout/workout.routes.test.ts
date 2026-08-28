@@ -76,10 +76,10 @@ describe('workout routes', () => {
   });
 
   describe('plan CRUD', () => {
-    it('POST /plans creates a plan (200) with server ids + source custom; then GET /plans lists it', async () => {
+    it('POST /plans creates a plan (201) with server ids + source custom; then GET /plans lists it', async () => {
       const app = makeWorkoutRoutes({ verify });
       const create = await app.request('/', { method: 'POST', headers: H, body: JSON.stringify(makeCreateInput({ name: 'Create List Plan' })) });
-      expect(create.status).toBe(200);
+      expect(create.status).toBe(201);
       const createBody = (await create.json()) as { data: { id: string; source: string; templates: Array<{ id: string; slots: Array<{ id: string }> }> } };
       expect(createBody.data.source).toBe('custom');
       expect(createBody.data.id).toBeTruthy();

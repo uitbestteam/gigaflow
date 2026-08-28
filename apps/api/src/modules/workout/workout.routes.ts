@@ -41,7 +41,7 @@ export function makeWorkoutRoutes(deps: { verify: TokenVerifier }): Hono {
     const input = c.req.valid('json');
     try {
       const plan = await createPlan(c.get('user').authId, input);
-      return c.json(apiSuccess(plan));
+      return c.json(apiSuccess(plan), 201);
     } catch (err) {
       if (err instanceof PlanError) return c.json(errorBody(err.message), err.status as 400 | 404);
       throw err;

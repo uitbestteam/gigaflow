@@ -194,4 +194,35 @@ describe('PlanBuilderPage', () => {
     // reset this back to the server's `setsTarget: 3`.
     expect(screen.getByLabelText(/sets/i)).toHaveValue(7);
   });
+
+  it('clamps an emptied sets field to 1 on blur, so save never submits an invalid 0', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
+    renderAt('/plans/new');
+
+    const addExerciseButton = await screen.findByRole('button', { name: /add exercise/i });
+    await user.click(addExerciseButton);
+
+    const pickItem = await screen.findByText('Bench Press');
+    await user.click(pickItem);
+
+    const setsInput = await screen.findByLabelText(/sets/i);
+    await user.clear(setsInput);
+    expect(setsInput).toHaveValue(null);
+
+    // Clicking Save blurs the still-empty sets field before the mutation
+    // fires; the blur-clamp must coerce it to the schema minimum (1), never
+    // to 0.
+    const saveButton = screen.getByRole('button', { name: /^save$/i });
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(api.createPlan).toHaveBeenCalledTimes(1);
+    });
+
+    const call = (api.createPlan as unknown as Mock).mock.calls[0];
+    if (!call) throw new Error('createPlan was not called');
+    const input = call[0] as { templates: { slots: { setsTarget: number }[] }[] };
+    expect(input.templates[0]?.slots[0]?.setsTarget).toBe(1);
+  });
 });

@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EquipmentType } from '@gigaflow/shared';
 import type { EditableSlot } from '../store/planBuilderStore';
@@ -19,6 +19,59 @@ const EQUIPMENT_TYPES = Object.values(EquipmentType);
 const numberInputClasses =
   'min-h-11 w-full rounded-[10px] border border-border-subtle bg-surface-elevated px-3 text-text tabular-nums';
 
+type NumericField = 'setsTarget' | 'repRangeMin' | 'repRangeMax' | 'weightIncrement';
+
+// Mirrors zSlotInput's minimums (packages/shared/src/schemas/plan.ts): sets
+// and rep-range fields are `min(1)`, weightIncrement is `min(0)`. An emptied
+// or invalid field must never silently become a value that fails that
+// schema on save.
+const FIELD_MIN: Record<NumericField, number> = {
+  setsTarget: 1,
+  repRangeMin: 1,
+  repRangeMax: 1,
+  weightIncrement: 0,
+};
+
+/**
+ * Backs one numeric input with a local text draft so the user can freely
+ * clear/retype (including a momentary empty box) without the field
+ * collapsing to `0` mid-edit. Valid keystrokes (>= the schema minimum) are
+ * committed to the store immediately; an empty or below-minimum value is
+ * clamped to the minimum on blur, so a save immediately after clearing a
+ * field can never submit an invalid `0`.
+ */
+function useNumericField(
+  value: number,
+  field: NumericField,
+  onChange: (patch: Partial<EditableSlot>) => void,
+) {
+  const [draft, setDraft] = useState(String(value));
+
+  useEffect(() => {
+    setDraft(String(value));
+  }, [value]);
+
+  const min = FIELD_MIN[field];
+
+  function handleChange(raw: string) {
+    setDraft(raw);
+    const parsed = Number(raw);
+    if (raw.trim() !== '' && !Number.isNaN(parsed) && parsed >= min) {
+      onChange({ [field]: parsed } as Partial<EditableSlot>);
+    }
+  }
+
+  function handleBlur() {
+    const parsed = Number(draft);
+    if (draft.trim() === '' || Number.isNaN(parsed) || parsed < min) {
+      setDraft(String(min));
+      onChange({ [field]: min } as Partial<EditableSlot>);
+    }
+  }
+
+  return { draft, handleChange, handleBlur };
+}
+
 /**
  * One exercise slot inside a `TemplateEditor`: exercise name, the numeric
  * targets (sets/rep range/increment — all `tabular-nums` for stable column
@@ -32,10 +85,10 @@ export function SlotEditorRow({ slot, exerciseName, onChange, onRemove, onMove, 
   const incrementId = useId();
   const equipmentId = useId();
 
-  function handleNumberChange(field: keyof EditableSlot, raw: string) {
-    const parsed = Number(raw);
-    onChange({ [field]: Number.isNaN(parsed) ? 0 : parsed } as Partial<EditableSlot>);
-  }
+  const sets = useNumericField(slot.setsTarget, 'setsTarget', onChange);
+  const repMin = useNumericField(slot.repRangeMin, 'repRangeMin', onChange);
+  const repMax = useNumericField(slot.repRangeMax, 'repRangeMax', onChange);
+  const increment = useNumericField(slot.weightIncrement, 'weightIncrement', onChange);
 
   return (
     <Card className={['flex flex-col gap-3', className].filter(Boolean).join(' ')}>
@@ -62,8 +115,9 @@ export function SlotEditorRow({ slot, exerciseName, onChange, onRemove, onMove, 
             type="number"
             inputMode="numeric"
             className={numberInputClasses}
-            value={slot.setsTarget}
-            onChange={(e) => handleNumberChange('setsTarget', e.target.value)}
+            value={sets.draft}
+            onChange={(e) => sets.handleChange(e.target.value)}
+            onBlur={sets.handleBlur}
           />
         </label>
 
@@ -74,8 +128,9 @@ export function SlotEditorRow({ slot, exerciseName, onChange, onRemove, onMove, 
             type="number"
             inputMode="numeric"
             className={numberInputClasses}
-            value={slot.repRangeMin}
-            onChange={(e) => handleNumberChange('repRangeMin', e.target.value)}
+            value={repMin.draft}
+            onChange={(e) => repMin.handleChange(e.target.value)}
+            onBlur={repMin.handleBlur}
           />
         </label>
 
@@ -86,8 +141,9 @@ export function SlotEditorRow({ slot, exerciseName, onChange, onRemove, onMove, 
             type="number"
             inputMode="numeric"
             className={numberInputClasses}
-            value={slot.repRangeMax}
-            onChange={(e) => handleNumberChange('repRangeMax', e.target.value)}
+            value={repMax.draft}
+            onChange={(e) => repMax.handleChange(e.target.value)}
+            onBlur={repMax.handleBlur}
           />
         </label>
 
@@ -99,8 +155,9 @@ export function SlotEditorRow({ slot, exerciseName, onChange, onRemove, onMove, 
             inputMode="decimal"
             step="0.5"
             className={numberInputClasses}
-            value={slot.weightIncrement}
-            onChange={(e) => handleNumberChange('weightIncrement', e.target.value)}
+            value={increment.draft}
+            onChange={(e) => increment.handleChange(e.target.value)}
+            onBlur={increment.handleBlur}
           />
         </label>
       </div>
