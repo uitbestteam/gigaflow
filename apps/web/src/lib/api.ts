@@ -9,6 +9,14 @@ import {
   zPersonalRecord,
   zExercise,
   MuscleGroup,
+  zGenerationJob,
+  zGenerateMealInput,
+  zMealPlanDoc,
+  zAnalyzeInbodyInput,
+  zInbodyResult,
+  zStatsSummary,
+  zAward,
+  zWeightLog,
   type User,
   type Plan,
   type PlanWithTemplates,
@@ -22,6 +30,16 @@ import {
   type PlanTemplateType,
   type Exercise,
   type CreateExerciseInput,
+  type GenerateWorkoutInput,
+  type GenerationJob,
+  type GenerateMealInput,
+  type MealPlanDoc,
+  type AnalyzeInbodyInput,
+  type InbodyResult,
+  type StatsSummary,
+  type Award,
+  type LogWeightInput,
+  type WeightLog,
 } from '@gigaflow/shared';
 
 export class ApiError extends Error {
@@ -228,4 +246,63 @@ export async function deletePlan(id: string, fetchImpl?: typeof fetch): Promise<
     schema: z.object({ deleted: z.boolean() }),
     fetchImpl,
   });
+}
+
+const zJobId = z.object({ jobId: z.string() });
+
+export async function generateWorkout(
+  input: GenerateWorkoutInput,
+  fetchImpl?: typeof fetch,
+): Promise<{ jobId: string }> {
+  return apiFetch('/workout/generate', { method: 'POST', body: input, schema: zJobId, fetchImpl });
+}
+
+export async function getGenerationJob(id: string, fetchImpl?: typeof fetch): Promise<GenerationJob> {
+  return apiFetch(`/workout/jobs/${id}`, { schema: zGenerationJob, fetchImpl });
+}
+
+export async function generateMeal(
+  input: GenerateMealInput,
+  fetchImpl?: typeof fetch,
+): Promise<{ jobId: string }> {
+  return apiFetch('/meal/generate', { method: 'POST', body: input, schema: zJobId, fetchImpl });
+}
+
+export async function getMealJob(id: string, fetchImpl?: typeof fetch): Promise<GenerationJob> {
+  return apiFetch(`/meal/jobs/${id}`, { schema: zGenerationJob, fetchImpl });
+}
+
+export async function getActiveMeal(fetchImpl?: typeof fetch): Promise<MealPlanDoc | null> {
+  return apiFetch('/meal/active', { schema: zMealPlanDoc.nullable(), fetchImpl });
+}
+
+export async function analyzeInbody(
+  input: AnalyzeInbodyInput,
+  fetchImpl?: typeof fetch,
+): Promise<{ jobId: string }> {
+  return apiFetch('/inbody/analyze', { method: 'POST', body: input, schema: zJobId, fetchImpl });
+}
+
+export async function getInbodyJob(id: string, fetchImpl?: typeof fetch): Promise<GenerationJob> {
+  return apiFetch(`/inbody/jobs/${id}`, { schema: zGenerationJob, fetchImpl });
+}
+
+export async function getLatestInbody(fetchImpl?: typeof fetch): Promise<InbodyResult | null> {
+  return apiFetch('/inbody/latest', { schema: zInbodyResult.nullable(), fetchImpl });
+}
+
+export async function getStatsSummary(fetchImpl?: typeof fetch): Promise<StatsSummary> {
+  return apiFetch('/stats/summary', { schema: zStatsSummary, fetchImpl });
+}
+
+export async function getAwards(fetchImpl?: typeof fetch): Promise<Award[]> {
+  return apiFetch('/stats/awards', { schema: zAward.array(), fetchImpl });
+}
+
+export async function logWeight(input: LogWeightInput, fetchImpl?: typeof fetch): Promise<WeightLog> {
+  return apiFetch('/weight', { method: 'POST', body: input, schema: zWeightLog, fetchImpl });
+}
+
+export async function getWeightHistory(fetchImpl?: typeof fetch): Promise<WeightLog[]> {
+  return apiFetch('/weight/history', { schema: zWeightLog.array(), fetchImpl });
 }
