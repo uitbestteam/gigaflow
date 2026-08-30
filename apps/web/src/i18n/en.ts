@@ -135,6 +135,17 @@ export interface TranslationSchema {
     loadError: string;
     saveError: string;
   };
+  job: {
+    submitting: string;
+    polling: string;
+    done: string;
+  };
+  inbody: {
+    errBadType: string;
+    errTooLarge: string;
+    uploadLabel: string;
+    previewAlt: string;
+  };
 }
 
 const en: TranslationSchema = {
@@ -267,6 +278,17 @@ const en: TranslationSchema = {
     colorLabel: 'Color',
     loadError: 'Could not load this plan.',
     saveError: 'Could not save this plan. Please check your entries and try again.',
+  },
+  job: {
+    submitting: 'Submitting…',
+    polling: 'Processing…',
+    done: 'Done',
+  },
+  inbody: {
+    errBadType: 'Please choose a JPEG or PNG image.',
+    errTooLarge: 'This image is too large. Please choose a smaller one.',
+    uploadLabel: 'Upload image',
+    previewAlt: 'Selected image preview',
   },
 };
 

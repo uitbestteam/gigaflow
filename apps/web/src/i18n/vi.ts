@@ -135,6 +135,17 @@ const vi: TranslationSchema = {
     loadError: 'Không thể tải kế hoạch này.',
     saveError: 'Không thể lưu kế hoạch này. Vui lòng kiểm tra lại thông tin và thử lại.',
   },
+  job: {
+    submitting: 'Đang gửi…',
+    polling: 'Đang xử lý…',
+    done: 'Hoàn tất',
+  },
+  inbody: {
+    errBadType: 'Vui lòng chọn ảnh JPEG hoặc PNG.',
+    errTooLarge: 'Ảnh này quá lớn. Vui lòng chọn ảnh nhỏ hơn.',
+    uploadLabel: 'Tải ảnh lên',
+    previewAlt: 'Xem trước ảnh đã chọn',
+  },
 };
 
 export default vi;
