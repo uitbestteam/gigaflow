@@ -156,6 +156,28 @@ const vi: TranslationSchema = {
     trendChart: 'Biểu đồ xu hướng',
     noData: 'Chưa có dữ liệu',
   },
+  ai: {
+    navLabel: 'Tạo bằng AI',
+    title: 'Tạo kế hoạch tập luyện',
+    goalLabel: 'Mục tiêu',
+    experienceLabel: 'Trình độ',
+    daysLabel: 'Số ngày mỗi tuần',
+    submit: 'Tạo kế hoạch',
+    exercisesCount: 'bài tập',
+    editInBuilder: 'Chỉnh trong builder',
+    backToPlans: 'Về Plans',
+    goal: {
+      strength: 'Sức mạnh',
+      hypertrophy: 'Tăng cơ',
+      general_fitness: 'Thể lực tổng quát',
+      weight_loss: 'Giảm cân',
+    },
+    experience: {
+      beginner: 'Mới bắt đầu',
+      intermediate: 'Trung bình',
+      advanced: 'Nâng cao',
+    },
+  },
 };
 
 export default vi;

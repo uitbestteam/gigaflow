@@ -156,6 +156,28 @@ export interface TranslationSchema {
     trendChart: string;
     noData: string;
   };
+  ai: {
+    navLabel: string;
+    title: string;
+    goalLabel: string;
+    experienceLabel: string;
+    daysLabel: string;
+    submit: string;
+    exercisesCount: string;
+    editInBuilder: string;
+    backToPlans: string;
+    goal: {
+      strength: string;
+      hypertrophy: string;
+      general_fitness: string;
+      weight_loss: string;
+    };
+    experience: {
+      beginner: string;
+      intermediate: string;
+      advanced: string;
+    };
+  };
 }
 
 const en: TranslationSchema = {
@@ -309,6 +331,28 @@ const en: TranslationSchema = {
   stats: {
     trendChart: 'Trend chart',
     noData: 'No data yet',
+  },
+  ai: {
+    navLabel: 'AI generate',
+    title: 'Generate a workout plan',
+    goalLabel: 'Goal',
+    experienceLabel: 'Experience level',
+    daysLabel: 'Days per week',
+    submit: 'Generate plan',
+    exercisesCount: 'exercises',
+    editInBuilder: 'Edit in builder',
+    backToPlans: 'Back to plans',
+    goal: {
+      strength: 'Strength',
+      hypertrophy: 'Hypertrophy',
+      general_fitness: 'General fitness',
+      weight_loss: 'Weight loss',
+    },
+    experience: {
+      beginner: 'Beginner',
+      intermediate: 'Intermediate',
+      advanced: 'Advanced',
+    },
   },
 };
 

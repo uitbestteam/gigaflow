@@ -11,6 +11,7 @@ import { SummaryPage } from './features/session/SummaryPage';
 import { ExerciseLibraryPage } from './features/exercises/ExerciseLibraryPage';
 import { PlansPage } from './features/plans/PlansPage';
 import { PlanBuilderPage } from './features/plans/PlanBuilderPage';
+import { GeneratePlanPage } from './features/ai/GeneratePlanPage';
 
 export function App() {
   return (
@@ -27,6 +28,7 @@ export function App() {
               <Route path={ROUTES.plans} element={<PlansPage />} />
               <Route path={ROUTES.planNew} element={<PlanBuilderPage />} />
               <Route path={ROUTES.planEdit} element={<PlanBuilderPage />} />
+              <Route path={ROUTES.generate} element={<GeneratePlanPage />} />
             </Routes>
           </MainLayout>
         </AuthGate>

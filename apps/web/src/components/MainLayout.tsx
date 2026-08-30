@@ -36,6 +36,12 @@ export function MainLayout({ children }: MainLayoutProps) {
             {t('plans.title')}
           </Link>
           <Link
+            to={ROUTES.generate}
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[10px] px-3 text-text-secondary"
+          >
+            {t('ai.navLabel')}
+          </Link>
+          <Link
             to={ROUTES.account}
             className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[10px] px-3 text-text-secondary"
           >
