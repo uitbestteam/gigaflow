@@ -146,6 +146,16 @@ const vi: TranslationSchema = {
     uploadLabel: 'Tải ảnh lên',
     previewAlt: 'Xem trước ảnh đã chọn',
   },
+  macro: {
+    calories: 'Cal',
+    protein: 'Đạm',
+    carbs: 'Tinh bột',
+    fat: 'Chất béo',
+  },
+  stats: {
+    trendChart: 'Biểu đồ xu hướng',
+    noData: 'Chưa có dữ liệu',
+  },
 };
 
 export default vi;

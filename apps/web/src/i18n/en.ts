@@ -146,6 +146,16 @@ export interface TranslationSchema {
     uploadLabel: string;
     previewAlt: string;
   };
+  macro: {
+    calories: string;
+    protein: string;
+    carbs: string;
+    fat: string;
+  };
+  stats: {
+    trendChart: string;
+    noData: string;
+  };
 }
 
 const en: TranslationSchema = {
@@ -289,6 +299,16 @@ const en: TranslationSchema = {
     errTooLarge: 'This image is too large. Please choose a smaller one.',
     uploadLabel: 'Upload image',
     previewAlt: 'Selected image preview',
+  },
+  macro: {
+    calories: 'Cal',
+    protein: 'Protein',
+    carbs: 'Carbs',
+    fat: 'Fat',
+  },
+  stats: {
+    trendChart: 'Trend chart',
+    noData: 'No data yet',
   },
 };
 

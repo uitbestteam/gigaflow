@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 export interface MacroBarProps {
   calories: number;
   proteinG: number;
@@ -14,16 +16,18 @@ interface MacroEntry {
 }
 
 /**
- * A labeled row of the four core nutrition numbers. Presentational only —
- * localization of the labels is left to callers via i18n keys elsewhere,
- * so this keeps short static labels suitable across both locales.
+ * A labeled row of the four core nutrition numbers. Labels are localized
+ * (`macro.*` i18n keys); the unit symbols ("kcal"/"g") are left as-is since
+ * they are locale-neutral abbreviations.
  */
 export function MacroBar({ calories, proteinG, carbsG, fatG, className = '' }: MacroBarProps) {
+  const { t } = useTranslation();
+
   const entries: MacroEntry[] = [
-    { key: 'calories', label: 'Cal', value: calories, unit: 'kcal' },
-    { key: 'protein', label: 'Protein', value: proteinG, unit: 'g' },
-    { key: 'carbs', label: 'Carbs', value: carbsG, unit: 'g' },
-    { key: 'fat', label: 'Fat', value: fatG, unit: 'g' },
+    { key: 'calories', label: t('macro.calories'), value: calories, unit: 'kcal' },
+    { key: 'protein', label: t('macro.protein'), value: proteinG, unit: 'g' },
+    { key: 'carbs', label: t('macro.carbs'), value: carbsG, unit: 'g' },
+    { key: 'fat', label: t('macro.fat'), value: fatG, unit: 'g' },
   ];
 
   const classes = ['flex items-stretch gap-2 min-h-11', className].filter(Boolean).join(' ');
