@@ -8,6 +8,9 @@ import { ROUTES } from './routes';
 import { HomePage } from './features/home/HomePage';
 import { ActiveSessionPage } from './features/session/ActiveSessionPage';
 import { SummaryPage } from './features/session/SummaryPage';
+import { ExerciseLibraryPage } from './features/exercises/ExerciseLibraryPage';
+import { PlansPage } from './features/plans/PlansPage';
+import { PlanBuilderPage } from './features/plans/PlanBuilderPage';
 
 export function App() {
   return (
@@ -20,6 +23,10 @@ export function App() {
               <Route path={ROUTES.session} element={<ActiveSessionPage />} />
               <Route path={ROUTES.sessionSummary} element={<SummaryPage />} />
               <Route path={ROUTES.account} element={<UpgradePrompt />} />
+              <Route path={ROUTES.exercises} element={<ExerciseLibraryPage />} />
+              <Route path={ROUTES.plans} element={<PlansPage />} />
+              <Route path={ROUTES.planNew} element={<PlanBuilderPage />} />
+              <Route path={ROUTES.planEdit} element={<PlanBuilderPage />} />
             </Routes>
           </MainLayout>
         </AuthGate>

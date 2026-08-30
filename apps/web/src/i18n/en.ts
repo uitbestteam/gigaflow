@@ -62,6 +62,79 @@ export interface TranslationSchema {
     prBadge: string;
     setsAvg: string;
   };
+  exercises: {
+    title: string;
+    searchPlaceholder: string;
+    filterAll: string;
+    empty: string;
+    loadError: string;
+    addCustom: string;
+    muscle: {
+      chest: string;
+      back: string;
+      legs: string;
+      shoulders: string;
+      arms: string;
+      core: string;
+      cardio: string;
+    };
+    equipment: {
+      barbell: string;
+      dumbbell: string;
+      machine: string;
+      bodyweight: string;
+      cable: string;
+    };
+    form: {
+      nameEnLabel: string;
+      nameViLabel: string;
+      muscleGroupLabel: string;
+      equipmentTypeLabel: string;
+      defaultIncrementLabel: string;
+      submit: string;
+      nameRequired: string;
+    };
+  };
+  plans: {
+    title: string;
+    activeBadge: string;
+    activate: string;
+    edit: string;
+    delete: string;
+    confirmDelete: string;
+    newPlan: string;
+    fromPreset: string;
+    presetPpl: string;
+    presetUpperLower: string;
+    presetFullBody: string;
+    empty: string;
+    loadError: string;
+    templateType: {
+      ppl: string;
+      upper_lower: string;
+      full_body: string;
+      custom: string;
+    };
+  };
+  builder: {
+    planNamePlaceholder: string;
+    templateNamePlaceholder: string;
+    addDay: string;
+    removeDay: string;
+    moveUp: string;
+    moveDown: string;
+    addExercise: string;
+    pickExerciseTitle: string;
+    removeExercise: string;
+    sets: string;
+    repMin: string;
+    repMax: string;
+    increment: string;
+    equipment: string;
+    colorLabel: string;
+    loadError: string;
+    saveError: string;
+  };
 }
 
 const en: TranslationSchema = {
@@ -121,6 +194,79 @@ const en: TranslationSchema = {
     backHome: 'Back to home',
     prBadge: 'PR',
     setsAvg: '{{count}} sets · avg {{avg}}kg',
+  },
+  exercises: {
+    title: 'Exercise library',
+    searchPlaceholder: 'Search exercises',
+    filterAll: 'All',
+    empty: 'No exercises found.',
+    loadError: 'Could not load exercises.',
+    addCustom: '＋ Custom',
+    muscle: {
+      chest: 'Chest',
+      back: 'Back',
+      legs: 'Legs',
+      shoulders: 'Shoulders',
+      arms: 'Arms',
+      core: 'Core',
+      cardio: 'Cardio',
+    },
+    equipment: {
+      barbell: 'Barbell',
+      dumbbell: 'Dumbbell',
+      machine: 'Machine',
+      bodyweight: 'Bodyweight',
+      cable: 'Cable',
+    },
+    form: {
+      nameEnLabel: 'Name (English)',
+      nameViLabel: 'Name (Vietnamese)',
+      muscleGroupLabel: 'Muscle group',
+      equipmentTypeLabel: 'Equipment type',
+      defaultIncrementLabel: 'Default increment (kg)',
+      submit: 'Add exercise',
+      nameRequired: 'Both names are required.',
+    },
+  },
+  plans: {
+    title: 'Plans',
+    activeBadge: 'Active',
+    activate: 'Activate',
+    edit: 'Edit',
+    delete: 'Delete',
+    confirmDelete: 'Confirm?',
+    newPlan: 'New plan',
+    fromPreset: 'From preset',
+    presetPpl: 'Push / Pull / Legs',
+    presetUpperLower: 'Upper / Lower',
+    presetFullBody: 'Full body',
+    empty: 'No plans yet. Create one to get started.',
+    loadError: 'Could not load your plans.',
+    templateType: {
+      ppl: 'Push / Pull / Legs',
+      upper_lower: 'Upper / Lower',
+      full_body: 'Full body',
+      custom: 'Custom',
+    },
+  },
+  builder: {
+    planNamePlaceholder: 'Plan name',
+    templateNamePlaceholder: 'Day name',
+    addDay: '＋ Add day',
+    removeDay: 'Remove day',
+    moveUp: 'Move up',
+    moveDown: 'Move down',
+    addExercise: '＋ Add exercise',
+    pickExerciseTitle: 'Pick an exercise',
+    removeExercise: 'Remove',
+    sets: 'Sets',
+    repMin: 'Rep min',
+    repMax: 'Rep max',
+    increment: 'Increment (kg)',
+    equipment: 'Equipment',
+    colorLabel: 'Color',
+    loadError: 'Could not load this plan.',
+    saveError: 'Could not save this plan. Please check your entries and try again.',
   },
 };
 
