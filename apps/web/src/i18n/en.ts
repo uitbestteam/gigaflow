@@ -145,6 +145,23 @@ export interface TranslationSchema {
     errTooLarge: string;
     uploadLabel: string;
     previewAlt: string;
+    navLabel: string;
+    title: string;
+    analyze: string;
+    takenAt: string;
+    noResult: string;
+    metric: {
+      weightKg: string;
+      bmi: string;
+      bodyFatPercent: string;
+      skeletalMuscleMassKg: string;
+      bodyFatMassKg: string;
+      visceralFatLevel: string;
+    };
+    unit: {
+      kg: string;
+      percent: string;
+    };
   };
   macro: {
     calories: string;
@@ -359,6 +376,23 @@ const en: TranslationSchema = {
     errTooLarge: 'This image is too large. Please choose a smaller one.',
     uploadLabel: 'Upload image',
     previewAlt: 'Selected image preview',
+    navLabel: 'InBody',
+    title: 'InBody capture',
+    analyze: 'Analyze',
+    takenAt: 'Taken on {{date}}',
+    noResult: 'No InBody result yet. Upload a scan photo to get started.',
+    metric: {
+      weightKg: 'Weight',
+      bmi: 'BMI',
+      bodyFatPercent: 'Body fat',
+      skeletalMuscleMassKg: 'Skeletal muscle mass',
+      bodyFatMassKg: 'Body fat mass',
+      visceralFatLevel: 'Visceral fat level',
+    },
+    unit: {
+      kg: 'kg',
+      percent: '%',
+    },
   },
   macro: {
     calories: 'Cal',

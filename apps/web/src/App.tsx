@@ -13,6 +13,7 @@ import { PlansPage } from './features/plans/PlansPage';
 import { PlanBuilderPage } from './features/plans/PlanBuilderPage';
 import { GeneratePlanPage } from './features/ai/GeneratePlanPage';
 import { MealPlannerPage } from './features/meal/MealPlannerPage';
+import { InbodyPage } from './features/inbody/InbodyPage';
 
 export function App() {
   return (
@@ -31,6 +32,7 @@ export function App() {
               <Route path={ROUTES.planEdit} element={<PlanBuilderPage />} />
               <Route path={ROUTES.generate} element={<GeneratePlanPage />} />
               <Route path={ROUTES.meal} element={<MealPlannerPage />} />
+              <Route path={ROUTES.inbody} element={<InbodyPage />} />
             </Routes>
           </MainLayout>
         </AuthGate>

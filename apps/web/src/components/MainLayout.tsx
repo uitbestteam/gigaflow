@@ -48,6 +48,12 @@ export function MainLayout({ children }: MainLayoutProps) {
             {t('meal.navLabel')}
           </Link>
           <Link
+            to={ROUTES.inbody}
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[10px] px-3 text-text-secondary"
+          >
+            {t('inbody.navLabel')}
+          </Link>
+          <Link
             to={ROUTES.account}
             className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[10px] px-3 text-text-secondary"
           >

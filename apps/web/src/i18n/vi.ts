@@ -145,6 +145,23 @@ const vi: TranslationSchema = {
     errTooLarge: 'Ảnh này quá lớn. Vui lòng chọn ảnh nhỏ hơn.',
     uploadLabel: 'Tải ảnh lên',
     previewAlt: 'Xem trước ảnh đã chọn',
+    navLabel: 'InBody',
+    title: 'Chụp chỉ số InBody',
+    analyze: 'Phân tích',
+    takenAt: 'Đo lúc {{date}}',
+    noResult: 'Chưa có kết quả InBody. Tải ảnh kết quả đo để bắt đầu.',
+    metric: {
+      weightKg: 'Cân nặng',
+      bmi: 'BMI',
+      bodyFatPercent: 'Tỷ lệ mỡ cơ thể',
+      skeletalMuscleMassKg: 'Khối lượng cơ xương',
+      bodyFatMassKg: 'Khối lượng mỡ',
+      visceralFatLevel: 'Mức mỡ nội tạng',
+    },
+    unit: {
+      kg: 'kg',
+      percent: '%',
+    },
   },
   macro: {
     calories: 'Cal',

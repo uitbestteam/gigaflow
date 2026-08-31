@@ -10,6 +10,7 @@ export const ROUTES = {
   planEdit: '/plans/:id/edit',
   generate: '/generate',
   meal: '/meal',
+  inbody: '/inbody',
 } as const;
 
 export function sessionPath(id: string): string {
