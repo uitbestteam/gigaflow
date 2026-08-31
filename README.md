@@ -220,9 +220,24 @@ loop)**, and **F2 (plans builder + exercise library)** have shipped:
   exercises with exercise picker, edit sets, rep range, weight increment, and
   equipment per exercise slot, save to create or update the plan
 
-**Deferred:** F3 (AI generate workout / meal planner / InBody capture / stats
-dashboards UI), a real Firebase project's config, browser/visual QA, and
-offline data sync (only the app shell is precached today).
+**F3 (AI planning, meal, InBody, stats)** has shipped:
+
+- **AI Generate Plan** (`/generate`): form to specify goal, experience level, and days per week
+  → job polling → generated plan opens in the Plan Builder for review and editing
+  (uses `POST /api/workout/generate` and `GET /api/workout/jobs/:id`)
+- **Meal Planner** (`/meal`): TDEE-based form (goal, gender, age, height, weight, activity level)
+  → job polling → 7-day meal plan with per-day macronutrient targets and meals
+  (uses `POST /api/meal/generate`, `GET /api/meal/jobs/:id`, and `GET /api/meal/active`)
+- **InBody Capture** (`/inbody`): photo upload (client-validated JPEG/PNG) → analysis job
+  → body composition metrics (weight, body fat %, muscle mass %, etc.)
+  (uses `POST /api/inbody/analyze`, `GET /api/inbody/jobs/:id`, and `GET /api/inbody/latest`)
+- **Stats Dashboard** (`/stats`): aggregated statistics including total sessions, total volume,
+  personal records count, awards with progress toward next badge, personal records per exercise,
+  and bodyweight logging with a mini chart (uses `GET /api/stats/summary`, `GET /api/stats/prs`,
+  `GET /api/stats/awards`, `POST /api/weight`, and `GET /api/weight/history`)
+
+**Deferred:** push notification UI (requires Firebase Cloud Messaging setup), real GCP/Firebase
+provisioning, and offline data sync (only the app shell is precached today).
 
 ### Running it
 
@@ -304,13 +319,13 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
 E5 Session Logging & Progression ✅ · E6 Rest Timer & RIR · E7 AI Workout Planner ✅ (backend) ·
 E8 InBody OCR ✅ (backend + weight log) · E9 Meal Planner ✅ (backend) · E10 Notifications ✅ (backend) · E11 Analytics ✅ (backend) ·
-E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth ✅ (web app F0+F1+F2 shipped; F3 remaining) · E14 Testing & Hardening ✅ (backend).
+E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth ✅ (web app F0+F1+F2+F3 done) · E14 Testing & Hardening ✅ (backend).
 
 *Notes:*
 - *E3-S4 Exercise library UI shipped in E13-F2.*
 - *E4-S3 Custom plan builder UI shipped in E13-F2; E4-S5 Home/Today queue UI shipped in E13-F1.*
 - *E5-S6 Active Session UI and E5-S7 Session Summary UI shipped in E13-F1.*
-- *E13-F3 deferred: E7-S5 Generate-plan UI (request form + job polling), E10-S3 Frontend FCM setup (push registration), E8-S3 InBody UI (scan upload + history), E9-S3 Meal planner UI (plan view + history), E11-S3 Statistics UI.*
+- *E13-F3 shipped: E7-S5 Generate-plan UI (request form + job polling), E8-S3 InBody UI (scan upload), E9-S3 Meal planner UI (plan view), E11-S3 Statistics UI.*
 - *E7 Cloud Tasks enqueuer (real job queuing for long-running plans) is deferred to future backend work.*
 - *E10 Cloud Scheduler trigger setup for workout reminders is deferred to deploy (Terraform + Cloud Build).*
 - *E8-S1 Cloud Storage signed-URL upload for images is deferred to deploy (E8 backend uses inline base64).*
