@@ -9,6 +9,7 @@ export const ROUTES = {
   planNew: '/plans/new',
   planEdit: '/plans/:id/edit',
   generate: '/generate',
+  meal: '/meal',
 } as const;
 
 export function sessionPath(id: string): string {

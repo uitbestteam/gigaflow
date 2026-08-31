@@ -178,6 +178,44 @@ const vi: TranslationSchema = {
       advanced: 'Nâng cao',
     },
   },
+  meal: {
+    navLabel: 'Thực đơn',
+    title: 'Lập thực đơn',
+    goalLabel: 'Mục tiêu',
+    genderLabel: 'Giới tính',
+    ageLabel: 'Tuổi',
+    heightLabel: 'Chiều cao (cm)',
+    weightLabel: 'Cân nặng (kg)',
+    activityLabel: 'Mức độ vận động',
+    submit: 'Tạo thực đơn',
+    dayLabel: 'Ngày {{n}}',
+    proteinShort: 'Đạm',
+    carbsShort: 'Tinh bột',
+    fatShort: 'Béo',
+    goal: {
+      strength: 'Sức mạnh',
+      hypertrophy: 'Tăng cơ',
+      general_fitness: 'Thể lực tổng quát',
+      weight_loss: 'Giảm cân',
+    },
+    gender: {
+      male: 'Nam',
+      female: 'Nữ',
+    },
+    activity: {
+      sedentary: 'Ít vận động',
+      light: 'Nhẹ',
+      moderate: 'Vừa phải',
+      active: 'Năng động',
+      very_active: 'Rất năng động',
+    },
+    mealType: {
+      breakfast: 'Bữa sáng',
+      lunch: 'Bữa trưa',
+      dinner: 'Bữa tối',
+      snack: 'Bữa phụ',
+    },
+  },
 };
 
 export default vi;

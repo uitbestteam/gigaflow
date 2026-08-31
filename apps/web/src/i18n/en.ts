@@ -178,6 +178,44 @@ export interface TranslationSchema {
       advanced: string;
     };
   };
+  meal: {
+    navLabel: string;
+    title: string;
+    goalLabel: string;
+    genderLabel: string;
+    ageLabel: string;
+    heightLabel: string;
+    weightLabel: string;
+    activityLabel: string;
+    submit: string;
+    dayLabel: string;
+    proteinShort: string;
+    carbsShort: string;
+    fatShort: string;
+    goal: {
+      strength: string;
+      hypertrophy: string;
+      general_fitness: string;
+      weight_loss: string;
+    };
+    gender: {
+      male: string;
+      female: string;
+    };
+    activity: {
+      sedentary: string;
+      light: string;
+      moderate: string;
+      active: string;
+      very_active: string;
+    };
+    mealType: {
+      breakfast: string;
+      lunch: string;
+      dinner: string;
+      snack: string;
+    };
+  };
 }
 
 const en: TranslationSchema = {
@@ -352,6 +390,44 @@ const en: TranslationSchema = {
       beginner: 'Beginner',
       intermediate: 'Intermediate',
       advanced: 'Advanced',
+    },
+  },
+  meal: {
+    navLabel: 'Meal plan',
+    title: 'Meal planner',
+    goalLabel: 'Goal',
+    genderLabel: 'Gender',
+    ageLabel: 'Age',
+    heightLabel: 'Height (cm)',
+    weightLabel: 'Weight (kg)',
+    activityLabel: 'Activity level',
+    submit: 'Generate meal plan',
+    dayLabel: 'Day {{n}}',
+    proteinShort: 'P',
+    carbsShort: 'C',
+    fatShort: 'F',
+    goal: {
+      strength: 'Strength',
+      hypertrophy: 'Hypertrophy',
+      general_fitness: 'General fitness',
+      weight_loss: 'Weight loss',
+    },
+    gender: {
+      male: 'Male',
+      female: 'Female',
+    },
+    activity: {
+      sedentary: 'Sedentary',
+      light: 'Light',
+      moderate: 'Moderate',
+      active: 'Active',
+      very_active: 'Very active',
+    },
+    mealType: {
+      breakfast: 'Breakfast',
+      lunch: 'Lunch',
+      dinner: 'Dinner',
+      snack: 'Snack',
     },
   },
 };
