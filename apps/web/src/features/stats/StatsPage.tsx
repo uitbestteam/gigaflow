@@ -1,8 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import type { Exercise } from '@gigaflow/shared';
-import { getAwards, getExercises, getPrs, getStatsSummary, getWeightHistory, logWeight } from '../../lib/api';
+import { getAwards, getPrs, getStatsSummary, getWeightHistory, logWeight } from '../../lib/api';
 import { resolveTranslatable } from '../../lib/i18n';
 import { StatTile } from '../../components/StatTile';
 import { MiniBarChart } from '../../components/MiniBarChart';
@@ -23,10 +22,7 @@ export function StatsPage() {
   const summaryQuery = useQuery({ queryKey: ['statsSummary'], queryFn: () => getStatsSummary() });
   const awardsQuery = useQuery({ queryKey: ['awards'], queryFn: () => getAwards() });
   const prsQuery = useQuery({ queryKey: ['prs'], queryFn: () => getPrs() });
-  const exercisesQuery = useQuery({ queryKey: ['exercises'], queryFn: () => getExercises() });
   const weightHistoryQuery = useQuery({ queryKey: ['weightHistory'], queryFn: () => getWeightHistory() });
-
-  const exercisesById = new Map<string, Exercise>((exercisesQuery.data ?? []).map((ex) => [ex.id, ex]));
 
   const [weightKg, setWeightKg] = useState('');
 
@@ -94,8 +90,7 @@ export function StatsPage() {
         )}
         <div className="flex flex-col gap-2">
           {prs.map((pr) => {
-            const exercise = exercisesById.get(pr.exerciseId);
-            const exerciseName = exercise ? resolveTranslatable(exercise.name, i18n.language) : pr.exerciseId;
+            const exerciseName = resolveTranslatable(pr.name, i18n.language);
             return (
               <div
                 key={pr.exerciseId}

@@ -55,7 +55,7 @@ export function MealPlannerPage() {
     submit();
   };
 
-  const plan = (status === 'done' ? result : undefined) ?? activeMealQuery.data;
+  const plan = status === 'done' && result !== undefined ? result : activeMealQuery.data;
 
   return (
     <div className="flex flex-col gap-4 p-4">

@@ -74,7 +74,7 @@ export function InbodyPage() {
 
   // Prefer the just-finished job's own fetched result (avoids waiting on the
   // query cache's background refetch), falling back to the query's data.
-  const result = (status === 'done' ? jobResult : undefined) ?? latestQuery.data;
+  const result = status === 'done' && jobResult !== undefined ? jobResult : latestQuery.data;
 
   return (
     <div className="flex flex-col gap-4 p-4">

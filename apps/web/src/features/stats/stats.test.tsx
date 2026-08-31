@@ -3,15 +3,14 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, type Mock } from 'vitest';
-import { AwardKey, EquipmentType, MuscleGroup } from '@gigaflow/shared';
-import type { Award, Exercise, PersonalRecord, StatsSummary, WeightLog } from '@gigaflow/shared';
+import { AwardKey } from '@gigaflow/shared';
+import type { Award, PersonalRecord, StatsSummary, WeightLog } from '@gigaflow/shared';
 import { StatsPage } from './StatsPage';
 
 vi.mock('../../lib/api', () => ({
   getStatsSummary: vi.fn(),
   getAwards: vi.fn(),
   getPrs: vi.fn(),
-  getExercises: vi.fn(),
   getWeightHistory: vi.fn(),
   logWeight: vi.fn(),
 }));
@@ -60,19 +59,6 @@ function makePr(overrides: Partial<PersonalRecord> = {}): PersonalRecord {
   };
 }
 
-function makeExercise(overrides: Partial<Exercise> = {}): Exercise {
-  return {
-    id: 'ex-1',
-    slug: 'bench-press',
-    name: { en: 'Bench Press', vi: 'Đẩy ngực' },
-    muscleGroup: MuscleGroup.CHEST,
-    equipmentType: EquipmentType.BARBELL,
-    defaultIncrement: 2.5,
-    isCustom: false,
-    ...overrides,
-  };
-}
-
 function makeWeightLog(overrides: Partial<WeightLog> = {}): WeightLog {
   return {
     id: 'w-1',
@@ -90,7 +76,6 @@ describe('StatsPage', () => {
     (api.getStatsSummary as unknown as Mock).mockResolvedValue(makeSummary());
     (api.getAwards as unknown as Mock).mockResolvedValue([]);
     (api.getPrs as unknown as Mock).mockResolvedValue([]);
-    (api.getExercises as unknown as Mock).mockResolvedValue([]);
     (api.getWeightHistory as unknown as Mock).mockResolvedValue([]);
     (api.logWeight as unknown as Mock).mockResolvedValue(makeWeightLog());
   });
@@ -129,10 +114,9 @@ describe('StatsPage', () => {
     expect(screen.getByText('3/10')).toBeInTheDocument();
   });
 
-  it('shows a PR row with the resolved exercise name joined from getExercises', async () => {
-    (api.getPrs as unknown as Mock).mockResolvedValue([makePr({ exerciseId: 'ex-1' })]);
-    (api.getExercises as unknown as Mock).mockResolvedValue([
-      makeExercise({ id: 'ex-1', name: { en: 'Bench Press', vi: 'Đẩy ngực' } }),
+  it('shows a PR row with the name resolved from pr.name', async () => {
+    (api.getPrs as unknown as Mock).mockResolvedValue([
+      makePr({ exerciseId: 'ex-1', name: { en: 'Bench Press', vi: 'Đẩy ngực' } }),
     ]);
 
     renderPage();
