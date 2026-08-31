@@ -11,6 +11,7 @@ export const ROUTES = {
   generate: '/generate',
   meal: '/meal',
   inbody: '/inbody',
+  stats: '/stats',
 } as const;
 
 export function sessionPath(id: string): string {

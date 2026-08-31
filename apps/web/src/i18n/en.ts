@@ -172,6 +172,21 @@ export interface TranslationSchema {
   stats: {
     trendChart: string;
     noData: string;
+    navLabel: string;
+    title: string;
+    totalSessions: string;
+    totalVolume: string;
+    totalPrs: string;
+    totalExercises: string;
+    awardsTitle: string;
+    awardsEmpty: string;
+    earnedBadge: string;
+    prsTitle: string;
+    prsEmpty: string;
+    e1rm: string;
+    weightTitle: string;
+    weightLabel: string;
+    logWeightSubmit: string;
   };
   ai: {
     navLabel: string;
@@ -403,6 +418,21 @@ const en: TranslationSchema = {
   stats: {
     trendChart: 'Trend chart',
     noData: 'No data yet',
+    navLabel: 'Stats',
+    title: 'Stats',
+    totalSessions: 'Sessions',
+    totalVolume: 'Total volume',
+    totalPrs: 'Personal records',
+    totalExercises: 'Exercises trained',
+    awardsTitle: 'Awards',
+    awardsEmpty: 'No awards yet',
+    earnedBadge: 'Earned',
+    prsTitle: 'Personal records',
+    prsEmpty: 'No personal records yet',
+    e1rm: 'e1RM',
+    weightTitle: 'Bodyweight',
+    weightLabel: 'Weight (kg)',
+    logWeightSubmit: 'Log weight',
   },
   ai: {
     navLabel: 'AI generate',

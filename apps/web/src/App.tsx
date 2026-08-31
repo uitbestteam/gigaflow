@@ -14,6 +14,7 @@ import { PlanBuilderPage } from './features/plans/PlanBuilderPage';
 import { GeneratePlanPage } from './features/ai/GeneratePlanPage';
 import { MealPlannerPage } from './features/meal/MealPlannerPage';
 import { InbodyPage } from './features/inbody/InbodyPage';
+import { StatsPage } from './features/stats/StatsPage';
 
 export function App() {
   return (
@@ -33,6 +34,7 @@ export function App() {
               <Route path={ROUTES.generate} element={<GeneratePlanPage />} />
               <Route path={ROUTES.meal} element={<MealPlannerPage />} />
               <Route path={ROUTES.inbody} element={<InbodyPage />} />
+              <Route path={ROUTES.stats} element={<StatsPage />} />
             </Routes>
           </MainLayout>
         </AuthGate>
