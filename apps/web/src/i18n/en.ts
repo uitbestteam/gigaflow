@@ -135,6 +135,119 @@ export interface TranslationSchema {
     loadError: string;
     saveError: string;
   };
+  job: {
+    submitting: string;
+    polling: string;
+    done: string;
+  };
+  inbody: {
+    errBadType: string;
+    errTooLarge: string;
+    uploadLabel: string;
+    previewAlt: string;
+    navLabel: string;
+    title: string;
+    analyze: string;
+    takenAt: string;
+    noResult: string;
+    metric: {
+      weightKg: string;
+      bmi: string;
+      bodyFatPercent: string;
+      skeletalMuscleMassKg: string;
+      bodyFatMassKg: string;
+      visceralFatLevel: string;
+    };
+    unit: {
+      kg: string;
+      percent: string;
+    };
+  };
+  macro: {
+    calories: string;
+    protein: string;
+    carbs: string;
+    fat: string;
+  };
+  stats: {
+    trendChart: string;
+    noData: string;
+    navLabel: string;
+    title: string;
+    totalSessions: string;
+    totalVolume: string;
+    totalPrs: string;
+    totalExercises: string;
+    awardsTitle: string;
+    awardsEmpty: string;
+    earnedBadge: string;
+    prsTitle: string;
+    prsEmpty: string;
+    e1rm: string;
+    weightTitle: string;
+    weightLabel: string;
+    logWeightSubmit: string;
+  };
+  ai: {
+    navLabel: string;
+    title: string;
+    goalLabel: string;
+    experienceLabel: string;
+    daysLabel: string;
+    submit: string;
+    exercisesCount: string;
+    editInBuilder: string;
+    backToPlans: string;
+    goal: {
+      strength: string;
+      hypertrophy: string;
+      general_fitness: string;
+      weight_loss: string;
+    };
+    experience: {
+      beginner: string;
+      intermediate: string;
+      advanced: string;
+    };
+  };
+  meal: {
+    navLabel: string;
+    title: string;
+    goalLabel: string;
+    genderLabel: string;
+    ageLabel: string;
+    heightLabel: string;
+    weightLabel: string;
+    activityLabel: string;
+    submit: string;
+    dayLabel: string;
+    proteinShort: string;
+    carbsShort: string;
+    fatShort: string;
+    goal: {
+      strength: string;
+      hypertrophy: string;
+      general_fitness: string;
+      weight_loss: string;
+    };
+    gender: {
+      male: string;
+      female: string;
+    };
+    activity: {
+      sedentary: string;
+      light: string;
+      moderate: string;
+      active: string;
+      very_active: string;
+    };
+    mealType: {
+      breakfast: string;
+      lunch: string;
+      dinner: string;
+      snack: string;
+    };
+  };
 }
 
 const en: TranslationSchema = {
@@ -267,6 +380,119 @@ const en: TranslationSchema = {
     colorLabel: 'Color',
     loadError: 'Could not load this plan.',
     saveError: 'Could not save this plan. Please check your entries and try again.',
+  },
+  job: {
+    submitting: 'Submitting…',
+    polling: 'Processing…',
+    done: 'Done',
+  },
+  inbody: {
+    errBadType: 'Please choose a JPEG or PNG image.',
+    errTooLarge: 'This image is too large. Please choose a smaller one.',
+    uploadLabel: 'Upload image',
+    previewAlt: 'Selected image preview',
+    navLabel: 'InBody',
+    title: 'InBody capture',
+    analyze: 'Analyze',
+    takenAt: 'Taken on {{date}}',
+    noResult: 'No InBody result yet. Upload a scan photo to get started.',
+    metric: {
+      weightKg: 'Weight',
+      bmi: 'BMI',
+      bodyFatPercent: 'Body fat',
+      skeletalMuscleMassKg: 'Skeletal muscle mass',
+      bodyFatMassKg: 'Body fat mass',
+      visceralFatLevel: 'Visceral fat level',
+    },
+    unit: {
+      kg: 'kg',
+      percent: '%',
+    },
+  },
+  macro: {
+    calories: 'Cal',
+    protein: 'Protein',
+    carbs: 'Carbs',
+    fat: 'Fat',
+  },
+  stats: {
+    trendChart: 'Trend chart',
+    noData: 'No data yet',
+    navLabel: 'Stats',
+    title: 'Stats',
+    totalSessions: 'Sessions',
+    totalVolume: 'Total volume',
+    totalPrs: 'Personal records',
+    totalExercises: 'Exercises trained',
+    awardsTitle: 'Awards',
+    awardsEmpty: 'No awards yet',
+    earnedBadge: 'Earned',
+    prsTitle: 'Personal records',
+    prsEmpty: 'No personal records yet',
+    e1rm: 'e1RM',
+    weightTitle: 'Bodyweight',
+    weightLabel: 'Weight (kg)',
+    logWeightSubmit: 'Log weight',
+  },
+  ai: {
+    navLabel: 'AI generate',
+    title: 'Generate a workout plan',
+    goalLabel: 'Goal',
+    experienceLabel: 'Experience level',
+    daysLabel: 'Days per week',
+    submit: 'Generate plan',
+    exercisesCount: 'exercises',
+    editInBuilder: 'Edit in builder',
+    backToPlans: 'Back to plans',
+    goal: {
+      strength: 'Strength',
+      hypertrophy: 'Hypertrophy',
+      general_fitness: 'General fitness',
+      weight_loss: 'Weight loss',
+    },
+    experience: {
+      beginner: 'Beginner',
+      intermediate: 'Intermediate',
+      advanced: 'Advanced',
+    },
+  },
+  meal: {
+    navLabel: 'Meal plan',
+    title: 'Meal planner',
+    goalLabel: 'Goal',
+    genderLabel: 'Gender',
+    ageLabel: 'Age',
+    heightLabel: 'Height (cm)',
+    weightLabel: 'Weight (kg)',
+    activityLabel: 'Activity level',
+    submit: 'Generate meal plan',
+    dayLabel: 'Day {{n}}',
+    proteinShort: 'P',
+    carbsShort: 'C',
+    fatShort: 'F',
+    goal: {
+      strength: 'Strength',
+      hypertrophy: 'Hypertrophy',
+      general_fitness: 'General fitness',
+      weight_loss: 'Weight loss',
+    },
+    gender: {
+      male: 'Male',
+      female: 'Female',
+    },
+    activity: {
+      sedentary: 'Sedentary',
+      light: 'Light',
+      moderate: 'Moderate',
+      active: 'Active',
+      very_active: 'Very active',
+    },
+    mealType: {
+      breakfast: 'Breakfast',
+      lunch: 'Lunch',
+      dinner: 'Dinner',
+      snack: 'Snack',
+    },
   },
 };
 
