@@ -318,7 +318,7 @@ export async function deleteDeviceToken(
   token: string,
   fetchImpl?: typeof fetch,
 ): Promise<{ deleted: boolean }> {
-  return apiFetch(`/notifications/device-token/${token}`, {
+  return apiFetch(`/notifications/device-token/${encodeURIComponent(token)}`, {
     method: 'DELETE',
     schema: z.object({ deleted: z.boolean() }),
     fetchImpl,

@@ -106,9 +106,6 @@ const vi: TranslationSchema = {
     confirmDelete: 'Xác nhận?',
     newPlan: 'Kế hoạch mới',
     fromPreset: 'Từ preset',
-    presetPpl: 'Đẩy / Kéo / Chân',
-    presetUpperLower: 'Thân trên / Thân dưới',
-    presetFullBody: 'Toàn thân',
     empty: 'Chưa có kế hoạch nào. Tạo một kế hoạch để bắt đầu.',
     loadError: 'Không thể tải danh sách kế hoạch.',
     templateType: {

@@ -242,6 +242,31 @@ describe('ActiveSessionPage', () => {
     expect(useSessionStore.getState().slots['slot-1']?.sets[0]).toMatchObject({ status: 'active', weightKg: 80 });
   });
 
+  it('double-clicking a different set in the same slot while the editor is open shows that set\'s values, not a stale draft', async () => {
+    const user = userEvent.setup();
+    renderActiveSession(makeStartResult());
+
+    const boxes = await screen.findAllByRole('button', { name: '80 × 8' });
+    const [firstBox, secondBox] = boxes;
+
+    // Open the editor for set 0 and type an unsaved draft value.
+    fireEvent.doubleClick(firstBox!);
+    const firstWeightInput = await screen.findByLabelText(/weight/i);
+    await user.clear(firstWeightInput);
+    await user.type(firstWeightInput, '999');
+    expect(screen.getByLabelText(/weight/i)).toHaveValue(999);
+
+    // Without closing, open the editor for set 1 in the same slot. The
+    // editor must remount and show set 1's real values, not the unsaved
+    // '999' draft left over from set 0.
+    fireEvent.doubleClick(secondBox!);
+
+    const secondWeightInput = await screen.findByLabelText(/weight/i);
+    const secondRepsInput = screen.getByLabelText(/reps/i);
+    expect(secondWeightInput).toHaveValue(80);
+    expect(secondRepsInput).toHaveValue(8);
+  });
+
   it('rest timer supports ±15s adjust and Pause/Resume, ticking deterministically', async () => {
     renderActiveSession(makeStartResult());
     const boxes = await screen.findAllByRole('button', { name: '80 × 8' });

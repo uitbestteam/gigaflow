@@ -106,9 +106,6 @@ export interface TranslationSchema {
     confirmDelete: string;
     newPlan: string;
     fromPreset: string;
-    presetPpl: string;
-    presetUpperLower: string;
-    presetFullBody: string;
     empty: string;
     loadError: string;
     templateType: {
@@ -362,9 +359,6 @@ const en: TranslationSchema = {
     confirmDelete: 'Confirm?',
     newPlan: 'New plan',
     fromPreset: 'From preset',
-    presetPpl: 'Push / Pull / Legs',
-    presetUpperLower: 'Upper / Lower',
-    presetFullBody: 'Full body',
     empty: 'No plans yet. Create one to get started.',
     loadError: 'Could not load your plans.',
     templateType: {

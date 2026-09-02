@@ -233,7 +233,8 @@ export function ActiveSessionPage() {
             muscleGroup: exercise?.muscleGroup ?? FALLBACK_MUSCLE_GROUP,
           };
 
-          const editingThisSlot = editingSet?.slotId === slotTarget.id ? slotSession.sets[editingSet.setIndex] : undefined;
+          const editingSetInSlot = editingSet && editingSet.slotId === slotTarget.id ? editingSet : undefined;
+          const editingThisSlot = editingSetInSlot ? slotSession.sets[editingSetInSlot.setIndex] : undefined;
 
           return (
             <div key={slotTarget.id} className="flex flex-col gap-2">
@@ -246,6 +247,7 @@ export function ActiveSessionPage() {
               />
               {editingThisSlot && (
                 <SetEditor
+                  key={`${editingSetInSlot?.slotId}-${editingSetInSlot?.setIndex}`}
                   initial={{ weightKg: editingThisSlot.weightKg, repsDone: editingThisSlot.repsDone }}
                   onSave={handleSetEditorSave}
                   onCancel={handleSetEditorCancel}

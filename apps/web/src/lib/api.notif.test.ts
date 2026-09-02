@@ -38,4 +38,17 @@ describe('device-token api helpers', () => {
     expect(seen?.method).toBe('DELETE');
     expect(new URL(seen!.url).pathname).toContain('/notifications/device-token/t1');
   });
+
+  it('deleteDeviceToken percent-encodes tokens containing unsafe path characters', async () => {
+    let seen: Request | undefined;
+    const fetchImpl = (async (i: RequestInfo, init?: RequestInit) => {
+      seen = new Request(i, init);
+      return new Response(JSON.stringify({ success: true, data: { deleted: true } }), { status: 200 });
+    }) as typeof fetch;
+    const rawToken = 'abc:def/ghi';
+    expect((await deleteDeviceToken(rawToken, fetchImpl)).deleted).toBe(true);
+    const pathname = new URL(seen!.url).pathname;
+    expect(pathname).toBe(`/api/notifications/device-token/${encodeURIComponent(rawToken)}`);
+    expect(pathname).not.toContain(rawToken);
+  });
 });
