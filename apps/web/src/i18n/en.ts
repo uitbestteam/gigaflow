@@ -248,6 +248,14 @@ export interface TranslationSchema {
       snack: string;
     };
   };
+  notif: {
+    title: string;
+    description: string;
+    enable: string;
+    disable: string;
+    deniedHint: string;
+    error: string;
+  };
 }
 
 const en: TranslationSchema = {
@@ -493,6 +501,14 @@ const en: TranslationSchema = {
       dinner: 'Dinner',
       snack: 'Snack',
     },
+  },
+  notif: {
+    title: 'Reminders',
+    description: 'Get a push notification when it is time to train.',
+    enable: 'Enable reminders',
+    disable: 'Disable reminders',
+    deniedHint: 'Notifications are blocked. Please allow notifications in your browser settings to enable reminders.',
+    error: 'Something went wrong. Please try again.',
   },
 };
 

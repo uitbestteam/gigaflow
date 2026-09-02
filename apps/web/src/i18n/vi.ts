@@ -248,6 +248,14 @@ const vi: TranslationSchema = {
       snack: 'Bữa phụ',
     },
   },
+  notif: {
+    title: 'Nhắc nhở',
+    description: 'Nhận thông báo đẩy khi đến giờ tập luyện.',
+    enable: 'Bật nhắc nhở',
+    disable: 'Tắt nhắc nhở',
+    deniedHint: 'Thông báo đang bị chặn. Vui lòng cho phép thông báo trong cài đặt trình duyệt để bật nhắc nhở.',
+    error: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
+  },
 };
 
 export default vi;
