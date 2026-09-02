@@ -4,7 +4,7 @@ AI-powered fitness app — workout planning with automatic progressive-overload
 suggestions, meal planning, InBody OCR, and analytics. Backend-first with cloud
 sync; guest mode works with no sign-up.
 
-> **Status:** E14 — Testing & Hardening ✅ (backend), E12 — Subscription & Quota ✅, E10 Notifications ✅ (backend), E8 InBody OCR + Weight Log backend ✅ complete, E13 — Web app F0 (foundation) + F1 (core training loop) ✅. Building toward the full app;
+> **Status:** E14 — Testing & Hardening ✅ (backend), E12 — Subscription & Quota ✅, E10 Notifications ✅ (backend), E8 InBody OCR + Weight Log backend ✅ complete, E13 — Web app F0–F4 ✅ (frontend product complete). Remaining: notifications delivery (FCM) + cloud infra (GCP/Firebase/Atlas) + deploy;
 > see the [feature roadmap](docs/superpowers/specs/2026-08-26-gigaflow-features-spec.md).
 
 ## Tech stack
@@ -236,8 +236,21 @@ loop)**, and **F2 (plans builder + exercise library)** have shipped:
   and bodyweight logging with a mini chart (uses `GET /api/stats/summary`, `GET /api/stats/prs`,
   `GET /api/stats/awards`, `POST /api/weight`, and `GET /api/weight/history`)
 
-**Deferred:** push notification UI (requires Firebase Cloud Messaging setup), real GCP/Firebase
-provisioning, and offline data sync (only the app shell is precached today).
+**F4 (notifications & polish)** has shipped:
+
+- **Notifications Settings** (`/account`): enable/disable workout-reminder web push
+  (uses `POST /api/notifications/device-token` and `DELETE /api/notifications/device-token/:token`).
+  Client flow (permission request → FCM token → register/unregister) is complete; actual push
+  **delivery requires Firebase Cloud Messaging provisioning** (a real Firebase project,
+  `VITE_FIREBASE_VAPID_KEY`, and the committed `apps/web/public/firebase-messaging-sw.js`
+  service worker) — provisioning is deferred to the infra phase.
+- **Polish**: inline set editor (replaces `window.prompt` in active session), shared `PresetPicker`
+  component (dedupes preset row across Home & Plans), and date handling switched to `z.coerce.date()`
+  in shared schemas (dropped the web JSON date reviver).
+
+**Frontend product code complete.** Remaining: notifications delivery (FCM setup), cloud infra
+(GCP Cloud Run, Firebase project + Hosting, MongoDB Atlas + Secret Manager, Cloud Tasks/Scheduler),
+and deploy.
 
 ### Running it
 
@@ -319,13 +332,14 @@ apply`, Artifact Registry + Cloud Build trigger, and Firebase Hosting deploy.
 E1 Foundation ✅ · E2 Backend Auth ✅ · E3 Exercise Catalog ✅ · E4 Workout Plans ✅ ·
 E5 Session Logging & Progression ✅ · E6 Rest Timer & RIR · E7 AI Workout Planner ✅ (backend) ·
 E8 InBody OCR ✅ (backend + weight log) · E9 Meal Planner ✅ (backend) · E10 Notifications ✅ (backend) · E11 Analytics ✅ (backend) ·
-E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth ✅ (web app F0+F1+F2+F3 done) · E14 Testing & Hardening ✅ (backend).
+E12 Subscription & Quota ✅ (backend) · E13 UI/UX Design System & Frontend Auth ✅ (web app F0–F4 complete) · E14 Testing & Hardening ✅ (backend).
 
 *Notes:*
 - *E3-S4 Exercise library UI shipped in E13-F2.*
 - *E4-S3 Custom plan builder UI shipped in E13-F2; E4-S5 Home/Today queue UI shipped in E13-F1.*
 - *E5-S6 Active Session UI and E5-S7 Session Summary UI shipped in E13-F1.*
 - *E13-F3 shipped: E7-S5 Generate-plan UI (request form + job polling), E8-S3 InBody UI (scan upload), E9-S3 Meal planner UI (plan view), E11-S3 Statistics UI.*
+- *E13-F4 shipped: E10 Notifications settings UI (enable/disable web push in `/account`), inline set editor, shared `PresetPicker` component, and `z.coerce.date()` schema updates. E10 FCM push delivery deferred to infra phase (Firebase Cloud Messaging provisioning).*
 - *E7 Cloud Tasks enqueuer (real job queuing for long-running plans) is deferred to future backend work.*
 - *E10 Cloud Scheduler trigger setup for workout reminders is deferred to deploy (Terraform + Cloud Build).*
 - *E8-S1 Cloud Storage signed-URL upload for images is deferred to deploy (E8 backend uses inline base64).*
