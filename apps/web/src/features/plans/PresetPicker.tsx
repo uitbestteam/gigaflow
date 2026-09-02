@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { PlanTemplateType } from '@gigaflow/shared';
 import { createPlanFromTemplate } from '../../lib/api';
-import { Button } from '../../components/Button';
+import { Button, type ButtonVariant } from '../../components/Button';
 
 const PRESETS: { type: PlanTemplateType; labelKey: 'presetPpl' | 'presetUpperLower' | 'presetFullBody' }[] = [
   { type: PlanTemplateType.PPL, labelKey: 'presetPpl' },
@@ -12,9 +12,10 @@ const PRESETS: { type: PlanTemplateType; labelKey: 'presetPpl' | 'presetUpperLow
 
 export interface PresetPickerProps {
   onCreated?: () => void;
+  variant?: ButtonVariant;
 }
 
-export function PresetPicker({ onCreated }: PresetPickerProps) {
+export function PresetPicker({ onCreated, variant = 'solid' }: PresetPickerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -32,6 +33,7 @@ export function PresetPicker({ onCreated }: PresetPickerProps) {
       {PRESETS.map((preset) => (
         <Button
           key={preset.type}
+          variant={variant}
           onClick={() => createPlanMutation.mutate(preset.type)}
           disabled={createPlanMutation.isPending}
         >

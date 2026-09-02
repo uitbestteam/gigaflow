@@ -42,7 +42,7 @@ export function PlansPage() {
 
       <div className="flex flex-col gap-2">
         <span className="text-sm text-text-secondary">{t('plans.fromPreset')}</span>
-        <PresetPicker />
+        <PresetPicker variant="ghost" />
       </div>
 
       {plansQuery.isLoading && (
