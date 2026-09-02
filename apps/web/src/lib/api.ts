@@ -15,6 +15,7 @@ import {
   zStatsSummary,
   zAward,
   zWeightLog,
+  zDeviceToken,
   type User,
   type Plan,
   type PlanWithTemplates,
@@ -38,6 +39,8 @@ import {
   type Award,
   type LogWeightInput,
   type WeightLog,
+  type RegisterDeviceTokenInput,
+  type DeviceToken,
 } from '@gigaflow/shared';
 
 export class ApiError extends Error {
@@ -303,4 +306,27 @@ export async function logWeight(input: LogWeightInput, fetchImpl?: typeof fetch)
 
 export async function getWeightHistory(fetchImpl?: typeof fetch): Promise<WeightLog[]> {
   return apiFetch('/weight/history', { schema: zWeightLog.array(), fetchImpl });
+}
+
+export async function registerDeviceToken(
+  input: RegisterDeviceTokenInput,
+  fetchImpl?: typeof fetch,
+): Promise<DeviceToken> {
+  return apiFetch('/notifications/device-token', {
+    method: 'POST',
+    body: input,
+    schema: zDeviceToken,
+    fetchImpl,
+  });
+}
+
+export async function deleteDeviceToken(
+  token: string,
+  fetchImpl?: typeof fetch,
+): Promise<{ deleted: boolean }> {
+  return apiFetch(`/notifications/device-token/${token}`, {
+    method: 'DELETE',
+    schema: z.object({ deleted: z.boolean() }),
+    fetchImpl,
+  });
 }
