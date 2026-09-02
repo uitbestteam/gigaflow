@@ -11,8 +11,8 @@ export const zUser = z.object({
   displayName: z.string().optional(),
   timezone: z.string(),
   language: z.nativeEnum(Language),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
   subscription: zSubscription.optional(),
 });
 

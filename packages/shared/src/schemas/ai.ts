@@ -39,8 +39,8 @@ export const zGenerationJob = z.object({
   input: z.unknown().optional(),
   resultId: z.string().optional(),
   error: z.string().optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
 });
 
 export type GenerateWorkoutInput = z.infer<typeof zGenerateWorkoutInput>;

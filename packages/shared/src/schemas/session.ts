@@ -21,7 +21,7 @@ export const zSetLog = z.object({
   restSeconds: z.number().int().min(0).optional(),
   rir: z.number().int().min(0).max(10).optional(),
   isCompleted: z.boolean(),
-  loggedAt: z.date(),
+  loggedAt: z.coerce.date(),
 });
 
 export const zLogSetInput = z.object({
@@ -42,8 +42,8 @@ export const zTrainingSession = z.object({
   userId: z.string(),
   templateId: z.string(),
   sessionNumber: z.number().int().min(1),
-  startedAt: z.date(),
-  finishedAt: z.date().optional(),
+  startedAt: z.coerce.date(),
+  finishedAt: z.coerce.date().optional(),
   status: z.nativeEnum(SessionStatus),
   pausedDurationSeconds: z.number().int().min(0).optional(),
   totalVolume: z.number().min(0).optional(),
@@ -57,7 +57,7 @@ export const zExercisePerformance = z.object({
   userId: z.string(),
   exerciseId: z.string(),
   lastSets: z.array(zPerfSet),
-  lastPerformedAt: z.date(),
+  lastPerformedAt: z.coerce.date(),
   bestSet: z.object({ weightKg: z.number().min(0), repsDone: z.number().int().min(0), e1RM: z.number().min(0) }),
   totalVolume: z.number().min(0),
   totalSessions: z.number().int().min(0),

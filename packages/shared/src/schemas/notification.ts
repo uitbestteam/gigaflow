@@ -13,8 +13,8 @@ export const zDeviceToken = z.object({
   userId: z.string(),
   token: z.string(),
   platform: z.nativeEnum(DevicePlatform).optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
 });
 
 export type DeviceToken = z.infer<typeof zDeviceToken>;
