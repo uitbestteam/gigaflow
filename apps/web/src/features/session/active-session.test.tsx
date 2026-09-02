@@ -195,6 +195,53 @@ describe('ActiveSessionPage', () => {
     expect(screen.getByText('Home Page')).toBeInTheDocument();
   });
 
+  it('double-clicking a SetBox opens the inline SetEditor; Save updates weight/reps in the store and marks it edited, with no window.prompt used', async () => {
+    const promptSpy = vi.spyOn(window, 'prompt');
+    const user = userEvent.setup();
+    renderActiveSession(makeStartResult());
+
+    const boxes = await screen.findAllByRole('button', { name: '80 × 8' });
+    const [firstBox] = boxes;
+    fireEvent.doubleClick(firstBox!);
+
+    const weightInput = await screen.findByLabelText(/weight/i);
+    const repsInput = screen.getByLabelText(/reps/i);
+
+    await user.clear(weightInput);
+    await user.type(weightInput, '90');
+    await user.clear(repsInput);
+    await user.type(repsInput, '10');
+
+    await user.click(screen.getByRole('button', { name: /^save$/i }));
+
+    await waitFor(() => {
+      expect(useSessionStore.getState().slots['slot-1']?.sets[0]).toMatchObject({
+        status: 'edited',
+        weightKg: 90,
+        repsDone: 10,
+      });
+    });
+
+    // The editor closes after Save.
+    expect(screen.queryByLabelText(/weight/i)).not.toBeInTheDocument();
+    expect(promptSpy).not.toHaveBeenCalled();
+  });
+
+  it('Cancel in the inline SetEditor closes it without changing the store', async () => {
+    const user = userEvent.setup();
+    renderActiveSession(makeStartResult());
+
+    const boxes = await screen.findAllByRole('button', { name: '80 × 8' });
+    const [firstBox] = boxes;
+    fireEvent.doubleClick(firstBox!);
+
+    await screen.findByLabelText(/weight/i);
+    await user.click(screen.getByRole('button', { name: /^cancel$/i }));
+
+    expect(screen.queryByLabelText(/weight/i)).not.toBeInTheDocument();
+    expect(useSessionStore.getState().slots['slot-1']?.sets[0]).toMatchObject({ status: 'active', weightKg: 80 });
+  });
+
   it('rest timer supports ±15s adjust and Pause/Resume, ticking deterministically', async () => {
     renderActiveSession(makeStartResult());
     const boxes = await screen.findAllByRole('button', { name: '80 × 8' });

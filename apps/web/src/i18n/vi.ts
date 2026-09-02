@@ -51,6 +51,8 @@ const vi: TranslationSchema = {
     rirEasy: 'Dễ (3 RIR)',
     rirModerate: 'Vừa (1 RIR)',
     rirHard: 'Khó (0 RIR)',
+    editWeight: 'Cân nặng (kg)',
+    editReps: 'Số reps',
   },
   summary: {
     title: 'Tổng kết buổi tập',

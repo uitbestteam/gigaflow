@@ -51,6 +51,8 @@ export interface TranslationSchema {
     rirEasy: string;
     rirModerate: string;
     rirHard: string;
+    editWeight: string;
+    editReps: string;
   };
   summary: {
     title: string;
@@ -305,6 +307,8 @@ const en: TranslationSchema = {
     rirEasy: 'Easy (3 RIR)',
     rirModerate: 'Moderate (1 RIR)',
     rirHard: 'Hard (0 RIR)',
+    editWeight: 'Weight (kg)',
+    editReps: 'Reps',
   },
   summary: {
     title: 'Session summary',
