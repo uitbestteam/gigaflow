@@ -15,6 +15,7 @@ import {
   zStatsSummary,
   zAward,
   zWeightLog,
+  zDeviceToken,
   type User,
   type Plan,
   type PlanWithTemplates,
@@ -38,6 +39,8 @@ import {
   type Award,
   type LogWeightInput,
   type WeightLog,
+  type RegisterDeviceTokenInput,
+  type DeviceToken,
 } from '@gigaflow/shared';
 
 export class ApiError extends Error {
@@ -83,19 +86,13 @@ interface ApiEnvelope<T> {
 }
 
 // The API serializes Date fields (e.g. createdAt) to ISO-8601 strings via
-// JSON.stringify. The shared Zod schemas declare those fields as z.date(),
-// which only accepts real Date instances — so we revive ISO date strings
-// back into Dates before schema.parse runs.
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
-
-function reviveDates(_key: string, value: unknown): unknown {
-  return typeof value === 'string' && ISO_DATE_RE.test(value) ? new Date(value) : value;
-}
-
+// JSON.stringify. The shared Zod schemas declare those fields as
+// z.coerce.date(), which accepts both real Date instances and ISO strings,
+// so plain JSON.parse is sufficient here — no blanket reviver needed.
 async function parseEnvelope<T>(res: Response): Promise<ApiEnvelope<T>> {
   const text = await res.text();
   if (!text) return { success: res.ok };
-  return JSON.parse(text, reviveDates) as ApiEnvelope<T>;
+  return JSON.parse(text) as ApiEnvelope<T>;
 }
 
 export interface ApiFetchOptions<T> {
@@ -303,4 +300,27 @@ export async function logWeight(input: LogWeightInput, fetchImpl?: typeof fetch)
 
 export async function getWeightHistory(fetchImpl?: typeof fetch): Promise<WeightLog[]> {
   return apiFetch('/weight/history', { schema: zWeightLog.array(), fetchImpl });
+}
+
+export async function registerDeviceToken(
+  input: RegisterDeviceTokenInput,
+  fetchImpl?: typeof fetch,
+): Promise<DeviceToken> {
+  return apiFetch('/notifications/device-token', {
+    method: 'POST',
+    body: input,
+    schema: zDeviceToken,
+    fetchImpl,
+  });
+}
+
+export async function deleteDeviceToken(
+  token: string,
+  fetchImpl?: typeof fetch,
+): Promise<{ deleted: boolean }> {
+  return apiFetch(`/notifications/device-token/${encodeURIComponent(token)}`, {
+    method: 'DELETE',
+    schema: z.object({ deleted: z.boolean() }),
+    fetchImpl,
+  });
 }

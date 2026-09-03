@@ -51,6 +51,8 @@ const vi: TranslationSchema = {
     rirEasy: 'Dễ (3 RIR)',
     rirModerate: 'Vừa (1 RIR)',
     rirHard: 'Khó (0 RIR)',
+    editWeight: 'Cân nặng (kg)',
+    editReps: 'Số reps',
   },
   summary: {
     title: 'Tổng kết buổi tập',
@@ -104,9 +106,6 @@ const vi: TranslationSchema = {
     confirmDelete: 'Xác nhận?',
     newPlan: 'Kế hoạch mới',
     fromPreset: 'Từ preset',
-    presetPpl: 'Đẩy / Kéo / Chân',
-    presetUpperLower: 'Thân trên / Thân dưới',
-    presetFullBody: 'Toàn thân',
     empty: 'Chưa có kế hoạch nào. Tạo một kế hoạch để bắt đầu.',
     loadError: 'Không thể tải danh sách kế hoạch.',
     templateType: {
@@ -247,6 +246,14 @@ const vi: TranslationSchema = {
       dinner: 'Bữa tối',
       snack: 'Bữa phụ',
     },
+  },
+  notif: {
+    title: 'Nhắc nhở',
+    description: 'Nhận thông báo đẩy khi đến giờ tập luyện.',
+    enable: 'Bật nhắc nhở',
+    disable: 'Tắt nhắc nhở',
+    deniedHint: 'Thông báo đang bị chặn. Vui lòng cho phép thông báo trong cài đặt trình duyệt để bật nhắc nhở.',
+    error: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
   },
 };
 

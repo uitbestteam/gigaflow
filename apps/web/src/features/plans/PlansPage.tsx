@@ -1,18 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { PlanTemplateType } from '@gigaflow/shared';
-import { activatePlan, createPlanFromTemplate, deletePlan, getPlans } from '../../lib/api';
+import { activatePlan, deletePlan, getPlans } from '../../lib/api';
 import { Spinner } from '../../components/Spinner';
 import { Button } from '../../components/Button';
 import { PlanListItem } from '../../components/PlanListItem';
 import { planEditPath, planNewPath } from '../../routes';
-
-const PRESETS: { type: PlanTemplateType; labelKey: 'presetPpl' | 'presetUpperLower' | 'presetFullBody' }[] = [
-  { type: PlanTemplateType.PPL, labelKey: 'presetPpl' },
-  { type: PlanTemplateType.UPPER_LOWER, labelKey: 'presetUpperLower' },
-  { type: PlanTemplateType.FULL_BODY, labelKey: 'presetFullBody' },
-];
+import { PresetPicker } from './PresetPicker';
 
 export function PlansPage() {
   const { t } = useTranslation();
@@ -39,28 +33,6 @@ export function PlansPage() {
     },
   });
 
-  const createFromPresetMutation = useMutation({
-    mutationFn: (templateType: PlanTemplateType) => createPlanFromTemplate(templateType),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['plans'] });
-    },
-  });
-
-  const presetButtons = (
-    <div className="flex flex-wrap gap-2">
-      {PRESETS.map((preset) => (
-        <Button
-          key={preset.type}
-          variant="ghost"
-          onClick={() => createFromPresetMutation.mutate(preset.type)}
-          disabled={createFromPresetMutation.isPending}
-        >
-          {t(`plans.${preset.labelKey}`)}
-        </Button>
-      ))}
-    </div>
-  );
-
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between gap-3">
@@ -70,7 +42,7 @@ export function PlansPage() {
 
       <div className="flex flex-col gap-2">
         <span className="text-sm text-text-secondary">{t('plans.fromPreset')}</span>
-        {presetButtons}
+        <PresetPicker variant="ghost" />
       </div>
 
       {plansQuery.isLoading && (

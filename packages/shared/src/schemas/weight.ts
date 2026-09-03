@@ -9,8 +9,8 @@ export const zWeightLog = z.object({
   id: z.string(),
   userId: z.string(),
   weightKg: z.number().gt(0),
-  loggedAt: z.date(),
-  createdAt: z.date(),
+  loggedAt: z.coerce.date(),
+  createdAt: z.coerce.date(),
 });
 
 export type LogWeightInput = z.infer<typeof zLogWeightInput>;

@@ -19,8 +19,8 @@ export const zInbodyResult = z.object({
   id: z.string(),
   userId: z.string(),
   metrics: zInbodyMetrics,
-  takenAt: z.date(),
-  createdAt: z.date(),
+  takenAt: z.coerce.date(),
+  createdAt: z.coerce.date(),
 });
 
 export type InbodyMetrics = z.infer<typeof zInbodyMetrics>;

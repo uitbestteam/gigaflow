@@ -9,7 +9,7 @@ export const zPlan = z.object({
   templateType: z.nativeEnum(PlanTemplateType),
   source: z.nativeEnum(PlanSource),
   isActive: z.boolean(),
-  createdAt: z.date(),
+  createdAt: z.coerce.date(),
 });
 
 export const zWorkoutTemplate = z.object({

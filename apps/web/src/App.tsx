@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import { AuthGate } from './features/auth/AuthGate';
-import { UpgradePrompt } from './features/auth/UpgradePrompt';
+import { AccountPage } from './features/account/AccountPage';
 import { MainLayout } from './components/MainLayout';
 import { ROUTES } from './routes';
 import { HomePage } from './features/home/HomePage';
@@ -26,7 +26,7 @@ export function App() {
               <Route path={ROUTES.home} element={<HomePage />} />
               <Route path={ROUTES.session} element={<ActiveSessionPage />} />
               <Route path={ROUTES.sessionSummary} element={<SummaryPage />} />
-              <Route path={ROUTES.account} element={<UpgradePrompt />} />
+              <Route path={ROUTES.account} element={<AccountPage />} />
               <Route path={ROUTES.exercises} element={<ExerciseLibraryPage />} />
               <Route path={ROUTES.plans} element={<PlansPage />} />
               <Route path={ROUTES.planNew} element={<PlanBuilderPage />} />

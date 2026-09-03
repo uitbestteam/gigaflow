@@ -47,7 +47,7 @@ export const zMealPlan = z.object({
 export const zMealPlanDoc = zMealPlan.extend({
   id: z.string(),
   userId: z.string(),
-  createdAt: z.date(),
+  createdAt: z.coerce.date(),
   isActive: z.boolean(),
 });
 

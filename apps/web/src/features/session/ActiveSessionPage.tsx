@@ -13,6 +13,7 @@ import { RirPicker } from '../../components/RirPicker';
 import { Button } from '../../components/Button';
 import { Spinner } from '../../components/Spinner';
 import type { SetBoxStatus } from '../../components/SetBox';
+import { SetEditor } from './SetEditor';
 
 const DEFAULT_REST_SECONDS = 90;
 
@@ -31,6 +32,11 @@ function formatMmSs(totalSeconds: number): string {
 }
 
 interface ActiveRest {
+  slotId: string;
+  setIndex: number;
+}
+
+interface EditingSet {
   slotId: string;
   setIndex: number;
 }
@@ -63,6 +69,7 @@ export function ActiveSessionPage() {
 
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [activeRest, setActiveRest] = useState<ActiveRest | null>(null);
+  const [editingSet, setEditingSet] = useState<EditingSet | null>(null);
   const [restSeconds, setRestSeconds] = useState(DEFAULT_REST_SECONDS);
   const [restRunning, setRestRunning] = useState(false);
   const restElapsedRef = useRef(0);
@@ -167,17 +174,17 @@ export function ActiveSessionPage() {
   };
 
   const handleSetEdit = (slotId: string, index: number) => {
-    const slot = storeSlots[slotId];
-    const set = slot?.sets[index];
-    if (!set) return;
-    const weightInput = window.prompt('Weight (kg)', String(set.weightKg));
-    if (weightInput === null) return;
-    const repsInput = window.prompt('Reps', String(set.repsDone));
-    if (repsInput === null) return;
-    const weightKg = Number(weightInput);
-    const repsDone = Number(repsInput);
-    if (Number.isNaN(weightKg) || Number.isNaN(repsDone)) return;
-    editSet(slotId, index, { weightKg, repsDone });
+    setEditingSet({ slotId, setIndex: index });
+  };
+
+  const handleSetEditorSave = (values: { weightKg: number; repsDone: number }) => {
+    if (!editingSet) return;
+    editSet(editingSet.slotId, editingSet.setIndex, values);
+    setEditingSet(null);
+  };
+
+  const handleSetEditorCancel = () => {
+    setEditingSet(null);
   };
 
   return (
@@ -226,15 +233,27 @@ export function ActiveSessionPage() {
             muscleGroup: exercise?.muscleGroup ?? FALLBACK_MUSCLE_GROUP,
           };
 
+          const editingSetInSlot = editingSet && editingSet.slotId === slotTarget.id ? editingSet : undefined;
+          const editingThisSlot = editingSetInSlot ? slotSession.sets[editingSetInSlot.setIndex] : undefined;
+
           return (
-            <ExerciseRow
-              key={slotTarget.id}
-              slot={slot}
-              sets={sets}
-              status={rowStatus}
-              onSetTap={(index) => handleSetTap(slotTarget.id, index)}
-              onSetEdit={(index) => handleSetEdit(slotTarget.id, index)}
-            />
+            <div key={slotTarget.id} className="flex flex-col gap-2">
+              <ExerciseRow
+                slot={slot}
+                sets={sets}
+                status={rowStatus}
+                onSetTap={(index) => handleSetTap(slotTarget.id, index)}
+                onSetEdit={(index) => handleSetEdit(slotTarget.id, index)}
+              />
+              {editingThisSlot && (
+                <SetEditor
+                  key={`${editingSetInSlot?.slotId}-${editingSetInSlot?.setIndex}`}
+                  initial={{ weightKg: editingThisSlot.weightKg, repsDone: editingThisSlot.repsDone }}
+                  onSave={handleSetEditorSave}
+                  onCancel={handleSetEditorCancel}
+                />
+              )}
+            </div>
           );
         })}
       </div>

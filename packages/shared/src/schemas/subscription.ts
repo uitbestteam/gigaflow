@@ -10,7 +10,7 @@ export const zAiUsage = z.object({
 export const zSubscription = z.object({
   plan: z.nativeEnum(SubscriptionPlan),
   aiUsage: zAiUsage,
-  periodStart: z.date(),
+  periodStart: z.coerce.date(),
 });
 
 export type AiUsage = z.infer<typeof zAiUsage>;

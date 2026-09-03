@@ -51,6 +51,8 @@ export interface TranslationSchema {
     rirEasy: string;
     rirModerate: string;
     rirHard: string;
+    editWeight: string;
+    editReps: string;
   };
   summary: {
     title: string;
@@ -104,9 +106,6 @@ export interface TranslationSchema {
     confirmDelete: string;
     newPlan: string;
     fromPreset: string;
-    presetPpl: string;
-    presetUpperLower: string;
-    presetFullBody: string;
     empty: string;
     loadError: string;
     templateType: {
@@ -248,6 +247,14 @@ export interface TranslationSchema {
       snack: string;
     };
   };
+  notif: {
+    title: string;
+    description: string;
+    enable: string;
+    disable: string;
+    deniedHint: string;
+    error: string;
+  };
 }
 
 const en: TranslationSchema = {
@@ -297,6 +304,8 @@ const en: TranslationSchema = {
     rirEasy: 'Easy (3 RIR)',
     rirModerate: 'Moderate (1 RIR)',
     rirHard: 'Hard (0 RIR)',
+    editWeight: 'Weight (kg)',
+    editReps: 'Reps',
   },
   summary: {
     title: 'Session summary',
@@ -350,9 +359,6 @@ const en: TranslationSchema = {
     confirmDelete: 'Confirm?',
     newPlan: 'New plan',
     fromPreset: 'From preset',
-    presetPpl: 'Push / Pull / Legs',
-    presetUpperLower: 'Upper / Lower',
-    presetFullBody: 'Full body',
     empty: 'No plans yet. Create one to get started.',
     loadError: 'Could not load your plans.',
     templateType: {
@@ -493,6 +499,14 @@ const en: TranslationSchema = {
       dinner: 'Dinner',
       snack: 'Snack',
     },
+  },
+  notif: {
+    title: 'Reminders',
+    description: 'Get a push notification when it is time to train.',
+    enable: 'Enable reminders',
+    disable: 'Disable reminders',
+    deniedHint: 'Notifications are blocked. Please allow notifications in your browser settings to enable reminders.',
+    error: 'Something went wrong. Please try again.',
   },
 };
 

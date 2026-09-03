@@ -10,9 +10,19 @@ import {
   type Auth,
   type User as FirebaseUser,
 } from 'firebase/auth';
+import {
+  getMessaging,
+  getToken,
+  deleteToken,
+  onMessage,
+  isSupported,
+  type Messaging,
+  type MessagePayload,
+} from 'firebase/messaging';
 
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
+let messaging: Messaging | undefined;
 
 export function initFirebase(): FirebaseApp {
   if (app) return app;
@@ -68,4 +78,46 @@ export async function linkEmailPassword(email: string, password: string): Promis
 
 export function onAuthChanged(cb: (user: FirebaseUser | null) => void): () => void {
   return onAuthStateChanged(getFirebaseAuth(), cb);
+}
+
+async function getFirebaseMessaging(): Promise<Messaging> {
+  if (!messaging) {
+    messaging = getMessaging(initFirebase());
+  }
+  return messaging;
+}
+
+export async function getMessagingToken(vapidKey: string): Promise<string | null> {
+  if (!(await isSupported())) {
+    return null;
+  }
+  let permission = Notification.permission;
+  if (permission !== 'granted') {
+    permission = await Notification.requestPermission();
+  }
+  if (permission !== 'granted') {
+    return null;
+  }
+  const serviceWorkerRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+  const messagingInstance = await getFirebaseMessaging();
+  const token = await getToken(messagingInstance, { vapidKey, serviceWorkerRegistration });
+  return token || null;
+}
+
+export function onForegroundMessage(cb: (payload: MessagePayload) => void): () => void {
+  let unsubscribe: (() => void) | undefined;
+  let cancelled = false;
+  void getFirebaseMessaging().then((messagingInstance) => {
+    if (cancelled) return;
+    unsubscribe = onMessage(messagingInstance, cb);
+  });
+  return () => {
+    cancelled = true;
+    unsubscribe?.();
+  };
+}
+
+export async function deleteMessagingToken(): Promise<void> {
+  const messagingInstance = await getFirebaseMessaging();
+  await deleteToken(messagingInstance);
 }

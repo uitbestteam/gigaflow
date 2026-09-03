@@ -1,19 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { PlanTemplateType, type WorkoutTemplate } from '@gigaflow/shared';
-import { createPlanFromTemplate, getActivePlan, startSession } from '../../lib/api';
+import type { WorkoutTemplate } from '@gigaflow/shared';
+import { getActivePlan, startSession } from '../../lib/api';
 import { resolveTranslatable } from '../../lib/i18n';
 import { Spinner } from '../../components/Spinner';
 import { Button } from '../../components/Button';
 import { SessionQueueItem, type SessionQueueStatus } from '../../components/SessionQueueItem';
 import { sessionPath } from '../../routes';
-
-const PRESETS: { type: PlanTemplateType; labelKey: 'presetPpl' | 'presetUpperLower' | 'presetFullBody' }[] = [
-  { type: PlanTemplateType.PPL, labelKey: 'presetPpl' },
-  { type: PlanTemplateType.UPPER_LOWER, labelKey: 'presetUpperLower' },
-  { type: PlanTemplateType.FULL_BODY, labelKey: 'presetFullBody' },
-];
+import { PresetPicker } from '../plans/PresetPicker';
 
 export function HomePage() {
   const { t, i18n } = useTranslation();
@@ -23,13 +18,6 @@ export function HomePage() {
   const activePlanQuery = useQuery({
     queryKey: ['activePlan'],
     queryFn: getActivePlan,
-  });
-
-  const createPlanMutation = useMutation({
-    mutationFn: (templateType: PlanTemplateType) => createPlanFromTemplate(templateType),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['activePlan'] });
-    },
   });
 
   const startSessionMutation = useMutation({
@@ -67,15 +55,7 @@ export function HomePage() {
         <h1 className="text-lg font-semibold text-text">{t('home.emptyStateTitle')}</h1>
         <p className="mt-1 text-text-secondary">{t('home.emptyStateBody')}</p>
         <div className="mt-4 flex flex-col gap-3">
-          {PRESETS.map((preset) => (
-            <Button
-              key={preset.type}
-              onClick={() => createPlanMutation.mutate(preset.type)}
-              disabled={createPlanMutation.isPending}
-            >
-              {t(`home.${preset.labelKey}`)}
-            </Button>
-          ))}
+          <PresetPicker />
         </div>
       </div>
     );

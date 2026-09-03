@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { z } from 'zod';
+import { zTrainingSession, SessionStatus } from '@gigaflow/shared';
 import { apiFetch, ApiError, configureApi } from './api';
 
 const ok = (data: unknown) => new Response(JSON.stringify({ success: true, data }), { status: 200 });
@@ -93,14 +94,36 @@ describe('apiFetch', () => {
     expect(out.n).toBe(1);
   });
 
-  it('revives ISO date strings so z.date() schema fields parse correctly', async () => {
+  it('coerces ISO date string fields into Date via schema (no JSON reviver needed)', async () => {
     const createdAt = new Date('2026-01-15T10:30:00.000Z');
     const fetchImpl = (async () => ok({ createdAt })) as typeof fetch;
 
-    const out = await apiFetch('/x', { schema: z.object({ createdAt: z.date() }), fetchImpl });
+    const out = await apiFetch('/x', { schema: z.object({ createdAt: z.coerce.date() }), fetchImpl });
 
     expect(out.createdAt).toBeInstanceOf(Date);
     expect(out.createdAt.toISOString()).toBe(createdAt.toISOString());
+  });
+
+  it('coerces real date fields to Date while leaving a free-text ISO-looking string field as a string', async () => {
+    const startedAt = new Date('2026-01-15T10:30:00.000Z');
+    const notes = '2026-02-20T08:00:00.000Z'; // free-text field that happens to look like an ISO date
+    const session = {
+      id: 's1',
+      userId: 'u1',
+      templateId: 't1',
+      sessionNumber: 1,
+      startedAt,
+      status: SessionStatus.IN_PROGRESS,
+      notes,
+    };
+    const fetchImpl = (async () => ok(session)) as typeof fetch;
+
+    const out = await apiFetch('/x', { schema: zTrainingSession, fetchImpl });
+
+    expect(out.startedAt).toBeInstanceOf(Date);
+    expect(out.startedAt.toISOString()).toBe(startedAt.toISOString());
+    expect(typeof out.notes).toBe('string');
+    expect(out.notes).toBe(notes);
   });
 
   it('on repeated 401s, calls onUnauthorized once and throws ApiError after the single retry', async () => {
