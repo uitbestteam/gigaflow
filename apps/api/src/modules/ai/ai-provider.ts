@@ -15,6 +15,10 @@ export interface AiProvider {
 export class AiEngine {
   constructor(private readonly providers: AiProvider[]) {}
 
+  get providerNames(): AiProviderName[] {
+    return this.providers.map((provider) => provider.name);
+  }
+
   private async generate<T>(prompt: AiPrompt, schema: z.ZodType<T>): Promise<T> {
     for (const provider of this.providers) {
       try {
