@@ -152,6 +152,14 @@ export async function postAuthSession(): Promise<User> {
   return apiFetch('/auth/session', { method: 'POST', schema: zUser });
 }
 
+/**
+ * Merge a former guest's data into the caller's account. Bearer is the target
+ * (logged-in) account's token; `guestToken` proves ownership of the guest.
+ */
+export async function postMergeGuest(guestToken: string): Promise<void> {
+  await apiFetch('/auth/merge', { method: 'POST', body: { guestToken } });
+}
+
 export async function getActivePlan(): Promise<PlanWithTemplates | null> {
   return apiFetch('/plans/active', { schema: zPlanWithTemplates.nullable() });
 }

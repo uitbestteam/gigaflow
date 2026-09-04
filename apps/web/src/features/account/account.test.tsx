@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 import { NotificationsSettings } from './NotificationsSettings';
 import { AccountPage } from './AccountPage';
 import { useNotificationStore } from '../../store/notificationStore';
+import { useAuthStore } from '../../store/authStore';
 
 function renderWithRouter(ui: React.ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -58,8 +59,9 @@ describe('AccountPage', () => {
     useNotificationStore.setState({ status: 'idle', token: undefined, error: undefined });
   });
 
-  it('renders both NotificationsSettings and UpgradePrompt', () => {
+  it('shows the UpgradePrompt (and reminders) for a guest', () => {
     vi.spyOn(useNotificationStore.getState(), 'init').mockResolvedValue();
+    useAuthStore.setState({ status: 'guest', isGuest: true, user: undefined });
 
     renderWithRouter(<AccountPage />);
 
@@ -67,5 +69,15 @@ describe('AccountPage', () => {
     expect(screen.getByText(/save your progress/i)).toBeInTheDocument();
     // From NotificationsSettings
     expect(screen.getByRole('button', { name: /enable reminders/i })).toBeInTheDocument();
+  });
+
+  it('shows Sign out (not the UpgradePrompt) for a signed-in user', () => {
+    vi.spyOn(useNotificationStore.getState(), 'init').mockResolvedValue();
+    useAuthStore.setState({ status: 'user', isGuest: false, user: undefined });
+
+    renderWithRouter(<AccountPage />);
+
+    expect(screen.getByRole('button', { name: /sign out/i })).toBeInTheDocument();
+    expect(screen.queryByText(/save your progress/i)).not.toBeInTheDocument();
   });
 });
