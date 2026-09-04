@@ -8,8 +8,12 @@ export interface AuthDeps {
   ensureSignedIn: () => Promise<string>;
   getIdToken: () => Promise<string>;
   postAuthSession: () => Promise<User>;
-  linkGoogle: () => Promise<void>;
+  /** Resolves to the former guest's token when a returning account was signed into (for data merge), else undefined. */
+  linkGoogle: () => Promise<string | undefined>;
   linkEmailPassword: (email: string, password: string) => Promise<void>;
+  mergeGuest: (guestToken: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  getProfile: () => Promise<{ photoURL?: string; displayName?: string; email?: string }>;
 }
 
 // Firebase-backed defaults are resolved lazily via dynamic import, so that
@@ -23,6 +27,9 @@ const defaultDeps: AuthDeps = {
   linkGoogle: async () => (await import('../lib/firebase')).linkGoogle(),
   linkEmailPassword: async (email: string, password: string) =>
     (await import('../lib/firebase')).linkEmailPassword(email, password),
+  mergeGuest: async (guestToken: string) => (await import('../lib/api')).postMergeGuest(guestToken),
+  signOut: async () => (await import('../lib/firebase')).signOutUser(),
+  getProfile: async () => (await import('../lib/firebase')).currentUserProfile(),
 };
 
 export interface AuthState {
@@ -31,10 +38,12 @@ export interface AuthState {
   token?: string;
   user?: User;
   isGuest: boolean;
+  photoURL?: string;
   bootstrap: (deps?: AuthDeps) => Promise<void>;
   refreshToken: (deps?: AuthDeps) => Promise<void>;
   upgradeGoogle: (deps?: AuthDeps) => Promise<void>;
   upgradeEmail: (email: string, password: string, deps?: AuthDeps) => Promise<void>;
+  signOut: (deps?: AuthDeps) => Promise<void>;
 }
 
 /**
@@ -53,12 +62,14 @@ async function syncSession(deps: AuthDeps, set: (partial: Partial<AuthState>) =>
   // api client's configured getToken) sees it before postAuthSession fires.
   set({ uid, token });
   const user = await deps.postAuthSession();
+  const profile = await deps.getProfile();
   set({
     status: user.isGuest ? 'guest' : 'user',
     uid,
     token,
     user,
     isGuest: user.isGuest,
+    photoURL: profile.photoURL,
   });
 }
 
@@ -88,7 +99,14 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   upgradeGoogle: async (deps = defaultDeps) => {
     try {
-      await deps.linkGoogle();
+      const guestToken = await deps.linkGoogle();
+      // Returning-user path: we signed into a pre-existing account. Push the new
+      // account's token into the store first (so the api client authenticates as
+      // the target), then merge the abandoned guest's data into it.
+      if (guestToken) {
+        set({ token: await deps.getIdToken() });
+        await deps.mergeGuest(guestToken);
+      }
       await syncSession(deps, set);
     } catch {
       set({ status: 'error' });
@@ -98,6 +116,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   upgradeEmail: async (email: string, password: string, deps = defaultDeps) => {
     try {
       await deps.linkEmailPassword(email, password);
+      await syncSession(deps, set);
+    } catch {
+      set({ status: 'error' });
+    }
+  },
+
+  signOut: async (deps = defaultDeps) => {
+    try {
+      await deps.signOut();
       await syncSession(deps, set);
     } catch {
       set({ status: 'error' });
