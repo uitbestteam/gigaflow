@@ -40,3 +40,9 @@ variable "openai_api_key" {
   sensitive   = true
   default     = ""
 }
+
+variable "ai_provider_order" {
+  type        = string
+  description = "AI provider priority list, e.g. \"vertex,gemini,openai\". Empty = default (gemini,openai). Set \"vertex,gemini\" to run AI through Vertex (uses the SA's ADC + roles/aiplatform.user)."
+  default     = ""
+}

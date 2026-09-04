@@ -35,12 +35,13 @@ module "cloud_run" {
   image           = var.image
   service_account = google_service_account.api.email
   env_vars = {
-    NODE_ENV       = "production"
-    GCP_PROJECT_ID = var.project_id
-    MONGODB_URI    = var.mongodb_uri
-    MONGODB_DB     = var.mongodb_db
-    GEMINI_API_KEY = var.gemini_api_key
-    OPENAI_API_KEY = var.openai_api_key
+    NODE_ENV          = "production"
+    GCP_PROJECT_ID    = var.project_id
+    MONGODB_URI       = var.mongodb_uri
+    MONGODB_DB        = var.mongodb_db
+    GEMINI_API_KEY    = var.gemini_api_key
+    OPENAI_API_KEY    = var.openai_api_key
+    AI_PROVIDER_ORDER = var.ai_provider_order
   }
 }
 
