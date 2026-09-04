@@ -8,24 +8,25 @@ export interface MuscleTagProps {
 
 /**
  * Maps every MuscleGroup member to a background/text color pairing. Reuses
- * existing semantic tokens (no new tokens introduced) so the tag stays
- * consistent with the rest of the dark-only palette.
+ * existing semantic tokens (no new tokens introduced) — chest/back/legs/core
+ * borrow the split-identity colors (push/pull/legs/core) so a scanning list
+ * reads by color, the rest fall back to neutral-ish accents.
  */
 const MUSCLE_CLASSES: Record<MuscleGroup, string> = {
-  [MuscleGroup.CHEST]: 'bg-push/20 text-push',
-  [MuscleGroup.BACK]: 'bg-pull/20 text-pull',
-  [MuscleGroup.LEGS]: 'bg-legs/20 text-legs',
-  [MuscleGroup.SHOULDERS]: 'bg-accent/20 text-accent',
-  [MuscleGroup.ARMS]: 'bg-warning/20 text-warning',
-  [MuscleGroup.CORE]: 'bg-success/20 text-success',
-  [MuscleGroup.CARDIO]: 'bg-surface-elevated text-text-secondary',
+  [MuscleGroup.CHEST]: 'bg-push/15 text-push ring-1 ring-inset ring-push/30',
+  [MuscleGroup.BACK]: 'bg-pull/15 text-pull ring-1 ring-inset ring-pull/30',
+  [MuscleGroup.LEGS]: 'bg-legs/15 text-legs ring-1 ring-inset ring-legs/30',
+  [MuscleGroup.SHOULDERS]: 'bg-accent/15 text-accent ring-1 ring-inset ring-accent/30',
+  [MuscleGroup.ARMS]: 'bg-warning/15 text-warning ring-1 ring-inset ring-warning/30',
+  [MuscleGroup.CORE]: 'bg-core/15 text-core ring-1 ring-inset ring-core/30',
+  [MuscleGroup.CARDIO]: 'bg-surface-3 text-text-secondary ring-1 ring-inset ring-border-subtle',
 };
 
 export function MuscleTag({ muscleGroup, className = '' }: MuscleTagProps) {
   const { t } = useTranslation();
 
   const classes = [
-    'inline-flex items-center rounded-full px-2 py-1 text-sm font-medium',
+    'inline-flex items-center rounded-pill px-2.5 py-1 text-xs font-semibold tracking-wide',
     MUSCLE_CLASSES[muscleGroup],
     className,
   ]

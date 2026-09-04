@@ -3,28 +3,153 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0f0f0f;
-  --surface: #1a1a1a;
-  --surface-elevated: #242424;
-  --border-subtle: #2a2a2a;
-  --border: #333333;
-  --text: #f0f0f0;
-  --text-secondary: #888888;
-  --text-muted: #555555;
-  --accent: #3b82f6;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --push: #ef4444;
-  --pull: #22c55e;
-  --legs: #f59e0b;
+  /* ── surfaces (calm neutral dark) ── */
+  --bg: #0e1014;
+  --bg-elevated: #14171d;
+  --surface: #181b22;
+  --surface-2: #1f232b;
+  --surface-3: #272c36;
+  --border-subtle: #262b34;
+  --border: #333a46;
+
+  /* ── text ── */
+  --text: #eef1f5;
+  --text-secondary: #98a2b3;
+  --text-muted: #616b7a;
+
+  /* ── accents (flat, softened — no neon) ── */
+  --accent: #4f83f1;
+  --neon-blue: #4f83f1;
+  --neon-violet: #7b86e8;
+  --neon-magenta: #e070a0;
+  --neon-cyan: #3ba9c4;
+
+  --success: #35b06a;
+  --warning: #e0973a;
+  --danger: #ef5a6b;
+
+  /* ── muscle-group identity (muted, semantic) ── */
+  --push: #ef5a6b;
+  --pull: #35b06a;
+  --legs: #e0973a;
+  --core: #3ba9c4;
+
+  /* ── "gradients" collapsed to flat solids so every bg-grad-* utility renders
+     as a single calm color (no rainbow, no AI look) ── */
+  --grad-primary: linear-gradient(0deg, #4f83f1, #4f83f1);
+  --grad-primary-soft: linear-gradient(0deg, rgba(79, 131, 241, 0.12), rgba(79, 131, 241, 0.12));
+  --grad-cyan: linear-gradient(0deg, #3ba9c4, #3ba9c4);
+  --grad-push: linear-gradient(0deg, #ef5a6b, #ef5a6b);
+  --grad-pull: linear-gradient(0deg, #35b06a, #35b06a);
+  --grad-legs: linear-gradient(0deg, #e0973a, #e0973a);
+  --grad-core: linear-gradient(0deg, #3ba9c4, #3ba9c4);
+
+  /* ── shadows: soft lift, no neon halo ── */
+  --glow-accent: 0 6px 18px rgba(79, 131, 241, 0.18);
+  --glow-blue: 0 6px 18px rgba(79, 131, 241, 0.18);
+  --glow-magenta: 0 6px 18px rgba(224, 112, 160, 0.16);
+  --shadow-card: 0 6px 18px rgba(0, 0, 0, 0.32);
+  --shadow-nav: 0 -6px 22px rgba(0, 0, 0, 0.38);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  background: var(--bg);
 }
 
 body {
-  background: var(--bg);
   color: var(--text);
   font-family: Inter, system-ui, sans-serif;
+  /* one faint, calm tint — not an aurora light show */
+  background-image: radial-gradient(70% 45% at 50% -15%, rgba(79, 131, 241, 0.06), transparent 70%);
+  background-attachment: fixed;
 }
 
 .tnum {
   font-variant-numeric: tabular-nums;
+}
+
+/* Mobile-first: the app lives in a phone-width column, centered on wide screens. */
+.app-container {
+  width: 100%;
+  max-width: 520px;
+  margin-inline: auto;
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Flat accent text (no gradient clip). */
+.text-gradient {
+  color: var(--accent);
+  -webkit-text-fill-color: currentColor;
+  background: none;
+}
+
+/* Glass surface used by nav / sticky bars. */
+.glass {
+  background: rgba(20, 23, 29, 0.78);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+}
+
+/* Soft accent hairline for "highlighted" cards (flat, not a gradient border). */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: rgba(79, 131, 241, 0.42);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ── keyframes ── */
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-gradient {
+  animation: none;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
 }

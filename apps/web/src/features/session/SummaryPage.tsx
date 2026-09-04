@@ -8,6 +8,9 @@ import { resolveTranslatable } from '../../lib/i18n';
 import { ROUTES } from '../../routes';
 import { SummaryRow } from '../../components/SummaryRow';
 import { Button } from '../../components/Button';
+import { Card } from '../../components/Card';
+import { FadeIn, Stagger, StaggerItem } from '../../components/motion';
+import { SparklesIcon } from '../../components/icons';
 
 function formatMmSs(totalSeconds: number): string {
   const clamped = Math.max(0, totalSeconds);
@@ -74,34 +77,49 @@ export function SummaryPage() {
   const prExerciseIds = new Set((prsQuery.data ?? []).map((pr) => pr.exerciseId));
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-lg font-semibold text-text">
+    <div className="flex flex-col gap-5 p-4">
+      <FadeIn className="flex flex-col items-center gap-3 py-4 text-center">
+        <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-grad-primary shadow-glow-accent animate-pop">
+          <SparklesIcon className="text-white" width={30} height={30} />
+        </span>
+        <h1 className="text-2xl font-extrabold tracking-tight text-gradient">
           ✓ {t('summary.doneTitle', { n: session.sessionNumber })}
         </h1>
-        <div className="flex items-center gap-4 text-sm text-text-secondary">
-          <span>
-            {t('summary.duration')}: <span className="tnum">{formatMmSs(session.durationSeconds ?? 0)}</span>
-          </span>
-          <span>
-            {t('summary.totalVolume')}: <span className="tnum">{session.totalVolume ?? 0}</span>
-          </span>
-        </div>
-      </header>
+      </FadeIn>
 
-      <div className="flex flex-col divide-y divide-border-subtle">
-        {exerciseSummaries.map((summary) => (
-          <SummaryRow
-            key={summary.exerciseId}
-            name={exercisesById.get(summary.exerciseId)?.name ?? summary.exerciseId}
-            setCount={summary.setCount}
-            avgWeightKg={summary.avgWeightKg}
-            hasPR={prExerciseIds.has(summary.exerciseId)}
-          />
-        ))}
+      <div className="grid grid-cols-2 gap-3">
+        <Card variant="flat" className="flex flex-col items-center gap-1 py-5">
+          <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+            {t('summary.duration')}
+          </span>
+          <span className="tnum text-2xl font-extrabold text-text">{formatMmSs(session.durationSeconds ?? 0)}</span>
+        </Card>
+        <Card variant="flat" className="flex flex-col items-center gap-1 py-5">
+          <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+            {t('summary.totalVolume')}
+          </span>
+          <span className="tnum text-2xl font-extrabold text-text">{session.totalVolume ?? 0}</span>
+        </Card>
       </div>
 
-      <Button onClick={() => navigate(ROUTES.home)}>{t('summary.backHome')}</Button>
+      <Card variant="default" className="p-0">
+        <Stagger className="flex flex-col divide-y divide-border-subtle px-4">
+          {exerciseSummaries.map((summary) => (
+            <StaggerItem key={summary.exerciseId}>
+              <SummaryRow
+                name={exercisesById.get(summary.exerciseId)?.name ?? summary.exerciseId}
+                setCount={summary.setCount}
+                avgWeightKg={summary.avgWeightKg}
+                hasPR={prExerciseIds.has(summary.exerciseId)}
+              />
+            </StaggerItem>
+          ))}
+        </Stagger>
+      </Card>
+
+      <Button size="lg" fullWidth onClick={() => navigate(ROUTES.home)}>
+        {t('summary.backHome')}
+      </Button>
     </div>
   );
 }

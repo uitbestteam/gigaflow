@@ -55,27 +55,27 @@ export function TemplateEditor({
   const nameId = useId();
 
   return (
-    <Card className={['flex flex-col gap-3', className].filter(Boolean).join(' ')}>
+    <Card variant="flat" className={['flex flex-col gap-3', className].filter(Boolean).join(' ')}>
       <div className="flex items-center justify-between gap-2">
         <label className="flex flex-1 flex-col gap-1 text-sm text-text-secondary" htmlFor={nameId}>
           {t('builder.templateNamePlaceholder')}
           <input
             id={nameId}
             type="text"
-            className="min-h-11 w-full rounded-[10px] border border-border-subtle bg-surface-elevated px-3 text-text"
+            className="min-h-11 w-full rounded-md border border-border-subtle bg-surface px-3 font-medium text-text focus:outline-none focus:ring-2 focus:ring-accent/40"
             placeholder={t('builder.templateNamePlaceholder')}
             value={template.name.en}
             onChange={(e) => onNameChange(e.target.value)}
           />
         </label>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" aria-label={t('builder.moveUp')} onClick={() => onMove('up')}>
+          <Button variant="ghost" size="sm" aria-label={t('builder.moveUp')} onClick={() => onMove('up')}>
             {'↑'}
           </Button>
-          <Button variant="ghost" aria-label={t('builder.moveDown')} onClick={() => onMove('down')}>
+          <Button variant="ghost" size="sm" aria-label={t('builder.moveDown')} onClick={() => onMove('down')}>
             {'↓'}
           </Button>
-          <Button variant="ghost" aria-label={t('builder.removeDay')} onClick={onRemove}>
+          <Button variant="ghost" size="sm" aria-label={t('builder.removeDay')} onClick={onRemove}>
             {'✕'}
           </Button>
         </div>
@@ -89,8 +89,8 @@ export function TemplateEditor({
             aria-label={tag}
             aria-pressed={template.colorTag === tag}
             className={[
-              'flex h-11 w-11 items-center justify-center rounded-full',
-              template.colorTag === tag ? 'ring-2 ring-accent' : '',
+              'flex h-11 w-11 items-center justify-center rounded-full transition-transform active:scale-95',
+              template.colorTag === tag ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface-2' : '',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -118,7 +118,7 @@ export function TemplateEditor({
         })}
       </div>
 
-      <Button variant="ghost" className="self-start" onClick={onAddExercise}>
+      <Button variant="outline" size="sm" className="self-start" onClick={onAddExercise}>
         {t('builder.addExercise')}
       </Button>
     </Card>

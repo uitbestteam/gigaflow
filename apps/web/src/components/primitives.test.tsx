@@ -7,18 +7,18 @@ import { Spinner } from './Spinner';
 import { ColorDot } from './ColorDot';
 import { LanguageToggle } from './LanguageToggle';
 
-it('renders a solid button', () => {
+it('renders a solid (gradient) button', () => {
   render(<Button>Go</Button>);
   const button = screen.getByRole('button', { name: 'Go' });
   expect(button).toBeInTheDocument();
-  expect(button).toHaveClass('bg-accent');
+  expect(button).toHaveClass('bg-grad-primary');
 });
 
 it('renders a ghost button', () => {
   render(<Button variant="ghost">Cancel</Button>);
   const button = screen.getByRole('button', { name: 'Cancel' });
-  expect(button).toHaveClass('text-text-secondary');
-  expect(button).not.toHaveClass('bg-accent');
+  expect(button).toHaveClass('bg-surface-2');
+  expect(button).not.toHaveClass('bg-grad-primary');
 });
 
 it('color dot uses tag color', () => {

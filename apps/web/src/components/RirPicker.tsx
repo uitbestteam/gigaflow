@@ -32,9 +32,9 @@ export function RirPicker({ value, onPick, className = '' }: RirPickerProps) {
       {OPTIONS.map((option) => {
         const selected = value === option.rir;
         const buttonClasses = [
-          'inline-flex min-h-11 min-w-11 items-center justify-center rounded-[10px] text-xl',
-          'transition-colors motion-reduce:transition-none',
-          selected ? 'bg-accent' : 'bg-surface-elevated',
+          'inline-flex min-h-12 min-w-12 items-center justify-center rounded-pill text-2xl',
+          'transition-all duration-150 active:scale-95 motion-reduce:transition-none',
+          selected ? 'bg-grad-primary shadow-glow-accent scale-105' : 'bg-surface-elevated hover:bg-surface-3',
         ].join(' ');
 
         return (

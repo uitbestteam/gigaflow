@@ -15,7 +15,7 @@ export function ProgressionBadge({ lastSet, className = '' }: ProgressionBadgePr
 
   if (!lastSet) return null;
 
-  const classes = ['tnum text-text-muted text-sm', className].filter(Boolean).join(' ');
+  const classes = ['tnum text-text-muted text-xs font-medium', className].filter(Boolean).join(' ');
 
   return (
     <span className={classes}>

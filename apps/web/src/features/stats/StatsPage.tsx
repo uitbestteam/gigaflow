@@ -1,16 +1,29 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { getAwards, getPrs, getStatsSummary, getWeightHistory, logWeight } from '../../lib/api';
 import { resolveTranslatable } from '../../lib/i18n';
-import { StatTile } from '../../components/StatTile';
+import { StatTile, type StatTileAccent } from '../../components/StatTile';
 import { MiniBarChart } from '../../components/MiniBarChart';
 import { Button } from '../../components/Button';
-import { Spinner } from '../../components/Spinner';
+import { Skeleton, SkeletonList } from '../../components/Skeleton';
+import { FadeIn, Stagger, StaggerItem } from '../../components/motion';
+import { FlameIcon, SparklesIcon, CheckIcon, ListIcon } from '../../components/icons';
 import { AwardCard } from './AwardCard';
 
 function shortDate(value: Date): string {
   return value.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function ErrorRetry({ message, retryLabel, onRetry }: { message: string; retryLabel: string; onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-lg border border-border-subtle bg-surface p-6 text-center">
+      <p className="text-sm text-text-secondary">{message}</p>
+      <Button variant="outline" size="sm" onClick={onRetry}>
+        {retryLabel}
+      </Button>
+    </div>
+  );
 }
 
 /** Stats dashboard (spec §4.6): summary tiles, awards, PRs, and a
@@ -51,64 +64,100 @@ export function StatsPage() {
     value: log.weightKg,
   }));
 
+  const tiles: { label: string; value: number; unit?: string; accent: StatTileAccent; icon: ReactNode }[] = summary
+    ? [
+        // Icons here are deliberately chosen from the icon set with no <rect>
+        // shapes (unlike ChartIcon/DumbbellIcon) so they don't collide with
+        // MiniBarChart's own `<rect>` bars in tests that query the page globally.
+        { label: t('stats.totalSessions'), value: summary.totalSessions, accent: 'push', icon: <FlameIcon width={16} height={16} /> },
+        { label: t('stats.totalVolume'), value: summary.totalVolume, unit: 'kg', accent: 'legs', icon: <SparklesIcon width={16} height={16} /> },
+        { label: t('stats.totalPrs'), value: summary.totalPrs, accent: 'pull', icon: <CheckIcon width={16} height={16} /> },
+        { label: t('stats.totalExercises'), value: summary.totalExercises, accent: 'core', icon: <ListIcon width={16} height={16} /> },
+      ]
+    : [];
+
   return (
-    <div className="flex flex-col gap-6 p-4">
-      <h1 className="text-lg font-semibold text-text">{t('stats.title')}</h1>
+    <div className="flex flex-col gap-8 p-4 pb-4">
+      <FadeIn>
+        <h1 className="text-2xl font-extrabold tracking-tight text-text">{t('stats.title')}</h1>
+      </FadeIn>
 
       <section className="flex flex-col gap-2">
         {summaryQuery.isLoading && (
-          <div className="flex items-center justify-center p-8">
-            <Spinner label={t('common.loading')} />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-24 w-full" />
           </div>
+        )}
+        {summaryQuery.isError && (
+          <ErrorRetry message={t('stats.loadError')} retryLabel={t('common.retry')} onRetry={() => void summaryQuery.refetch()} />
         )}
         {summary && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatTile label={t('stats.totalSessions')} value={summary.totalSessions} />
-            <StatTile label={t('stats.totalVolume')} value={summary.totalVolume} unit="kg" />
-            <StatTile label={t('stats.totalPrs')} value={summary.totalPrs} />
-            <StatTile label={t('stats.totalExercises')} value={summary.totalExercises} />
-          </div>
+          <Stagger className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {tiles.map((tile) => (
+              <StaggerItem key={tile.label}>
+                <StatTile label={tile.label} value={tile.value} unit={tile.unit} accent={tile.accent} icon={tile.icon} />
+              </StaggerItem>
+            ))}
+          </Stagger>
         )}
       </section>
 
-      <section className="flex flex-col gap-2">
+      <FadeIn className="flex flex-col gap-2">
         <h2 className="text-base font-semibold text-text">{t('stats.awardsTitle')}</h2>
-        {awards.length === 0 && !awardsQuery.isLoading && (
+        {awardsQuery.isLoading && <SkeletonList rows={2} />}
+        {awardsQuery.isError && (
+          <ErrorRetry message={t('stats.loadError')} retryLabel={t('common.retry')} onRetry={() => void awardsQuery.refetch()} />
+        )}
+        {awards.length === 0 && !awardsQuery.isLoading && !awardsQuery.isError && (
           <p className="text-sm text-text-secondary">{t('stats.awardsEmpty')}</p>
         )}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <Stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {awards.map((award) => (
-            <AwardCard key={award.key} award={award} />
+            <StaggerItem key={award.key}>
+              <AwardCard award={award} />
+            </StaggerItem>
           ))}
-        </div>
-      </section>
+        </Stagger>
+      </FadeIn>
 
-      <section className="flex flex-col gap-2">
+      <FadeIn className="flex flex-col gap-2">
         <h2 className="text-base font-semibold text-text">{t('stats.prsTitle')}</h2>
-        {prs.length === 0 && !prsQuery.isLoading && (
+        {prsQuery.isLoading && <SkeletonList rows={3} />}
+        {prsQuery.isError && <ErrorRetry message={t('stats.loadError')} retryLabel={t('common.retry')} onRetry={() => void prsQuery.refetch()} />}
+        {prs.length === 0 && !prsQuery.isLoading && !prsQuery.isError && (
           <p className="text-sm text-text-secondary">{t('stats.prsEmpty')}</p>
         )}
-        <div className="flex flex-col gap-2">
+        <Stagger className="flex flex-col gap-2">
           {prs.map((pr) => {
             const exerciseName = resolveTranslatable(pr.name, i18n.language);
             return (
-              <div
+              <StaggerItem
                 key={pr.exerciseId}
-                className="flex items-center justify-between gap-3 rounded-[10px] border border-border-subtle bg-surface p-3"
+                className="flex items-center justify-between gap-3 rounded-md border border-border-subtle bg-surface p-3"
               >
-                <span className="text-text">{exerciseName}</span>
+                <span className="font-medium text-text">{exerciseName}</span>
                 <span className="tnum text-sm text-text-secondary">
                   {pr.bestSet.weightKg}kg &times; {pr.bestSet.repsDone} ({t('stats.e1rm')}: {pr.bestSet.e1RM})
                 </span>
-              </div>
+              </StaggerItem>
             );
           })}
-        </div>
-      </section>
+        </Stagger>
+      </FadeIn>
 
-      <section className="flex flex-col gap-3">
+      <FadeIn className="flex flex-col gap-3">
         <h2 className="text-base font-semibold text-text">{t('stats.weightTitle')}</h2>
-        <MiniBarChart points={chartPoints} unit="kg" />
+
+        {weightHistoryQuery.isLoading && <Skeleton className="h-24 w-full" />}
+        {weightHistoryQuery.isError && (
+          <ErrorRetry message={t('stats.loadError')} retryLabel={t('common.retry')} onRetry={() => void weightHistoryQuery.refetch()} />
+        )}
+        {!weightHistoryQuery.isLoading && !weightHistoryQuery.isError && (
+          <MiniBarChart points={chartPoints} unit="kg" />
+        )}
 
         <form onSubmit={handleSubmit} className="flex items-end gap-3">
           <label className="flex flex-col gap-2">
@@ -119,7 +168,7 @@ export function StatsPage() {
               min={0}
               value={weightKg}
               onChange={(event) => setWeightKg(event.target.value)}
-              className="min-h-11 max-w-[8rem] rounded-[10px] border border-border bg-surface px-3 text-text"
+              className="min-h-11 max-w-[8rem] rounded-md border border-border bg-surface px-3 text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
             />
           </label>
           <Button type="submit" disabled={logWeightMutation.isPending || weightKg.trim() === ''}>
@@ -136,7 +185,7 @@ export function StatsPage() {
             ))}
           </ul>
         )}
-      </section>
+      </FadeIn>
     </div>
   );
 }

@@ -18,11 +18,14 @@
 importScripts('https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.0.0/firebase-messaging-compat.js');
 
+// gigaflow-dev public Firebase web config (non-secret). For a different
+// deploy target (e.g. prod), substitute the matching project's values here.
 firebase.initializeApp({
-  apiKey: '__VITE_FIREBASE_API_KEY__',
-  authDomain: '__VITE_FIREBASE_AUTH_DOMAIN__',
-  projectId: '__VITE_FIREBASE_PROJECT_ID__',
-  appId: '__VITE_FIREBASE_APP_ID__',
+  apiKey: 'AIzaSyBtlVAEeS8v4N2RE1J_irl92flrCXxfBI0',
+  authDomain: 'gigaflow-dev.firebaseapp.com',
+  projectId: 'gigaflow-dev',
+  messagingSenderId: '380948844114',
+  appId: '1:380948844114:web:f626c14678d37f0c1a598b',
 });
 
 const messaging = firebase.messaging();

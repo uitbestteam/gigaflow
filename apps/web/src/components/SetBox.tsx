@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { CheckIcon } from './icons';
 
 export type SetBoxStatus = 'pending' | 'done' | 'edited';
 
@@ -17,9 +18,9 @@ export interface SetBoxProps {
 }
 
 const STATUS_CLASSES: Record<SetBoxStatus, string> = {
-  pending: 'bg-surface-elevated text-accent border border-border-subtle',
-  done: 'bg-success/10 text-success border border-success',
-  edited: 'bg-surface-elevated text-accent border border-warning',
+  pending: 'bg-surface-elevated text-accent border border-border-subtle active:scale-[0.96]',
+  done: 'bg-success/15 text-success border-2 border-success animate-pop',
+  edited: 'bg-warning/10 text-warning border-2 border-warning animate-pop',
 };
 
 const LONG_PRESS_MS = 500;
@@ -46,9 +47,9 @@ export function SetBox({ target, actual, status, onTap, onEdit, className = '' }
   const display = actual ?? target;
 
   const classes = [
-    'relative inline-flex min-h-14 min-w-[72px] flex-col items-center justify-center',
-    'rounded-[10px] tnum font-medium select-none touch-manipulation',
-    'transition-colors motion-reduce:transition-none',
+    'relative inline-flex min-h-16 min-w-[84px] flex-col items-center justify-center gap-0.5',
+    'rounded-lg tnum text-base font-bold select-none touch-manipulation',
+    'transition-all motion-reduce:transition-none motion-reduce:animate-none',
     STATUS_CLASSES[status],
     className,
   ]
@@ -106,11 +107,14 @@ export function SetBox({ target, actual, status, onTap, onEdit, className = '' }
       onPointerLeave={clearLongPress}
       onPointerCancel={clearLongPress}
     >
+      {status === 'done' && (
+        <CheckIcon aria-hidden="true" width={16} height={16} className="absolute right-1.5 top-1.5" />
+      )}
       {status === 'edited' && (
         <span
           data-testid="set-box-edited-dot"
           aria-hidden="true"
-          className="absolute right-1 top-1 h-2 w-2 rounded-full bg-warning"
+          className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-warning"
         />
       )}
       <span>
