@@ -1,2 +1,10 @@
 project_id = "gigaflow-dev"
 image      = "asia-southeast1-docker.pkg.dev/gigaflow-dev/gigaflow/api:latest"
+
+# Secrets — copy this file to terraform.tfvars (gitignored) and fill real values.
+# These land in Cloud Run env AND Terraform state as plaintext: protect the state
+# backend (private GCS bucket, restricted IAM) and do NOT commit terraform.tfvars.
+mongodb_db     = "gigaflow"
+mongodb_uri    = "mongodb+srv://USER:PASS@cluster.mongodb.net/gigaflow"
+gemini_api_key = "" # optional; empty disables the Gemini provider
+openai_api_key = "" # optional; empty disables OpenAI fallback

@@ -20,15 +20,10 @@ resource "google_cloud_run_v2_service" "api" {
       }
 
       dynamic "env" {
-        for_each = var.secret_env
+        for_each = var.env_vars
         content {
-          name = env.key
-          value_source {
-            secret_key_ref {
-              secret  = env.value
-              version = "latest"
-            }
-          }
+          name  = env.key
+          value = env.value
         }
       }
 
