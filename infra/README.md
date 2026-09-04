@@ -75,7 +75,14 @@ that don't exist yet:
    Verify rewrite to Cloud Run works: `curl https://<hosting-url>/api/health`
    (deferred until Cloud Run is deployed and verified).
 
-## CI/CD (now Terraform-managed, one manual OAuth step)
+## Deploy
+
+**Manual (no Cloud Build):** `./scripts/deploy.sh dev` (or `prod`) — builds &
+pushes the API image, `terraform apply`s (Cloud Run image + env from tfvars),
+builds the web app, `firebase deploy`s hosting, and health-checks. This is the
+recommended path; the Cloud Build trigger below is optional (off by default).
+
+## CI/CD (optional — Cloud Build, one manual OAuth step)
 
 Artifact Registry, the Cloud Build **SA IAM** (`run.admin`,
 `iam.serviceAccountUser`, `artifactregistry.writer`, `firebasehosting.admin`),

@@ -136,6 +136,22 @@ for the workout-reminder cron.
 > and **never commit `terraform.tfvars`** (it is gitignored via `*.tfvars`).
 > Rotate a secret by editing `terraform.tfvars` and re-running `terraform apply`.
 
+## Deploy — manual, no Cloud Build (recommended)
+
+One command does the whole rollout (build+push API image → `terraform apply` →
+build web → `firebase deploy` → health check):
+```bash
+./scripts/deploy.sh dev          # or: prod
+```
+Prereqs: `gcloud auth login`, `firebase login`, `infra/envs/<env>/terraform.tfvars`
+filled + `terraform init` done, and `apps/web/.env` filled (its `VITE_*` are baked
+into the web build). Useful flags: `AUTO_APPROVE=1` (skip the terraform prompt),
+`SKIP_WEB=1` (api only), `SKIP_API=1` (web only), `TAG=<tag>` (image tag; default = git short SHA).
+
+Steps 8–9 below are exactly what the script runs, if you prefer to do them by hand.
+**Cloud Build (step 10) is optional** — the trigger is off by default
+(`enable_build_trigger = false`); use the script instead of CI if you want.
+
 ## 8. Build & push the API image, then roll out
 
 ```bash
@@ -154,7 +170,7 @@ firebase deploy --only hosting --project gigaflow-dev
 curl https://gigaflow-dev.web.app/api/health   # confirms the /api/** rewrite → Cloud Run
 ```
 
-## 10. CI/CD (Cloud Build trigger — Terraform, one manual OAuth step)
+## 10. CI/CD (Cloud Build trigger — OPTIONAL; use `scripts/deploy.sh` instead if you prefer manual)
 
 The Cloud Build **SA IAM** and the **trigger** are Terraform-managed; only the
 GitHub↔Cloud Build OAuth connection is manual (Terraform can't do the handshake):
@@ -239,7 +255,9 @@ covers Agent Builder/Discovery Engine, Vertex still works but is billed normally
 ## Known gaps to close before a working deploy
 
 1. **`cloudbuild.yaml` doesn't build the web app** before `firebase deploy` (placeholder
-   step) → Hosting ships a stale/empty `apps/web/dist`. Add
-   `pnpm install && pnpm --filter @gigaflow/web build` (with the `VITE_*` build envs).
+   step) → Hosting would ship a stale/empty `apps/web/dist`. This affects **only the
+   optional Cloud Build path** — `scripts/deploy.sh` builds the web app correctly. If
+   you enable Cloud Build, add `pnpm install && pnpm --filter @gigaflow/web build`
+   (with the `VITE_*` build envs) to `cloudbuild.yaml` first.
 2. **`apps/web/.env.example`** is missing `VITE_FIREBASE_VAPID_KEY` / `VITE_FIREBASE_MESSAGING_SENDER_ID`
    (needed for F4 push).
