@@ -20,6 +20,13 @@ export interface TranslationSchema {
     meal: string;
     stats: string;
   };
+  wizard: {
+    back: string;
+    next: string;
+    finish: string;
+    stepOf: string;
+    optional: string;
+  };
   auth: {
     splashLabel: string;
     errorTitle: string;
@@ -291,6 +298,13 @@ const en: TranslationSchema = {
     generate: 'AI',
     meal: 'Meal',
     stats: 'Stats',
+  },
+  wizard: {
+    back: 'Back',
+    next: 'Next',
+    finish: 'Generate',
+    stepOf: 'Step {{current}} of {{total}}',
+    optional: 'Optional',
   },
   auth: {
     splashLabel: 'Signing you in…',

@@ -20,6 +20,13 @@ const vi: TranslationSchema = {
     meal: 'Bữa ăn',
     stats: 'Thống kê',
   },
+  wizard: {
+    back: 'Quay lại',
+    next: 'Tiếp',
+    finish: 'Tạo',
+    stepOf: 'Bước {{current}}/{{total}}',
+    optional: 'Không bắt buộc',
+  },
   auth: {
     splashLabel: 'Đang đăng nhập…',
     errorTitle: 'Đã có lỗi xảy ra',
