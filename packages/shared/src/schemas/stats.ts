@@ -17,6 +17,19 @@ export const zStatsSummary = z.object({
   totalVolume: z.number().min(0),
   totalPrs: z.number().int().min(0),
   totalExercises: z.number().int().min(0),
+  /** Consecutive calendar weeks (up to and including the current one) with ≥1 finished session. */
+  currentStreakWeeks: z.number().int().min(0),
+  /** Best-ever consecutive-week streak. */
+  longestStreakWeeks: z.number().int().min(0),
+  /** Total meal plans the user has generated (for the first-meal-plan award). */
+  totalMealPlans: z.number().int().min(0),
+});
+
+/** One week's training volume split by muscle group (for the volume-trend chart). */
+export const zVolumeByWeek = z.object({
+  weekStart: z.coerce.date(),
+  byMuscleGroup: z.record(z.string(), z.number().min(0)),
+  total: z.number().min(0),
 });
 
 export const zAward = z.object({
@@ -31,3 +44,4 @@ export const zAward = z.object({
 export type PersonalRecord = z.infer<typeof zPersonalRecord>;
 export type StatsSummary = z.infer<typeof zStatsSummary>;
 export type Award = z.infer<typeof zAward>;
+export type VolumeByWeek = z.infer<typeof zVolumeByWeek>;

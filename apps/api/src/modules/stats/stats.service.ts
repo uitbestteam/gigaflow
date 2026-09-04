@@ -13,6 +13,10 @@ export async function buildSummary(userId: string): Promise<StatsSummary> {
     totalVolume,
     totalExercises: perf.length,
     totalPrs: perf.length,
+    // TODO(gamification): compute real streak + meal-plan count.
+    currentStreakWeeks: 0,
+    longestStreakWeeks: 0,
+    totalMealPlans: 0,
   };
 }
 

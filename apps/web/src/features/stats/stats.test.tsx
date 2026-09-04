@@ -34,6 +34,9 @@ function makeSummary(overrides: Partial<StatsSummary> = {}): StatsSummary {
     totalVolume: 34500,
     totalPrs: 5,
     totalExercises: 8,
+    currentStreakWeeks: 2,
+    longestStreakWeeks: 4,
+    totalMealPlans: 1,
     ...overrides,
   };
 }
