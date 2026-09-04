@@ -3,6 +3,7 @@ import {
   getAuth,
   signInAnonymously,
   signInWithCredential,
+  signOut as firebaseSignOut,
   onAuthStateChanged,
   linkWithPopup,
   linkWithCredential,
@@ -72,7 +73,13 @@ export async function getIdToken(): Promise<string> {
  *    we recover the credential from the error and `signInWithCredential` into
  *    that existing account instead of failing.
  */
-export async function linkGoogle(): Promise<void> {
+/**
+ * Sign in / upgrade with Google. Returns the FORMER guest's ID token ONLY when
+ * we had to sign into a pre-existing Google account (returning user) while a
+ * guest with data was active — the caller uses it to merge that guest's data
+ * into the account. Returns `undefined` for the in-place link (no merge needed).
+ */
+export async function linkGoogle(): Promise<string | undefined> {
   const a = getFirebaseAuth();
   const provider = new GoogleAuthProvider();
 
@@ -90,14 +97,15 @@ export async function linkGoogle(): Promise<void> {
   } catch (err) {
     const code = (err as AuthError).code;
     // Returning user: this Google identity already owns an account, so it can't
-    // be linked onto the current guest. Sign into that existing account instead
-    // (restores their real history); the throwaway guest is discarded.
+    // be linked onto the current guest. Capture the guest token (to merge its
+    // data), sign into the existing account, and hand the token back.
     if (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use') {
       const cred = GoogleAuthProvider.credentialFromError(err as AuthError);
       if (cred) {
+        const guestToken = guest.isAnonymous ? await guest.getIdToken() : undefined;
         await signInWithCredential(a, cred);
         await a.currentUser?.getIdToken(true);
-        return;
+        return guestToken;
       }
     }
     throw err;
@@ -107,6 +115,24 @@ export async function linkGoogle(): Promise<void> {
   // refresh so the fresh ID token carries the newly linked google.com identity,
   // which the API reads to flip the user from guest to a permanent account.
   await a.currentUser?.getIdToken(true);
+  return undefined;
+}
+
+/** Sign out, then immediately re-establish a fresh anonymous guest session. */
+export async function signOutUser(): Promise<void> {
+  const a = getFirebaseAuth();
+  await firebaseSignOut(a);
+  await signInAnonymously(a);
+}
+
+/** The current Firebase user's photo URL / display name, if any (for the profile UI). */
+export function currentUserProfile(): { photoURL?: string; displayName?: string; email?: string } {
+  const u = getFirebaseAuth().currentUser;
+  return {
+    photoURL: u?.photoURL ?? undefined,
+    displayName: u?.displayName ?? undefined,
+    email: u?.email ?? undefined,
+  };
 }
 
 export async function linkEmailPassword(email: string, password: string): Promise<void> {

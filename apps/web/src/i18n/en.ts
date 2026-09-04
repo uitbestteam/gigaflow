@@ -381,6 +381,9 @@ export interface TranslationSchema {
     exercisesNav: string;
     inbodyNav: string;
     languageLabel: string;
+    guestName: string;
+    guestBadge: string;
+    signOut: string;
   };
 }
 
@@ -761,6 +764,9 @@ const en: TranslationSchema = {
     exercisesNav: 'Exercise library',
     inbodyNav: 'InBody',
     languageLabel: 'Language',
+    guestName: 'Guest',
+    guestBadge: 'Guest',
+    signOut: 'Sign out',
   },
 };
 
