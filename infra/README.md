@@ -3,9 +3,11 @@
 Terraform for the GCP resources backing `gigaflow-api`. Terraform-managed:
 **project APIs** (`google_project_service`), **Artifact Registry** repo,
 runtime service account + IAM, **Cloud Tasks** queues, the **Cloud Run**
-service (plain env vars), the **Cloud Scheduler** reminder job, and the
-**Cloud Build** SA IAM + CI trigger. Manual (can't be Terraformed): the first
-GCS state bucket, the GitHub↔Cloud Build OAuth connection, the image build/push,
+service (plain env vars), the **Cloud Scheduler** reminder job, the **Cloud
+Build** SA IAM + CI trigger, and **Firebase Auth** sign-in methods (Identity
+Platform: Anonymous + Email/Password, optional Google). Manual (can't be
+Terraformed): the first GCS state bucket, the GitHub↔Cloud Build OAuth
+connection, the Google OAuth client for social sign-in, the image build/push,
 and `firebase deploy` of the web app.
 
 **Secrets:** this setup does NOT use Secret Manager. Secret values
@@ -126,16 +128,19 @@ The following are explicitly deferred, with the blocker for each:
    Terraform state and Cloud Run env — so keep the state backend private and
    the `terraform.tfvars` files off git.
 
-## Firebase auth (deferred)
+## Firebase auth
 
-The backend API implements Firebase ID token verification for the `/api/auth/session` endpoint. Setup steps:
+The backend API verifies Firebase ID tokens for `/api/auth/session`.
 
-1. **Enable providers in Firebase Console** (one-time, manual):
-   - Go to the Firebase project console (`gigaflow-dev`).
-   - In **Authentication → Sign-in method**, enable:
-     - **Anonymous** — for guest mode (zero migration path).
-     - **Google** — for social sign-in.
-     - **Email/Password** — for email + password sign-in.
+1. **Sign-in providers — Terraform-managed** (`firebase-auth.tf`, Identity Platform):
+   - **Anonymous** (guest) and **Email/Password** are enabled by `terraform apply`.
+   - **Google** (social) is gated behind `enable_google_signin` because it needs an
+     OAuth 2.0 Web client: create the client (Console → APIs & Services →
+     Credentials → OAuth client ID → Web), set `google_oauth_client_id` /
+     `google_oauth_client_secret` in `terraform.tfvars`, set
+     `enable_google_signin = true`, and `terraform apply`.
+   - One-time init: if the first apply errors on `google_identity_platform_config`,
+     open Firebase Console → Authentication → **Get started** once, then re-apply.
 
 2. **Cloud Run runtime credentials** (automatic in production):
    - The Cloud Run service account (created by Terraform) has the `roles/iam.serviceAccountTokenCreator` role bound to it.
