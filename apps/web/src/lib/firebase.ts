@@ -2,12 +2,15 @@ import { initializeApp, type FirebaseApp } from 'firebase/app';
 import {
   getAuth,
   signInAnonymously,
+  signInWithPopup,
+  signInWithCredential,
   onAuthStateChanged,
   linkWithPopup,
   linkWithCredential,
   GoogleAuthProvider,
   EmailAuthProvider,
   type Auth,
+  type AuthError,
   type User as FirebaseUser,
 } from 'firebase/auth';
 import {
@@ -59,12 +62,39 @@ export async function getIdToken(): Promise<string> {
   return a.currentUser.getIdToken();
 }
 
+/**
+ * Sign in / upgrade with Google.
+ *
+ * The app is anonymous-first, so the happy path LINKS Google to the current
+ * guest (preserving their data). Two fallbacks keep it robust:
+ *  - No guest yet → plain `signInWithPopup`.
+ *  - The Google identity already belongs to another account (returning user):
+ *    `linkWithPopup` throws `credential-already-in-use`/`email-already-in-use`;
+ *    we recover the credential from the error and `signInWithCredential` into
+ *    that existing account instead of failing.
+ */
 export async function linkGoogle(): Promise<void> {
   const a = getFirebaseAuth();
+  const provider = new GoogleAuthProvider();
+
   if (!a.currentUser) {
-    throw new Error('No signed-in Firebase user');
+    await signInWithPopup(a, provider);
+    return;
   }
-  await linkWithPopup(a.currentUser, new GoogleAuthProvider());
+
+  try {
+    await linkWithPopup(a.currentUser, provider);
+  } catch (err) {
+    const code = (err as AuthError).code;
+    if (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use') {
+      const cred = GoogleAuthProvider.credentialFromError(err as AuthError);
+      if (cred) {
+        await signInWithCredential(a, cred);
+        return;
+      }
+    }
+    throw err;
+  }
 }
 
 export async function linkEmailPassword(email: string, password: string): Promise<void> {

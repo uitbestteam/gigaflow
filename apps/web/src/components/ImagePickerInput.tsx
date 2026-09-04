@@ -1,6 +1,7 @@
 import { useId, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ImageMimeType } from '@gigaflow/shared';
+import { CameraIcon } from './icons';
 
 export interface ImagePickerInputProps {
   accept: string;
@@ -74,16 +75,32 @@ export function ImagePickerInput({
 
   const classes = ['flex flex-col gap-2', className].filter(Boolean).join(' ');
 
+  const labelClasses = [
+    'flex min-h-11 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg text-center transition-all',
+    'active:scale-[0.98] motion-reduce:active:scale-100',
+    previewSrc
+      ? 'border border-border-subtle bg-surface p-2'
+      : 'border-2 border-dashed border-border bg-surface-2 px-4 py-10 hover:border-accent',
+  ].join(' ');
+
   return (
     <div className={classes}>
-      <label
-        htmlFor={inputId}
-        className={[
-          'inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center px-4',
-          'rounded-[10px] bg-accent font-medium text-white',
-        ].join(' ')}
-      >
-        {t('inbody.uploadLabel')}
+      <label htmlFor={inputId} className={labelClasses}>
+        {previewSrc ? (
+          <img
+            src={previewSrc}
+            alt={t('inbody.previewAlt')}
+            className="max-h-48 w-full rounded-[10px] object-contain"
+          />
+        ) : (
+          <>
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-grad-primary shadow-glow-accent">
+              <CameraIcon className="text-white" width={26} height={26} />
+            </span>
+            <span className="font-medium text-text">{t('inbody.uploadLabel')}</span>
+            <span className="text-xs text-text-muted">{t('inbody.uploadHint')}</span>
+          </>
+        )}
       </label>
       <input
         id={inputId}
@@ -93,13 +110,6 @@ export function ImagePickerInput({
         aria-label={t('inbody.uploadLabel')}
         onChange={handleChange}
       />
-      {previewSrc ? (
-        <img
-          src={previewSrc}
-          alt={t('inbody.previewAlt')}
-          className="max-h-48 rounded-[10px] border border-border-subtle object-contain"
-        />
-      ) : null}
     </div>
   );
 }

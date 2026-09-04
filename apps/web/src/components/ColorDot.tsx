@@ -25,7 +25,7 @@ const TAG_CLASSES: Record<ColorTag, string> = {
 
 export function ColorDot({ tag, className = '' }: ColorDotProps) {
   const classes = [
-    'inline-block h-[28px] w-[28px] rounded-full',
+    'inline-block h-[28px] w-[28px] rounded-full shadow-[0_0_0_2px_rgba(255,255,255,0.06)]',
     TAG_CLASSES[tag],
     className,
   ]
