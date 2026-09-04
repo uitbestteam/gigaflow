@@ -133,3 +133,68 @@ export enum DevicePlatform {
   ANDROID = 'android',
   WEB = 'web',
 }
+
+/** Joint/area a user reports as injured — the AI avoids loading it. */
+export enum InjuryArea {
+  KNEE = 'knee',
+  LOWER_BACK = 'lower_back',
+  SHOULDER = 'shoulder',
+  ELBOW_WRIST = 'elbow_wrist',
+  HIP = 'hip',
+  NECK = 'neck',
+}
+
+/** Coarse cuisine family for meal generation. */
+export enum CuisineRegion {
+  EAST_ASIAN = 'east_asian',
+  SOUTHEAST_ASIAN = 'southeast_asian',
+  SOUTH_ASIAN = 'south_asian',
+  WESTERN = 'western',
+  MEDITERRANEAN = 'mediterranean',
+  LATIN_AMERICAN = 'latin_american',
+  MIDDLE_EASTERN = 'middle_eastern',
+}
+
+/** Specific country whose cuisine to model meals on (optional, refines region). */
+export enum Country {
+  VIETNAM = 'vietnam',
+  THAILAND = 'thailand',
+  JAPAN = 'japan',
+  KOREA = 'korea',
+  CHINA = 'china',
+  INDIA = 'india',
+  INDONESIA = 'indonesia',
+  USA = 'usa',
+  UK = 'uk',
+  ITALY = 'italy',
+  FRANCE = 'france',
+  SPAIN = 'spain',
+  GREECE = 'greece',
+  MEXICO = 'mexico',
+  BRAZIL = 'brazil',
+  TURKEY = 'turkey',
+}
+
+/** Overall eating pattern / restriction the meal plan must follow. */
+export enum DietaryPattern {
+  OMNIVORE = 'omnivore',
+  VEGETARIAN = 'vegetarian',
+  VEGAN = 'vegan',
+  PESCATARIAN = 'pescatarian',
+  HALAL = 'halal',
+  KETO = 'keto',
+  LOW_CARB = 'low_carb',
+}
+
+/** Common food allergens/intolerances to exclude entirely. */
+export enum Allergen {
+  PEANUTS = 'peanuts',
+  TREE_NUTS = 'tree_nuts',
+  SHELLFISH = 'shellfish',
+  FISH = 'fish',
+  EGGS = 'eggs',
+  DAIRY = 'dairy',
+  GLUTEN = 'gluten',
+  SOY = 'soy',
+  SESAME = 'sesame',
+}
