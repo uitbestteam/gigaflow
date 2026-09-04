@@ -1,15 +1,23 @@
 # GigaFlow infra (Terraform)
 
 Terraform skeleton for the GCP resources backing `gigaflow-api`: Cloud Run
-service, Secret Manager secrets, and the runtime service account + IAM.
+service, Cloud Tasks queues, and the runtime service account + IAM.
+
+**Secrets:** this setup does NOT use Secret Manager. Secret values
+(`mongodb_uri`, `gemini_api_key`, `openai_api_key`) are passed via
+`terraform.tfvars` and injected as plain Cloud Run **env vars**. Trade-off:
+those values live in `terraform.tfvars` (gitignored) AND in Terraform state
+as plaintext, and are visible to anyone with `run.viewer`/console access —
+so **protect the state backend** (private GCS bucket, restricted IAM) and
+never commit `terraform.tfvars`.
 
 Layout:
 
 ```
 infra/
   envs/dev/            # dev environment root module
-  modules/secrets/     # Secret Manager secrets
-  modules/cloud-run/   # Cloud Run v2 service + public invoker IAM
+  modules/cloud-tasks/ # Cloud Tasks queues
+  modules/cloud-run/   # Cloud Run v2 service + public invoker IAM (plain env vars)
 ```
 
 This skeleton was authored and statically validated (`terraform fmt`,
@@ -26,43 +34,32 @@ that don't exist yet:
 
 2. **Enable required GCP APIs** (one-time, manual):
    ```bash
-   gcloud services enable run.googleapis.com secretmanager.googleapis.com \
+   gcloud services enable run.googleapis.com \
      cloudtasks.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com \
      aiplatform.googleapis.com \
      --project=gigaflow-dev
    ```
 
-3. **Create the Atlas cluster (dev)** by hand in MongoDB Atlas, then add its
-   connection string as the `mongodb-uri` secret version:
-   ```bash
-   printf '%s' "mongodb+srv://USER:PASS@cluster.mongodb.net/gigaflow" | \
-     gcloud secrets versions add mongodb-uri --data-file=- --project=gigaflow-dev
-   ```
-   Note: the secret resource itself is created by `terraform apply` (step 5
-   below) — add the version *after* apply, or after the secret exists.
+3. **Create the Atlas cluster (dev)** by hand in MongoDB Atlas and copy its
+   SRV connection string — you'll put it in `terraform.tfvars` (step 4), not
+   Secret Manager.
 
-4. **Add the `gemini-api-key` and `openai-api-key` secret versions** the same
-   way, using real provider API keys:
-   ```bash
-   printf '%s' "<gemini-api-key>" | gcloud secrets versions add gemini-api-key --data-file=- --project=gigaflow-dev
-   printf '%s' "<openai-api-key>" | gcloud secrets versions add openai-api-key --data-file=- --project=gigaflow-dev
-   ```
-
-5. **Init with the real backend and apply**:
+4. **Fill `terraform.tfvars`, init, and apply**:
    ```bash
    cd infra/envs/dev
-   cp terraform.tfvars.example terraform.tfvars   # fill in the real image URL
+   cp terraform.tfvars.example terraform.tfvars   # fill image URL + mongodb_uri + gemini/openai keys
+   # terraform.tfvars is gitignored — never commit it.
    terraform init                                  # uses the GCS backend (needs step 1 done)
    terraform validate
    terraform plan
    terraform apply
    ```
-
-Ordering note: `terraform apply` creates the Secret Manager secret
-*resources* (empty, no versions) as well as the Cloud Run service, service
-account, and IAM bindings. The Cloud Run revision will fail to start until
-each secret has at least one version, so add the secret versions (steps 3-4)
-either right after `apply`, or before deploying real traffic to the service.
+   `terraform apply` creates the service account, Cloud Tasks queues, IAM, and
+   the Cloud Run service with the `mongodb_uri`/`gemini_api_key`/`openai_api_key`
+   values from `terraform.tfvars` set as plain env vars — no secret versions to
+   add. Re-run `apply` after building a new image (update `image` in tfvars) to
+   roll out both the new image and any env changes. Secret rotation = edit
+   `terraform.tfvars` and `terraform apply`.
 
 6. **Firebase Hosting deployment**:
    ```bash
@@ -143,9 +140,10 @@ The following are explicitly deferred, with the blocker for each:
    point Cloud Scheduler at `POST /internal/cron/workout-reminders`.
 4. **Rotate any exposed secrets** — any Atlas connection string / password
    used during development or shared in chat, docs, or `.env` files should
-   be rotated before go-live, since local `.env` values are not treated as
-   production secrets. Only `gcloud secrets versions add` into Secret
-   Manager (per the steps above) should hold the production credentials.
+   be rotated before go-live. Production credentials live in
+   `infra/envs/<env>/terraform.tfvars` (gitignored) and, once applied, in the
+   Terraform state and Cloud Run env — so keep the state backend private and
+   the `terraform.tfvars` files off git.
 
 ## Firebase auth (deferred)
 

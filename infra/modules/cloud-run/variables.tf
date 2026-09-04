@@ -18,8 +18,9 @@ variable "service_account" {
   description = "Runtime service account email for the Cloud Run service."
 }
 
-variable "secret_env" {
+variable "env_vars" {
   type        = map(string)
-  description = "Map of ENV_NAME => secret_id to inject as env vars from Secret Manager."
+  description = "Map of ENV_NAME => literal value to inject as Cloud Run env vars. Secret values passed here land in Cloud Run env AND Terraform state as plaintext — protect the state backend and restrict run.viewer."
+  sensitive   = true
   default     = {}
 }

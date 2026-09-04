@@ -1,2 +1,14 @@
 project_id = "gigaflow-prod"
 image      = "asia-southeast1-docker.pkg.dev/gigaflow-prod/gigaflow/api:latest"
+
+# Secrets — copy this file to terraform.tfvars (gitignored) and fill real values.
+# These land in Cloud Run env AND Terraform state as plaintext: protect the state
+# backend (private GCS bucket, restricted IAM) and do NOT commit terraform.tfvars.
+mongodb_db     = "gigaflow"
+mongodb_uri    = "mongodb+srv://USER:PASS@cluster.mongodb.net/gigaflow"
+gemini_api_key = "" # optional; empty disables the Gemini provider
+openai_api_key = "" # optional; empty disables OpenAI fallback
+
+# AI provider switch. Empty = default (gemini,openai). To run AI through Vertex:
+#   ai_provider_order = "vertex,gemini"   # Vertex uses the SA's ADC (roles/aiplatform.user)
+ai_provider_order = ""
