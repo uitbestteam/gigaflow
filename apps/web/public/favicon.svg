@@ -1,0 +1,16 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GigaFlow">
+  <rect width="512" height="512" rx="116" fill="#4f83f1"/>
+  <g fill="#ffffff">
+    <!-- handle bar -->
+    <rect x="168" y="236" width="176" height="40" rx="20"/>
+    <!-- inner plates -->
+    <rect x="146" y="206" width="38" height="100" rx="16"/>
+    <rect x="328" y="206" width="38" height="100" rx="16"/>
+    <!-- outer plates -->
+    <rect x="116" y="222" width="28" height="68" rx="13"/>
+    <rect x="368" y="222" width="28" height="68" rx="13"/>
+    <!-- end caps -->
+    <rect x="96" y="236" width="16" height="40" rx="8"/>
+    <rect x="400" y="236" width="16" height="40" rx="8"/>
+  </g>
+</svg>
