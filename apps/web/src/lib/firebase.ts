@@ -2,7 +2,6 @@ import { initializeApp, type FirebaseApp } from 'firebase/app';
 import {
   getAuth,
   signInAnonymously,
-  signInWithPopup,
   signInWithCredential,
   onAuthStateChanged,
   linkWithPopup,
@@ -77,16 +76,22 @@ export async function linkGoogle(): Promise<void> {
   const a = getFirebaseAuth();
   const provider = new GoogleAuthProvider();
 
+  // Always upgrade a guest IN PLACE (same uid → the API keeps their data). If
+  // bootstrap hasn't produced a guest yet, create one first, so we NEVER fall
+  // into a standalone Google sign-in that would orphan the current guest.
   if (!a.currentUser) {
-    const cred = await signInWithPopup(a, provider);
-    await cred.user.getIdToken(true);
-    return;
+    await signInAnonymously(a);
   }
+  const guest = a.currentUser;
+  if (!guest) throw new Error('No Firebase user to link');
 
   try {
-    await linkWithPopup(a.currentUser, provider);
+    await linkWithPopup(guest, provider);
   } catch (err) {
     const code = (err as AuthError).code;
+    // Returning user: this Google identity already owns an account, so it can't
+    // be linked onto the current guest. Sign into that existing account instead
+    // (restores their real history); the throwaway guest is discarded.
     if (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use') {
       const cred = GoogleAuthProvider.credentialFromError(err as AuthError);
       if (cred) {

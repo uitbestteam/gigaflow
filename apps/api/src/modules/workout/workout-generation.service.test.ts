@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { connectDb, closeDb, getDb } from '../../lib/db.js';
 import {
-  ColorTag, ExperienceLevel, Goal, GenerationType, JobStatus, type GeneratedPlan,
+  ColorTag, EquipmentType, ExperienceLevel, Goal, GenerationType, JobStatus, type GeneratedPlan,
 } from '@gigaflow/shared';
 import { ensureExerciseIndexes } from '../exercise/exercise.repo.js';
 import { seedPresets } from '../exercise/seed-exercises.js';
@@ -113,5 +113,54 @@ describe('workout-generation.service', () => {
   it('throws when the job does not exist', async () => {
     const deps: WorkoutGenDeps = { engine: { generateWorkoutPlan: async () => validPlan } };
     await expect(processGenerateWorkout('000000000000000000000000', deps)).rejects.toThrow();
+  });
+
+  it('filters the catalog to the available equipment and passes intake directives', async () => {
+    await makeUser('gen-eq1');
+    const job = await createJob('gen-eq1', GenerationType.WORKOUT, {
+      goal: Goal.STRENGTH, experienceLevel: ExperienceLevel.INTERMEDIATE, daysPerWeek: 3,
+      availableEquipment: [EquipmentType.BARBELL],
+      injuries: ['knee'],
+      sessionMinutes: 45,
+      emphasis: ['chest'],
+    });
+
+    let captured = '';
+    const deps: WorkoutGenDeps = {
+      engine: {
+        generateWorkoutPlan: async (p) => { captured = p.user; return validPlan; },
+      },
+    };
+    await processGenerateWorkout(job.id, deps);
+
+    // Barbell exercises kept, cable/machine-only exercises removed from the catalog.
+    expect(captured).toContain('bench-barbell');
+    expect(captured).not.toContain('facepull'); // cable
+    expect(captured).not.toContain('leg-press'); // machine
+    // Directives threaded through.
+    expect(captured).toContain('knee');
+    expect(captured).toContain('45');
+    expect(captured).toContain('chest');
+  });
+
+  it('falls back to the full catalog when equipment filtering leaves too few exercises', async () => {
+    await makeUser('gen-eq2');
+    // Only 6 seeded cable exercises (< MIN_CATALOG of 8) → fall back to full catalog.
+    const job = await createJob('gen-eq2', GenerationType.WORKOUT, {
+      goal: Goal.STRENGTH, experienceLevel: ExperienceLevel.INTERMEDIATE, daysPerWeek: 3,
+      availableEquipment: [EquipmentType.CABLE],
+    });
+
+    let captured = '';
+    const deps: WorkoutGenDeps = {
+      engine: {
+        generateWorkoutPlan: async (p) => { captured = p.user; return validPlan; },
+      },
+    };
+    await processGenerateWorkout(job.id, deps);
+
+    // Full catalog is used, so non-cable slugs are present again.
+    expect(captured).toContain('bench-barbell');
+    expect(captured).toContain('leg-press');
   });
 });

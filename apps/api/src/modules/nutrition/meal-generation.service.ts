@@ -23,7 +23,16 @@ export async function processGenerateMeal(jobId: string, deps: MealGenDeps): Pro
 
     const tdee = computeTdee(input);
 
-    const prompt = buildMealPrompt({ ...tdee, goal: input.goal });
+    const prompt = buildMealPrompt({
+      ...tdee,
+      goal: input.goal,
+      dietaryPattern: input.dietaryPattern,
+      allergies: input.allergies,
+      cuisineCountry: input.cuisineCountry,
+      cuisineRegion: input.cuisineRegion,
+      avoidFoods: input.avoidFoods,
+      mealsPerDay: input.mealsPerDay,
+    });
 
     const plan = await deps.engine.generateMealPlan(prompt);
 
