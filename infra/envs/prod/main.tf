@@ -26,6 +26,7 @@ module "cloud_tasks" {
   project_id = var.project_id
   region     = var.region
   queues     = ["workout-gen", "meal-gen", "inbody-ocr"]
+  depends_on = [google_project_service.services]
 }
 
 module "cloud_run" {
@@ -43,6 +44,7 @@ module "cloud_run" {
     OPENAI_API_KEY    = var.openai_api_key
     AI_PROVIDER_ORDER = var.ai_provider_order
   }
+  depends_on = [google_project_service.services]
 }
 
 output "api_url" {
