@@ -14,9 +14,13 @@ import {
   zInbodyResult,
   zStatsSummary,
   zAward,
+  zVolumeByWeek,
+  zUserProfile,
   zWeightLog,
   zDeviceToken,
   type User,
+  type UserProfile,
+  type VolumeByWeek,
   type Plan,
   type PlanWithTemplates,
   type CreatePlanInput,
@@ -150,6 +154,17 @@ async function runFetch<T>(path: string, opts: ApiFetchOptions<T>, allowRetry: b
 
 export async function postAuthSession(): Promise<User> {
   return apiFetch('/auth/session', { method: 'POST', schema: zUser });
+}
+
+/** Save the onboarding profile (sets the user's `profile` + `onboardedAt`). */
+export async function saveProfile(profile: UserProfile): Promise<User> {
+  const body = zUserProfile.parse(profile);
+  return apiFetch('/auth/profile', { method: 'POST', body, schema: zUser });
+}
+
+/** Weekly training volume split by muscle group, oldest→newest (for the trend chart). */
+export async function getVolumeByWeek(): Promise<VolumeByWeek[]> {
+  return apiFetch('/stats/volume-by-week', { schema: zVolumeByWeek.array() });
 }
 
 /**
