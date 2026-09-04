@@ -92,6 +92,7 @@ export enum JobStatus {
 export enum AiProviderName {
   GEMINI = 'gemini',
   OPENAI = 'openai',
+  VERTEX = 'vertex',
 }
 
 export enum Gender {

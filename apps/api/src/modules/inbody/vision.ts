@@ -1,3 +1,5 @@
+import { extractGeminiText } from '../ai/gemini-parse.js';
+
 const DEFAULT_MODEL = 'gemini-2.0-flash';
 
 export interface VisionAnalyzeInput {
@@ -8,31 +10,6 @@ export interface VisionAnalyzeInput {
 
 export interface VisionAnalyzer {
   analyze(input: VisionAnalyzeInput): Promise<unknown>;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function extractText(json: unknown): string {
-  if (!isRecord(json)) throw new Error('Gemini: unexpected response shape');
-  const candidates = json.candidates;
-  if (!Array.isArray(candidates) || candidates.length === 0) {
-    throw new Error('Gemini: missing candidates in response');
-  }
-  const first = candidates[0];
-  if (!isRecord(first) || !isRecord(first.content)) {
-    throw new Error('Gemini: missing content in candidate');
-  }
-  const parts = first.content.parts;
-  if (!Array.isArray(parts) || parts.length === 0) {
-    throw new Error('Gemini: missing parts in candidate content');
-  }
-  const part = parts[0];
-  if (!isRecord(part) || typeof part.text !== 'string') {
-    throw new Error('Gemini: missing text in candidate part');
-  }
-  return part.text;
 }
 
 export class GeminiVisionAnalyzer implements VisionAnalyzer {
@@ -62,7 +39,7 @@ export class GeminiVisionAnalyzer implements VisionAnalyzer {
       throw new Error(`Gemini vision request failed: ${res.status} ${res.statusText}`);
     }
     const json: unknown = await res.json();
-    const text = extractText(json);
+    const text = extractGeminiText(json);
     return JSON.parse(text) as unknown;
   }
 }
