@@ -78,7 +78,8 @@ export async function linkGoogle(): Promise<void> {
   const provider = new GoogleAuthProvider();
 
   if (!a.currentUser) {
-    await signInWithPopup(a, provider);
+    const cred = await signInWithPopup(a, provider);
+    await cred.user.getIdToken(true);
     return;
   }
 
@@ -90,11 +91,17 @@ export async function linkGoogle(): Promise<void> {
       const cred = GoogleAuthProvider.credentialFromError(err as AuthError);
       if (cred) {
         await signInWithCredential(a, cred);
+        await a.currentUser?.getIdToken(true);
         return;
       }
     }
     throw err;
   }
+
+  // Linking keeps the session's sign_in_provider as 'anonymous'; force a token
+  // refresh so the fresh ID token carries the newly linked google.com identity,
+  // which the API reads to flip the user from guest to a permanent account.
+  await a.currentUser?.getIdToken(true);
 }
 
 export async function linkEmailPassword(email: string, password: string): Promise<void> {
@@ -104,6 +111,9 @@ export async function linkEmailPassword(email: string, password: string): Promis
   }
   const credential = EmailAuthProvider.credential(email, password);
   await linkWithCredential(a.currentUser, credential);
+  // Force-refresh so the new token carries the linked `email` identity (the
+  // session's sign_in_provider stays 'anonymous' after linking).
+  await a.currentUser.getIdToken(true);
 }
 
 export function onAuthChanged(cb: (user: FirebaseUser | null) => void): () => void {
