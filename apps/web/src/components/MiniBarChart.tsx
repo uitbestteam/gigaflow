@@ -1,4 +1,3 @@
-import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface MiniBarChartPoint {
@@ -26,7 +25,6 @@ const BAR_GAP = 14;
  */
 export function MiniBarChart({ points, unit = '', className = '' }: MiniBarChartProps) {
   const { t } = useTranslation();
-  const gradId = useId();
   const wrapperClasses = ['overflow-x-auto', className].filter(Boolean).join(' ');
 
   if (points.length === 0) {
@@ -43,7 +41,6 @@ export function MiniBarChart({ points, unit = '', className = '' }: MiniBarChart
   const safeMax = max > 0 ? max : 1;
   const width = points.length * (BAR_WIDTH + BAR_GAP);
   const chartTitle = t('stats.trendChart');
-  const fillId = `mbc-grad-${gradId}`;
 
   return (
     <div className={wrapperClasses}>
@@ -55,12 +52,6 @@ export function MiniBarChart({ points, unit = '', className = '' }: MiniBarChart
         viewBox={`0 0 ${width} ${CHART_HEIGHT}`}
       >
         <title>{chartTitle}</title>
-        <defs>
-          <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#8b5cf6" />
-            <stop offset="100%" stopColor="#3b82f6" />
-          </linearGradient>
-        </defs>
         {points.map((point, index) => {
           const barHeight = (point.value / safeMax) * (CHART_HEIGHT - 20);
           const x = index * (BAR_WIDTH + BAR_GAP);
@@ -73,7 +64,7 @@ export function MiniBarChart({ points, unit = '', className = '' }: MiniBarChart
               width={BAR_WIDTH}
               height={Math.max(barHeight, 1)}
               rx={7}
-              fill={`url(#${fillId})`}
+              fill="var(--accent)"
               className="transition-all duration-500 ease-out motion-reduce:transition-none"
             >
               <title>

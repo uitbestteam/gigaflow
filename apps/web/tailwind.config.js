@@ -65,8 +65,8 @@ export default {
           '100%': { transform: 'scale(1)' },
         },
         'pulse-glow': {
-          '0%, 100%': { boxShadow: '0 0 0 0 rgba(139,92,246,0.5)' },
-          '50%': { boxShadow: '0 0 22px 4px rgba(139,92,246,0.55)' },
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.72' },
         },
       },
       animation: {
