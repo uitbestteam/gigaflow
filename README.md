@@ -118,11 +118,28 @@ catalog). DB-backed reads/writes now work.
 ### AI Generation (E7 Workout, E9 Meal, E8 InBody OCR)
 
 Plan generation (workout and meal) and InBody OCR run **inline in-process** by default (no
-Cloud Tasks or external job queue needed). Workouts support Gemini-first with
-OpenAI fallback; meals and InBody use **Gemini only** (vision for InBody). Set `GEMINI_API_KEY` in your `.env`
+Cloud Tasks or external job queue needed). **By default** workouts are Gemini-first with
+OpenAI fallback, and meals + InBody use Gemini only (vision for InBody). Set `GEMINI_API_KEY` in your `.env`
 to enable real generation and InBody image analysis. Optionally set `OPENAI_API_KEY` for workout
 fallback. Optionally override model names with `GEMINI_MODEL` or
 `OPENAI_MODEL` (defaults: `gemini-2.0-flash` and `gpt-4o-mini`).
+
+#### Which env vars to set (choose a mode)
+
+The AI provider(s) and their fallback order are driven by **`AI_PROVIDER_ORDER`** (a
+comma-separated priority list). Set your `.env` for one of these modes:
+
+| Mode | Env to set | Result |
+|---|---|---|
+| **AI Studio Gemini (default)** | `GEMINI_API_KEY=…` (optional `OPENAI_API_KEY=…`); leave `AI_PROVIDER_ORDER` unset | Unchanged behavior: workout = `gemini,openai`, meal/InBody = `gemini`. |
+| **Vertex only** | `GCP_PROJECT_ID=…` (or `VERTEX_PROJECT_ID=…`) + `AI_PROVIDER_ORDER=vertex` + ADC | All AI runs through Vertex/GCP (no API key). |
+| **Both (switchable)** | keys above **and** `AI_PROVIDER_ORDER=vertex,gemini,openai` (or `gemini,vertex` to prefer AI Studio) | First provider wins, next is fallback. Flip the order anytime — no code change. |
+
+`AI_PROVIDER_ORDER` applies to workout, meal, **and** InBody vision. `VERTEX_LOCATION`
+(default `global`) and `VERTEX_MODEL` (default `gemini-2.5-flash`) are optional overrides.
+ADC = for Vertex, run `gcloud auth application-default login` locally; on Cloud Run the
+runtime SA supplies it (Terraform grants `roles/aiplatform.user`). See the Vertex subsection
+below for details. All flows are covered by `pnpm test` with fake engines — no keys needed to run tests.
 
 The entire `POST /api/workout/generate` → `GET /api/workout/jobs/:id`,
 `POST /api/meal/generate` → `GET /api/meal/jobs/:id`, and
