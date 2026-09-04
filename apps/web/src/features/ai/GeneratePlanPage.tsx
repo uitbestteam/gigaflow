@@ -92,6 +92,7 @@ export function GeneratePlanPage() {
   const { run, status, job, result, error } = useJobPolling<PlanWithTemplates, GenerateWorkoutInput>({
     start: generateWorkout,
     poll: getGenerationJob,
+    persistKey: 'gf.job.workout',
     fetchResult: (currentJob) => {
       if (!currentJob.resultId) {
         return Promise.reject(new Error('Generation job is missing a result id'));

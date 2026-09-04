@@ -1,6 +1,11 @@
 project_id = "gigaflow-dev"
 image      = "asia-southeast1-docker.pkg.dev/gigaflow-dev/gigaflow/api:latest"
 
+# Cloud Run public URL — set to the `api_url` output after the first deploy so
+# Cloud Tasks can target the internal task routes (async job processing). Empty
+# = disable Cloud Tasks (in-process background fallback).
+api_base_url = "https://gigaflow-api-xxxxxxxxxx-as.a.run.app"
+
 # Secrets — copy this file to terraform.tfvars (gitignored) and fill real values.
 # These land in Cloud Run env AND Terraform state as plaintext: protect the state
 # backend (private GCS bucket, restricted IAM) and do NOT commit terraform.tfvars.

@@ -47,6 +47,11 @@ function getFirebaseAuth(): Auth {
 
 export async function ensureSignedIn(): Promise<string> {
   const a = getFirebaseAuth();
+  // Firebase restores the persisted session ASYNCHRONOUSLY on load. Without
+  // waiting, `currentUser` is still null right after a reload and we'd sign in a
+  // brand-new anonymous guest — silently discarding the user's real (Google/
+  // email) session. Wait for the restore to settle before deciding.
+  await a.authStateReady();
   if (a.currentUser) {
     return a.currentUser.uid;
   }

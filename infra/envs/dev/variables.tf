@@ -14,6 +14,12 @@ variable "image" {
   description = "Cloud Run container image URL."
 }
 
+variable "api_base_url" {
+  type        = string
+  description = "Public base URL of the Cloud Run service (e.g. https://gigaflow-api-xxxx-as.a.run.app). Used as the Cloud Tasks target for async job processing. Set to the `api_url` output after the first deploy; empty disables Cloud Tasks (falls back to in-process background jobs)."
+  default     = ""
+}
+
 variable "mongodb_db" {
   type        = string
   description = "MongoDB database name."
