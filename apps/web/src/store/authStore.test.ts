@@ -18,8 +18,11 @@ const deps: AuthDeps = {
   ensureSignedIn: async () => 'uid_1',
   getIdToken: async () => 'tok_1',
   postAuthSession: async () => baseUser,
-  linkGoogle: async () => {},
+  linkGoogle: async () => undefined,
   linkEmailPassword: async () => {},
+  mergeGuest: async () => {},
+  signOut: async () => {},
+  getProfile: async () => ({}),
 };
 
 describe('authStore', () => {
@@ -51,6 +54,7 @@ describe('authStore', () => {
       ...deps,
       linkGoogle: async () => {
         linkGoogleCalled = true;
+        return undefined;
       },
       getIdToken: async () => 'tok_2',
       postAuthSession: async () => ({
@@ -65,6 +69,41 @@ describe('authStore', () => {
     expect(s.status).toBe('user');
     expect(s.isGuest).toBe(false);
     expect(s.token).toBe('tok_2');
+  });
+
+  it('upgradeGoogle merges the guest when a returning account was signed into', async () => {
+    await useAuthStore.getState().bootstrap(deps);
+
+    let mergedWith: string | undefined;
+    await useAuthStore.getState().upgradeGoogle({
+      ...deps,
+      linkGoogle: async () => 'guest_tok', // returning-user path
+      mergeGuest: async (guestToken) => {
+        mergedWith = guestToken;
+      },
+      getIdToken: async () => 'tok_target',
+      postAuthSession: async () => ({
+        ...baseUser,
+        authProvider: AuthProvider.GOOGLE,
+        isGuest: false,
+      }),
+    });
+
+    expect(mergedWith).toBe('guest_tok');
+    expect(useAuthStore.getState().isGuest).toBe(false);
+  });
+
+  it('signOut re-establishes a guest session', async () => {
+    await useAuthStore.getState().bootstrap(deps);
+    let signedOut = false;
+    await useAuthStore.getState().signOut({
+      ...deps,
+      signOut: async () => {
+        signedOut = true;
+      },
+    });
+    expect(signedOut).toBe(true);
+    expect(useAuthStore.getState().status).toBe('guest');
   });
 
   it('refreshToken updates the token without re-hitting postAuthSession', async () => {

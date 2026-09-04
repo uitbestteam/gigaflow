@@ -381,6 +381,9 @@ const vi: TranslationSchema = {
     exercisesNav: 'Thư viện bài tập',
     inbodyNav: 'InBody',
     languageLabel: 'Ngôn ngữ',
+    guestName: 'Khách',
+    guestBadge: 'Khách',
+    signOut: 'Đăng xuất',
   },
 };
 
