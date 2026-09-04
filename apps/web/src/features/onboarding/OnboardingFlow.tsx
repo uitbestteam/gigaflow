@@ -116,11 +116,10 @@ export function OnboardingFlow() {
       title: t('onboarding.welcomeTitle'),
       subtitle: t('onboarding.welcomeBody'),
       content: (
-        <div className="flex flex-col items-center gap-4 py-6 text-center">
-          <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-accent/15 text-accent">
-            <SparklesIcon width={30} height={30} />
+        <div className="flex flex-col items-center gap-4 py-10 text-center">
+          <span className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-accent/15 text-accent">
+            <SparklesIcon width={38} height={38} />
           </span>
-          <p className="text-sm text-text-secondary">{t('onboarding.welcomeBody')}</p>
         </div>
       ),
     },
