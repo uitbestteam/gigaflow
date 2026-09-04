@@ -60,7 +60,14 @@ bootstrap.
 
 ## 4. Firebase — Auth, Web config, FCM
 
-- **Auth** (Console → Authentication → Sign-in method): enable **Anonymous**, **Google**, **Email/Password**.
+- **Auth providers — Terraform-managed** (`firebase-auth.tf`): **Anonymous** +
+  **Email/Password** are enabled automatically by `terraform apply` (step 7).
+  **Google** sign-in needs an OAuth 2.0 Web client — create one (APIs & Services →
+  Credentials → OAuth client ID → Web), put `google_oauth_client_id` /
+  `google_oauth_client_secret` in `terraform.tfvars`, set
+  `enable_google_signin = true`, and `terraform apply`. (First apply may need
+  Firebase Console → Authentication → **Get started** once to initialize Identity
+  Platform, then re-apply.)
 - **Web config** (Project settings → your web app) → into `apps/web/.env`:
   ```bash
   VITE_FIREBASE_API_KEY=…

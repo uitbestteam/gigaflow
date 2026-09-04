@@ -14,6 +14,7 @@ locals {
     "cloudbuild.googleapis.com",
     "aiplatform.googleapis.com",
     "iam.googleapis.com",
+    "identitytoolkit.googleapis.com",
   ]
   cloudbuild_sa = "serviceAccount:${data.google_project.this.number}@cloudbuild.gserviceaccount.com"
 }

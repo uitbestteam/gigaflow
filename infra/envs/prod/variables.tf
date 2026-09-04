@@ -82,3 +82,22 @@ variable "reminders_time_zone" {
   description = "IANA time zone for the reminder cron."
   default     = "Asia/Ho_Chi_Minh"
 }
+
+variable "enable_google_signin" {
+  type        = bool
+  description = "Enable Google sign-in (Identity Platform). Requires an OAuth 2.0 client — set google_oauth_client_id/secret first."
+  default     = false
+}
+
+variable "google_oauth_client_id" {
+  type        = string
+  description = "OAuth 2.0 Web client id for Google sign-in. Set in terraform.tfvars when enable_google_signin = true."
+  default     = ""
+}
+
+variable "google_oauth_client_secret" {
+  type        = string
+  description = "OAuth 2.0 Web client secret for Google sign-in. Set in terraform.tfvars (gitignored)."
+  sensitive   = true
+  default     = ""
+}

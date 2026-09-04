@@ -12,3 +12,12 @@ openai_api_key = "" # optional; empty disables OpenAI fallback
 # AI provider switch. Empty = default (gemini,openai). To run AI through Vertex:
 #   ai_provider_order = "vertex,gemini"   # Vertex uses the SA's ADC (roles/aiplatform.user)
 ai_provider_order = ""
+
+# Firebase Auth (Identity Platform): Anonymous + Email/Password are enabled by
+# Terraform automatically. Google sign-in needs an OAuth 2.0 Web client:
+#   enable_google_signin       = true
+#   google_oauth_client_id     = "…apps.googleusercontent.com"
+#   google_oauth_client_secret = "…"
+enable_google_signin       = false
+google_oauth_client_id     = ""
+google_oauth_client_secret = ""
