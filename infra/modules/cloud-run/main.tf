@@ -20,9 +20,11 @@ resource "google_cloud_run_v2_service" "api" {
       }
 
       resources {
-        # CPU always allocated so fire-and-forget background jobs (AI plan/meal
-        # generation, InBody OCR) run to completion after the 202 response.
-        cpu_idle          = false
+        # Request-based billing (serverless): CPU is allocated only while a
+        # request is being handled. Async job processing runs via Cloud Tasks
+        # hitting the /internal/tasks routes in their own requests, so no
+        # cpu-always-on is needed. startup_cpu_boost speeds cold starts.
+        cpu_idle          = true
         startup_cpu_boost = true
       }
 

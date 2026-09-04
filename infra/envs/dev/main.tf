@@ -43,6 +43,9 @@ module "cloud_run" {
     GEMINI_API_KEY    = var.gemini_api_key
     OPENAI_API_KEY    = var.openai_api_key
     AI_PROVIDER_ORDER = var.ai_provider_order
+    # Cloud Tasks: when set, AI generation / InBody run async via the queues.
+    TASKS_TARGET_BASE_URL = var.api_base_url
+    TASKS_LOCATION        = var.region
   }
   depends_on = [google_project_service.services]
 }
