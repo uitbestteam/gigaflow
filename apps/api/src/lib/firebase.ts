@@ -22,5 +22,6 @@ export const firebaseVerifier: TokenVerifier = async (token: string): Promise<Ve
     email: decoded.email,
     name: decoded.name,
     signInProvider: decoded.firebase.sign_in_provider,
+    identities: Object.keys(decoded.firebase.identities ?? {}),
   };
 };

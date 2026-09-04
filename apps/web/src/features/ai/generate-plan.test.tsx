@@ -17,6 +17,56 @@ import {
 import type { GenerationJob, PlanWithTemplates } from '@gigaflow/shared';
 import { GeneratePlanPage } from './GeneratePlanPage';
 
+// framer-motion's AnimatePresence mode="wait" never completes its exit
+// animation under jsdom, which strands wizard steps mid-transition. Render
+// motion elements and AnimatePresence as plain passthroughs so step changes
+// are synchronous and deterministic in tests.
+vi.mock('framer-motion', async () => {
+  const React = await import('react');
+  const DROP = new Set([
+    'initial',
+    'animate',
+    'exit',
+    'transition',
+    'variants',
+    'custom',
+    'layout',
+    'layoutId',
+    'whileTap',
+    'whileHover',
+    'whileFocus',
+    'whileInView',
+    'drag',
+  ]);
+  const clean = (props: Record<string, unknown>) =>
+    Object.fromEntries(Object.entries(props).filter(([k]) => !DROP.has(k)));
+  // Cache one stable component per tag — a fresh component identity on every
+  // access would remount the subtree each render and detach inputs.
+  const cache = new Map<string, React.ElementType>();
+  const motion = new Proxy(
+    {},
+    {
+      get: (_t, tag: string) => {
+        let comp = cache.get(tag);
+        if (!comp) {
+          comp = React.forwardRef((props: Record<string, unknown>, ref) =>
+            React.createElement(tag, { ref, ...clean(props) }, props.children as React.ReactNode),
+          );
+          cache.set(tag, comp);
+        }
+        return comp;
+      },
+    },
+  );
+  return {
+    __esModule: true,
+    motion,
+    AnimatePresence: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    useReducedMotion: () => true,
+  };
+});
+
 vi.mock('../../lib/api', () => ({
   generateWorkout: vi.fn(),
   getGenerationJob: vi.fn(),
@@ -92,16 +142,27 @@ function makePlan(overrides: Partial<PlanWithTemplates> = {}): PlanWithTemplates
   };
 }
 
-// Fills the form (goal, experience, days) and clicks submit.
+// Walks the wizard: goal + experience, days + session, equipment preset,
+// injuries (skipped), emphasis (skipped), then finishes.
 async function fillAndSubmit(user: ReturnType<typeof userEvent.setup>) {
+  // Step 1 — goal + experience
   await user.click(screen.getByRole('button', { name: /hypertrophy/i }));
   await user.click(screen.getByRole('button', { name: /intermediate/i }));
+  await user.click(screen.getByRole('button', { name: 'Next' }));
 
-  const daysInput = screen.getByLabelText(/days per week/i);
-  await user.clear(daysInput);
-  await user.type(daysInput, '4');
+  // Step 2 — days per week (chips) + optional session length
+  await user.click(screen.getByRole('button', { name: '4' }));
+  await user.click(screen.getByRole('button', { name: 'Next' }));
 
-  await user.click(screen.getByRole('button', { name: /generate/i }));
+  // Step 3 — equipment preset
+  await user.click(screen.getByRole('button', { name: /bodyweight only/i }));
+  await user.click(screen.getByRole('button', { name: 'Next' }));
+
+  // Step 4 — injuries (skip)
+  await user.click(screen.getByRole('button', { name: 'Next' }));
+
+  // Step 5 — emphasis (skip) then finish
+  await user.click(screen.getByRole('button', { name: /generate plan/i }));
 }
 
 // Flushes pending microtasks so the mocked api promises (and the resulting
@@ -139,6 +200,7 @@ describe('GeneratePlanPage', () => {
       goal: Goal.HYPERTROPHY,
       experienceLevel: ExperienceLevel.INTERMEDIATE,
       daysPerWeek: 4,
+      availableEquipment: [EquipmentType.BODYWEIGHT],
     });
 
     expect(screen.getByText('AI PPL Plan')).toBeInTheDocument();

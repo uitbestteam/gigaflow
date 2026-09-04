@@ -2,7 +2,6 @@ import { initializeApp, type FirebaseApp } from 'firebase/app';
 import {
   getAuth,
   signInAnonymously,
-  signInWithPopup,
   signInWithCredential,
   onAuthStateChanged,
   linkWithPopup,
@@ -77,24 +76,37 @@ export async function linkGoogle(): Promise<void> {
   const a = getFirebaseAuth();
   const provider = new GoogleAuthProvider();
 
+  // Always upgrade a guest IN PLACE (same uid → the API keeps their data). If
+  // bootstrap hasn't produced a guest yet, create one first, so we NEVER fall
+  // into a standalone Google sign-in that would orphan the current guest.
   if (!a.currentUser) {
-    await signInWithPopup(a, provider);
-    return;
+    await signInAnonymously(a);
   }
+  const guest = a.currentUser;
+  if (!guest) throw new Error('No Firebase user to link');
 
   try {
-    await linkWithPopup(a.currentUser, provider);
+    await linkWithPopup(guest, provider);
   } catch (err) {
     const code = (err as AuthError).code;
+    // Returning user: this Google identity already owns an account, so it can't
+    // be linked onto the current guest. Sign into that existing account instead
+    // (restores their real history); the throwaway guest is discarded.
     if (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use') {
       const cred = GoogleAuthProvider.credentialFromError(err as AuthError);
       if (cred) {
         await signInWithCredential(a, cred);
+        await a.currentUser?.getIdToken(true);
         return;
       }
     }
     throw err;
   }
+
+  // Linking keeps the session's sign_in_provider as 'anonymous'; force a token
+  // refresh so the fresh ID token carries the newly linked google.com identity,
+  // which the API reads to flip the user from guest to a permanent account.
+  await a.currentUser?.getIdToken(true);
 }
 
 export async function linkEmailPassword(email: string, password: string): Promise<void> {
@@ -104,6 +116,9 @@ export async function linkEmailPassword(email: string, password: string): Promis
   }
   const credential = EmailAuthProvider.credential(email, password);
   await linkWithCredential(a.currentUser, credential);
+  // Force-refresh so the new token carries the linked `email` identity (the
+  // session's sign_in_provider stays 'anonymous' after linking).
+  await a.currentUser.getIdToken(true);
 }
 
 export function onAuthChanged(cb: (user: FirebaseUser | null) => void): () => void {

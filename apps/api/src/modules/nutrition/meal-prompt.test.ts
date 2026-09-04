@@ -26,4 +26,42 @@ describe('buildMealPrompt', () => {
     expect(user).toContain('70');
     expect(user).toContain('muscle_gain');
   });
+
+  it('defaults to omnivore and omits allergy/cuisine/mealsPerDay directives when absent', () => {
+    const { user } = buildMealPrompt(input);
+    expect(user).toContain('omnivore');
+    expect(user).not.toContain('STRICTLY exclude');
+    expect(user).not.toContain('Model meals on');
+    expect(user).not.toContain('Meals per day');
+    expect(user).not.toContain('Also avoid');
+  });
+
+  it('embeds diet, allergy, cuisine, avoid and mealsPerDay directives when provided', () => {
+    const { user } = buildMealPrompt({
+      ...input,
+      dietaryPattern: 'vegan',
+      allergies: ['peanuts', 'shellfish'],
+      cuisineCountry: 'vietnam',
+      avoidFoods: 'cilantro',
+      mealsPerDay: 5,
+    });
+    // dietary pattern enforced with its rule
+    expect(user).toContain('vegan');
+    expect(user).toContain('no animal products');
+    // allergies
+    expect(user).toContain('STRICTLY exclude');
+    expect(user).toContain('peanuts');
+    expect(user).toContain('shellfish');
+    // cuisine (country preferred)
+    expect(user).toContain('Model meals on vietnam');
+    // avoid foods
+    expect(user).toContain('cilantro');
+    // meals per day
+    expect(user).toContain('exactly 5 meals');
+  });
+
+  it('falls back to cuisineRegion when no country is given', () => {
+    const { user } = buildMealPrompt({ ...input, cuisineRegion: 'east_asian' });
+    expect(user).toContain('Model meals on east_asian');
+  });
 });

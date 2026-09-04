@@ -1,5 +1,14 @@
 import { z } from 'zod';
-import { Goal, Gender, ActivityLevel, MealType } from '../enums/index.js';
+import {
+  Goal,
+  Gender,
+  ActivityLevel,
+  MealType,
+  CuisineRegion,
+  Country,
+  DietaryPattern,
+  Allergen,
+} from '../enums/index.js';
 import { zTranslatable } from './common.js';
 
 export const zGenerateMealInput = z.object({
@@ -9,6 +18,18 @@ export const zGenerateMealInput = z.object({
   heightCm: z.number().gt(0),
   weightKg: z.number().gt(0),
   activityLevel: z.nativeEnum(ActivityLevel),
+  /** Coarse cuisine family (e.g. east_asian, western). */
+  cuisineRegion: z.nativeEnum(CuisineRegion).optional(),
+  /** Specific country cuisine to model on; refines cuisineRegion. */
+  cuisineCountry: z.nativeEnum(Country).optional(),
+  /** Eating pattern the whole plan must respect (default omnivore). */
+  dietaryPattern: z.nativeEnum(DietaryPattern).optional(),
+  /** Allergens/intolerances to exclude entirely. */
+  allergies: z.array(z.nativeEnum(Allergen)).optional(),
+  /** Free-text foods the user dislikes / wants avoided. */
+  avoidFoods: z.string().max(300).optional(),
+  /** Meals per day including snacks (3–5 typical). */
+  mealsPerDay: z.number().int().min(2).max(6).optional(),
 });
 
 export const zTdeeResult = z.object({

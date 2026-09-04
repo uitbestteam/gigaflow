@@ -7,6 +7,56 @@ import { ActivityLevel, Gender, Goal, GenerationType, JobStatus, MealType } from
 import type { GenerationJob, MealPlanDoc } from '@gigaflow/shared';
 import { MealPlannerPage } from './MealPlannerPage';
 
+// framer-motion's AnimatePresence mode="wait" never completes its exit
+// animation under jsdom, which strands wizard steps mid-transition. Render
+// motion elements and AnimatePresence as plain passthroughs so step changes
+// are synchronous and deterministic in tests.
+vi.mock('framer-motion', async () => {
+  const React = await import('react');
+  const DROP = new Set([
+    'initial',
+    'animate',
+    'exit',
+    'transition',
+    'variants',
+    'custom',
+    'layout',
+    'layoutId',
+    'whileTap',
+    'whileHover',
+    'whileFocus',
+    'whileInView',
+    'drag',
+  ]);
+  const clean = (props: Record<string, unknown>) =>
+    Object.fromEntries(Object.entries(props).filter(([k]) => !DROP.has(k)));
+  // Cache one stable component per tag — a fresh component identity on every
+  // access would remount the subtree each render and detach inputs.
+  const cache = new Map<string, React.ElementType>();
+  const motion = new Proxy(
+    {},
+    {
+      get: (_t, tag: string) => {
+        let comp = cache.get(tag);
+        if (!comp) {
+          comp = React.forwardRef((props: Record<string, unknown>, ref) =>
+            React.createElement(tag, { ref, ...clean(props) }, props.children as React.ReactNode),
+          );
+          cache.set(tag, comp);
+        }
+        return comp;
+      },
+    },
+  );
+  return {
+    __esModule: true,
+    motion,
+    AnimatePresence: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    useReducedMotion: () => true,
+  };
+});
+
 vi.mock('../../lib/api', () => ({
   generateMeal: vi.fn(),
   getMealJob: vi.fn(),
@@ -107,9 +157,12 @@ describe('MealPlannerPage', () => {
 
     renderPage();
 
+    // Step 1 — goal
     await screen.findByRole('button', { name: /weight loss/i });
-
     await user.click(screen.getByRole('button', { name: /weight loss/i }));
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    // Step 2 — body
     await user.click(screen.getByRole('button', { name: /female/i }));
 
     const ageInput = screen.getByLabelText(/age/i);
@@ -125,8 +178,16 @@ describe('MealPlannerPage', () => {
     await user.type(weightInput, '60');
 
     await user.click(screen.getByRole('button', { name: /moderate/i }));
+    await user.click(screen.getByRole('button', { name: 'Next' }));
 
-    await user.click(screen.getByRole('button', { name: /generate/i }));
+    // Step 3 — cuisine (skip)
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    // Step 4 — diet & allergies (skip)
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    // Step 5 — preferences (skip) then finish
+    await user.click(screen.getByRole('button', { name: /generate meal plan/i }));
 
     expect(await screen.findByText('My Meal Plan')).toBeInTheDocument();
 

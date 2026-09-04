@@ -1,12 +1,20 @@
 import { z } from 'zod';
 import { ExperienceLevel, GenerationType, Goal, JobStatus } from '../enums/index.js';
-import { ColorTag } from '../enums/index.js';
+import { ColorTag, EquipmentType, InjuryArea, MuscleGroup } from '../enums/index.js';
 import { zTranslatable } from './common.js';
 
 export const zGenerateWorkoutInput = z.object({
   goal: z.nativeEnum(Goal),
   experienceLevel: z.nativeEnum(ExperienceLevel),
   daysPerWeek: z.number().int().min(1).max(7),
+  /** Equipment the user can train with; empty/omitted = assume a full gym. */
+  availableEquipment: z.array(z.nativeEnum(EquipmentType)).optional(),
+  /** Joints/areas to protect; the AI avoids loading these. */
+  injuries: z.array(z.nativeEnum(InjuryArea)).optional(),
+  /** Target time per session in minutes (caps sets/exercises). */
+  sessionMinutes: z.number().int().min(20).max(120).optional(),
+  /** Muscle groups to emphasize with extra volume. */
+  emphasis: z.array(z.nativeEnum(MuscleGroup)).optional(),
 });
 
 export const zGeneratedPlan = z.object({

@@ -19,6 +19,10 @@ afterAll(async () => {
 const fakeVerify: TokenVerifier = async (t) => {
   if (t === 'good-anon') return { uid: 'uid_anon', signInProvider: 'anonymous' };
   if (t === 'good-google') return { uid: 'uid_anon', email: 'g@x.com', signInProvider: 'google.com' };
+  // Guest who linked Google: the session token still reports anonymous, but the
+  // linked google.com identity must flip them to a permanent (non-guest) user.
+  if (t === 'linked-google')
+    return { uid: 'uid_link', email: 'g@x.com', signInProvider: 'anonymous', identities: ['google.com'] };
   if (t === 'unsupported-provider') return { uid: 'uid_x', signInProvider: 'facebook.com' };
   throw new Error('invalid token');
 };
@@ -53,6 +57,13 @@ describe('firebaseAuth', () => {
     expect(body.data.isGuest).toBe(false);
     expect(body.data.authProvider).toBe('google');
     expect(body.data.email).toBe('g@x.com');
+  });
+  it('anonymous session with a linked Google identity is a non-guest Google user', async () => {
+    const res = await app().request('/me', { headers: { Authorization: 'Bearer linked-google' } });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { data: { isGuest: boolean; authProvider: string } };
+    expect(body.data.isGuest).toBe(false);
+    expect(body.data.authProvider).toBe('google');
   });
   it('403 when token verifies but sign-in provider is unsupported', async () => {
     const res = await app().request('/me', { headers: { Authorization: 'Bearer unsupported-provider' } });

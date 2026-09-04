@@ -17,13 +17,31 @@ export interface WorkoutPromptInput {
   daysPerWeek: number;
   catalog: PromptExercise[];
   history: PromptHistory[];
+  /** Equipment the (already-filtered) catalog is limited to. */
+  availableEquipment?: string[];
+  /** Joints/areas to protect; the plan avoids loading these. */
+  injuries?: string[];
+  /** Target minutes per session; caps sets/exercises per day. */
+  sessionMinutes?: number;
+  /** Muscle groups to emphasize with extra volume. */
+  emphasis?: string[];
 }
 
 export function buildWorkoutPrompt(input: WorkoutPromptInput): {
   system: string;
   user: string;
 } {
-  const { goal, experienceLevel, daysPerWeek, catalog, history } = input;
+  const {
+    goal,
+    experienceLevel,
+    daysPerWeek,
+    catalog,
+    history,
+    availableEquipment,
+    injuries,
+    sessionMinutes,
+    emphasis,
+  } = input;
 
   // System prompt: defines role and constraints
   // Instructs model to return minified JSON only, matching zGeneratedPlan schema exactly
@@ -66,6 +84,28 @@ CONSTRAINTS:
           .join('\n')
       : 'No prior training history.';
 
+  // Optional intake directives — only emitted when the field is provided
+  const directives: string[] = [];
+  if (availableEquipment && availableEquipment.length > 0) {
+    directives.push(
+      `- Equipment: the athlete can only train with ${availableEquipment.join(', ')}. The exercise catalog below is already filtered to this equipment—the plan may ONLY use these exercises.`,
+    );
+  }
+  if (injuries && injuries.length > 0) {
+    directives.push(
+      `- Injuries: Athlete reports issues with: ${injuries.join(', ')}. AVOID exercises that heavily load these joints; choose joint-friendly alternatives.`,
+    );
+  }
+  if (sessionMinutes) {
+    directives.push(
+      `- Session length: Each session must fit ~${sessionMinutes} minutes—keep exercises/sets per day appropriate (rule of thumb ~1 compound exercise per 10–12 min).`,
+    );
+  }
+  if (emphasis && emphasis.length > 0) {
+    directives.push(`- Emphasis: Add extra sets/volume for these muscle groups: ${emphasis.join(', ')}.`);
+  }
+  const directivesSection = directives.length > 0 ? `\n\n**Additional Requirements:**\n${directives.join('\n')}` : '';
+
   // User prompt: context and request
   const user = `Create a ${daysPerWeek}-day per week strength training program.
 
@@ -78,7 +118,7 @@ CONSTRAINTS:
 ${catalogLines}
 
 **Training History:**
-${historyLines}
+${historyLines}${directivesSection}
 
 Design a structured ${daysPerWeek}-day workout plan using ONLY the provided catalog exerciseSlug values. Progress from the athlete's prior lifts. Return as minified JSON only.`;
 

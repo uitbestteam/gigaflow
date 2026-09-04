@@ -33,7 +33,7 @@ export function BottomNav() {
   const isActive = (to: string) => (to === ROUTES.home ? pathname === to : pathname.startsWith(to));
 
   return (
-    <nav className="glass safe-bottom sticky bottom-0 z-40 border-t border-border-subtle shadow-nav">
+    <nav className="glass safe-bottom z-40 shrink-0 border-t border-border-subtle shadow-nav">
       <ul className="mx-auto flex max-w-[520px] items-stretch justify-between px-2">
         {tabs.map(({ to, label, Icon, center }) => {
           const active = isActive(to);

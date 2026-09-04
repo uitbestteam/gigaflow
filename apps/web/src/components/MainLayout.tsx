@@ -9,18 +9,23 @@ export interface MainLayoutProps {
 }
 
 /**
- * Mobile-first app frame: a centered phone-width column with a glassy sticky
- * header, a scrollable page area (re-animated on every route change via the
- * keyed `PageTransition`), and a glassy bottom tab bar for primary nav.
+ * Mobile-first app-shell frame. The shell fills exactly one dynamic viewport
+ * (`100dvh`) and never scrolls itself — the header and bottom nav are a fixed
+ * frame, and ONLY the middle `<main>` scrolls. This avoids the mobile/PWA
+ * address-bar resize jumps and rubber-band bounce that a body-scroll + sticky
+ * layout produces. Page content re-animates on every route change via the
+ * keyed `PageTransition`.
  */
 export function MainLayout({ children }: MainLayoutProps) {
   const { pathname } = useLocation();
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-bg text-text">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-bg text-text">
       <AppHeader />
-      <main className="app-container flex-1 px-4 pb-24 pt-4">
-        <PageTransition key={pathname}>{children}</PageTransition>
+      <main className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="app-container px-4 pb-6 pt-4">
+          <PageTransition key={pathname}>{children}</PageTransition>
+        </div>
       </main>
       <BottomNav />
     </div>
