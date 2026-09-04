@@ -17,15 +17,18 @@ export function SegmentedFilter<T extends string>({
   onChange,
   className = '',
 }: SegmentedFilterProps<T>) {
-  const classes = ['flex flex-wrap gap-2', className].filter(Boolean).join(' ');
+  const classes = ['flex flex-nowrap gap-2 overflow-x-auto pb-1', className].filter(Boolean).join(' ');
 
   return (
     <div className={classes} role="group">
       {options.map((option) => {
         const selected = option.value === value;
         const chipClasses = [
-          'inline-flex min-h-11 items-center justify-center rounded-full px-4 font-medium transition-colors',
-          selected ? 'bg-accent text-white' : 'bg-surface-elevated text-text-secondary',
+          'inline-flex min-h-11 shrink-0 items-center justify-center rounded-pill px-4 text-sm font-semibold',
+          'transition-all duration-150 active:scale-[0.97]',
+          selected
+            ? 'bg-grad-primary text-white shadow-glow-accent'
+            : 'bg-surface-2 text-text-secondary hover:bg-surface-3',
         ].join(' ');
 
         return (

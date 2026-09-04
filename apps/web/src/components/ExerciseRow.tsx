@@ -32,7 +32,7 @@ export interface ExerciseRowProps {
 
 export function ExerciseRow({ slot, sets, status = 'active', onSetTap, onSetEdit, className = '' }: ExerciseRowProps) {
   const classes = [
-    'flex flex-col gap-2',
+    'flex flex-col gap-2 transition-opacity',
     status === 'pending' ? 'opacity-60' : '',
     className,
   ]
@@ -43,8 +43,8 @@ export function ExerciseRow({ slot, sets, status = 'active', onSetTap, onSetEdit
     <div className={classes}>
       <div className="flex items-baseline justify-between gap-2">
         <div className="flex items-baseline gap-2">
-          <span className="font-medium text-text">{slot.name}</span>
-          <span className="text-xs uppercase text-text-secondary">{slot.muscleGroup}</span>
+          <span className="font-semibold text-text">{slot.name}</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-text-muted">{slot.muscleGroup}</span>
         </div>
         <ProgressionBadge lastSet={slot.lastSets?.[0]} />
       </div>

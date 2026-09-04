@@ -3,28 +3,183 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0f0f0f;
-  --surface: #1a1a1a;
-  --surface-elevated: #242424;
-  --border-subtle: #2a2a2a;
-  --border: #333333;
-  --text: #f0f0f0;
-  --text-secondary: #888888;
-  --text-muted: #555555;
-  --accent: #3b82f6;
+  /* ── surfaces (near-black with a cool blue tint) ── */
+  --bg: #0a0b10;
+  --bg-elevated: #0f1118;
+  --surface: #14161f;
+  --surface-2: #1b1e2a;
+  --surface-3: #232735;
+  --border-subtle: #232733;
+  --border: #333a4f;
+
+  /* ── text ── */
+  --text: #f5f7fa;
+  --text-secondary: #9aa3b5;
+  --text-muted: #5b6478;
+
+  /* ── neon accents ── */
+  --neon-blue: #3b82f6;
+  --neon-violet: #8b5cf6;
+  --neon-magenta: #ec4899;
+  --neon-cyan: #22d3ee;
+  --accent: #8b5cf6;
+
   --success: #22c55e;
   --warning: #f59e0b;
-  --push: #ef4444;
+  --danger: #ef4444;
+
+  /* ── muscle-group identity ── */
+  --push: #f43f5e;
   --pull: #22c55e;
   --legs: #f59e0b;
+  --core: #22d3ee;
+
+  /* ── gradients ── */
+  --grad-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+  --grad-primary-soft: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.16) 0%,
+    rgba(139, 92, 246, 0.16) 50%,
+    rgba(236, 72, 153, 0.16) 100%
+  );
+  --grad-cyan: linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%);
+  --grad-push: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+  --grad-pull: linear-gradient(135deg, #16a34a 0%, #4ade80 100%);
+  --grad-legs: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  --grad-core: linear-gradient(135deg, #0891b2 0%, #22d3ee 100%);
+
+  /* ── glows & shadows ── */
+  --glow-accent: 0 0 24px rgba(139, 92, 246, 0.45);
+  --glow-blue: 0 0 24px rgba(59, 130, 246, 0.4);
+  --glow-magenta: 0 0 24px rgba(236, 72, 153, 0.4);
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-nav: 0 -8px 30px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  background: var(--bg);
 }
 
 body {
-  background: var(--bg);
   color: var(--text);
   font-family: Inter, system-ui, sans-serif;
+  /* subtle aurora glow behind the app */
+  background-image: radial-gradient(60% 40% at 50% -10%, rgba(139, 92, 246, 0.12), transparent 70%),
+    radial-gradient(50% 30% at 100% 0%, rgba(59, 130, 246, 0.1), transparent 70%);
+  background-attachment: fixed;
 }
 
 .tnum {
   font-variant-numeric: tabular-nums;
+}
+
+/* Mobile-first: the app lives in a phone-width column, centered on wide screens. */
+.app-container {
+  width: 100%;
+  max-width: 520px;
+  margin-inline: auto;
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Gradient text helper */
+.text-gradient {
+  background: var(--grad-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Glass surface used by nav / sticky bars */
+.glass {
+  background: rgba(16, 18, 26, 0.72);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+/* Gradient hairline border via mask (for "glow cards") */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--grad-primary);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* ── keyframes ── */
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 22px 4px rgba(139, 92, 246, 0.55);
+  }
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-gradient,
+  .skeleton {
+    animation: none;
+  }
 }

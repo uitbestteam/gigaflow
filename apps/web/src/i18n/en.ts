@@ -13,6 +13,13 @@ export interface TranslationSchema {
     save: string;
     loading: string;
   };
+  nav: {
+    home: string;
+    plans: string;
+    generate: string;
+    meal: string;
+    stats: string;
+  };
   auth: {
     splashLabel: string;
     errorTitle: string;
@@ -143,6 +150,7 @@ export interface TranslationSchema {
     errBadType: string;
     errTooLarge: string;
     uploadLabel: string;
+    uploadHint: string;
     previewAlt: string;
     navLabel: string;
     title: string;
@@ -186,10 +194,12 @@ export interface TranslationSchema {
     weightTitle: string;
     weightLabel: string;
     logWeightSubmit: string;
+    loadError: string;
   };
   ai: {
     navLabel: string;
     title: string;
+    heroSubtitle: string;
     goalLabel: string;
     experienceLabel: string;
     daysLabel: string;
@@ -212,6 +222,7 @@ export interface TranslationSchema {
   meal: {
     navLabel: string;
     title: string;
+    heroSubtitle: string;
     goalLabel: string;
     genderLabel: string;
     ageLabel: string;
@@ -255,6 +266,14 @@ export interface TranslationSchema {
     deniedHint: string;
     error: string;
   };
+  account: {
+    title: string;
+    subtitle: string;
+    moreTitle: string;
+    exercisesNav: string;
+    inbodyNav: string;
+    languageLabel: string;
+  };
 }
 
 const en: TranslationSchema = {
@@ -265,6 +284,13 @@ const en: TranslationSchema = {
     cancel: 'Cancel',
     save: 'Save',
     loading: 'Loading…',
+  },
+  nav: {
+    home: 'Train',
+    plans: 'Plans',
+    generate: 'AI',
+    meal: 'Meal',
+    stats: 'Stats',
   },
   auth: {
     splashLabel: 'Signing you in…',
@@ -396,6 +422,7 @@ const en: TranslationSchema = {
     errBadType: 'Please choose a JPEG or PNG image.',
     errTooLarge: 'This image is too large. Please choose a smaller one.',
     uploadLabel: 'Upload image',
+    uploadHint: 'Upload a clear photo of your InBody scan.',
     previewAlt: 'Selected image preview',
     navLabel: 'InBody',
     title: 'InBody capture',
@@ -439,10 +466,12 @@ const en: TranslationSchema = {
     weightTitle: 'Bodyweight',
     weightLabel: 'Weight (kg)',
     logWeightSubmit: 'Log weight',
+    loadError: 'Could not load this. Please try again.',
   },
   ai: {
     navLabel: 'AI generate',
     title: 'Generate a workout plan',
+    heroSubtitle: 'Answer a few questions and let AI build your week.',
     goalLabel: 'Goal',
     experienceLabel: 'Experience level',
     daysLabel: 'Days per week',
@@ -465,6 +494,7 @@ const en: TranslationSchema = {
   meal: {
     navLabel: 'Meal plan',
     title: 'Meal planner',
+    heroSubtitle: 'Personalized macros, sized to your goal.',
     goalLabel: 'Goal',
     genderLabel: 'Gender',
     ageLabel: 'Age',
@@ -507,6 +537,14 @@ const en: TranslationSchema = {
     disable: 'Disable reminders',
     deniedHint: 'Notifications are blocked. Please allow notifications in your browser settings to enable reminders.',
     error: 'Something went wrong. Please try again.',
+  },
+  account: {
+    title: 'Account',
+    subtitle: 'Manage your profile, data and preferences.',
+    moreTitle: 'More',
+    exercisesNav: 'Exercise library',
+    inbodyNav: 'InBody',
+    languageLabel: 'Language',
   },
 };
 

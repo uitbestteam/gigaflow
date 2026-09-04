@@ -13,6 +13,13 @@ const vi: TranslationSchema = {
     save: 'Lưu',
     loading: 'Đang tải…',
   },
+  nav: {
+    home: 'Tập',
+    plans: 'Giáo án',
+    generate: 'AI',
+    meal: 'Bữa ăn',
+    stats: 'Thống kê',
+  },
   auth: {
     splashLabel: 'Đang đăng nhập…',
     errorTitle: 'Đã có lỗi xảy ra',
@@ -143,6 +150,7 @@ const vi: TranslationSchema = {
     errBadType: 'Vui lòng chọn ảnh JPEG hoặc PNG.',
     errTooLarge: 'Ảnh này quá lớn. Vui lòng chọn ảnh nhỏ hơn.',
     uploadLabel: 'Tải ảnh lên',
+    uploadHint: 'Tải lên ảnh chụp rõ nét kết quả đo InBody.',
     previewAlt: 'Xem trước ảnh đã chọn',
     navLabel: 'InBody',
     title: 'Chụp chỉ số InBody',
@@ -186,10 +194,12 @@ const vi: TranslationSchema = {
     weightTitle: 'Cân nặng',
     weightLabel: 'Cân nặng (kg)',
     logWeightSubmit: 'Ghi nhận cân nặng',
+    loadError: 'Không thể tải dữ liệu này. Vui lòng thử lại.',
   },
   ai: {
     navLabel: 'Tạo bằng AI',
     title: 'Tạo kế hoạch tập luyện',
+    heroSubtitle: 'Trả lời vài câu hỏi để AI lên lịch tập cho bạn.',
     goalLabel: 'Mục tiêu',
     experienceLabel: 'Trình độ',
     daysLabel: 'Số ngày mỗi tuần',
@@ -212,6 +222,7 @@ const vi: TranslationSchema = {
   meal: {
     navLabel: 'Thực đơn',
     title: 'Lập thực đơn',
+    heroSubtitle: 'Khẩu phần dinh dưỡng cá nhân hóa theo mục tiêu của bạn.',
     goalLabel: 'Mục tiêu',
     genderLabel: 'Giới tính',
     ageLabel: 'Tuổi',
@@ -254,6 +265,14 @@ const vi: TranslationSchema = {
     disable: 'Tắt nhắc nhở',
     deniedHint: 'Thông báo đang bị chặn. Vui lòng cho phép thông báo trong cài đặt trình duyệt để bật nhắc nhở.',
     error: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
+  },
+  account: {
+    title: 'Tài khoản',
+    subtitle: 'Quản lý hồ sơ, dữ liệu và tùy chọn của bạn.',
+    moreTitle: 'Khác',
+    exercisesNav: 'Thư viện bài tập',
+    inbodyNav: 'InBody',
+    languageLabel: 'Ngôn ngữ',
   },
 };
 

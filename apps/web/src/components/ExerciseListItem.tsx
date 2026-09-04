@@ -14,12 +14,19 @@ export function ExerciseListItem({ exercise, className = '' }: ExerciseListItemP
   const name = resolveTranslatable(exercise.name, i18n.language);
 
   return (
-    <Card className={['flex items-center justify-between gap-3', className].filter(Boolean).join(' ')}>
-      <div className="flex flex-col gap-1">
-        <span className="font-medium text-text">{name}</span>
+    <Card
+      className={[
+        'flex items-center justify-between gap-3 transition-colors active:bg-surface-2',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <div className="flex min-w-0 flex-col gap-1">
+        <span className="truncate font-semibold text-text">{name}</span>
         <span className="text-sm text-text-secondary">{t(`exercises.equipment.${exercise.equipmentType}`)}</span>
       </div>
-      <MuscleTag muscleGroup={exercise.muscleGroup} />
+      <MuscleTag muscleGroup={exercise.muscleGroup} className="shrink-0" />
     </Card>
   );
 }
