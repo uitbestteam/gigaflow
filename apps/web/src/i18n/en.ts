@@ -214,6 +214,41 @@ export interface TranslationSchema {
     exercisesCount: string;
     editInBuilder: string;
     backToPlans: string;
+    stepGoalTitle: string;
+    stepGoalSubtitle: string;
+    stepScheduleTitle: string;
+    stepScheduleSubtitle: string;
+    stepEquipmentTitle: string;
+    stepEquipmentSubtitle: string;
+    stepInjuriesTitle: string;
+    stepInjuriesSubtitle: string;
+    stepEmphasisTitle: string;
+    stepEmphasisSubtitle: string;
+    sessionLabel: string;
+    minShort: string;
+    equipmentPresetLabel: string;
+    equipmentCustomLabel: string;
+    injuriesLabel: string;
+    emphasisLabel: string;
+    none: string;
+    equipmentPreset: {
+      full_gym: string;
+      full_gym_desc: string;
+      home: string;
+      home_desc: string;
+      bodyweight: string;
+      bodyweight_desc: string;
+      custom: string;
+      custom_desc: string;
+    };
+    injury: {
+      knee: string;
+      lower_back: string;
+      shoulder: string;
+      elbow_wrist: string;
+      hip: string;
+      neck: string;
+    };
     goal: {
       strength: string;
       hypertrophy: string;
@@ -241,6 +276,72 @@ export interface TranslationSchema {
     proteinShort: string;
     carbsShort: string;
     fatShort: string;
+    stepGoalTitle: string;
+    stepGoalSubtitle: string;
+    stepBodyTitle: string;
+    stepBodySubtitle: string;
+    stepCuisineTitle: string;
+    stepCuisineSubtitle: string;
+    stepDietTitle: string;
+    stepDietSubtitle: string;
+    stepPrefsTitle: string;
+    stepPrefsSubtitle: string;
+    cuisineRegionLabel: string;
+    cuisineCountryLabel: string;
+    anyCountry: string;
+    dietaryPatternLabel: string;
+    allergiesLabel: string;
+    dislikesLabel: string;
+    dislikesPlaceholder: string;
+    mealsPerDayLabel: string;
+    none: string;
+    cuisineRegion: {
+      east_asian: string;
+      southeast_asian: string;
+      south_asian: string;
+      western: string;
+      mediterranean: string;
+      latin_american: string;
+      middle_eastern: string;
+    };
+    country: {
+      vietnam: string;
+      thailand: string;
+      japan: string;
+      korea: string;
+      china: string;
+      india: string;
+      indonesia: string;
+      usa: string;
+      uk: string;
+      italy: string;
+      france: string;
+      spain: string;
+      greece: string;
+      mexico: string;
+      brazil: string;
+      turkey: string;
+    };
+    dietaryPattern: {
+      omnivore: string;
+      vegetarian: string;
+      vegan: string;
+      pescatarian: string;
+      halal: string;
+      keto: string;
+      low_carb: string;
+    };
+    allergen: {
+      peanuts: string;
+      tree_nuts: string;
+      shellfish: string;
+      fish: string;
+      eggs: string;
+      dairy: string;
+      gluten: string;
+      soy: string;
+      sesame: string;
+    };
     goal: {
       strength: string;
       hypertrophy: string;
@@ -493,6 +594,41 @@ const en: TranslationSchema = {
     exercisesCount: 'exercises',
     editInBuilder: 'Edit in builder',
     backToPlans: 'Back to plans',
+    stepGoalTitle: 'Your goal',
+    stepGoalSubtitle: 'What do you want to get out of training?',
+    stepScheduleTitle: 'Your schedule',
+    stepScheduleSubtitle: 'How often and how long can you train?',
+    stepEquipmentTitle: 'Your equipment',
+    stepEquipmentSubtitle: 'What do you have access to?',
+    stepInjuriesTitle: 'Injuries to protect',
+    stepInjuriesSubtitle: 'We will avoid loading these areas.',
+    stepEmphasisTitle: 'Muscles to emphasize',
+    stepEmphasisSubtitle: 'Pick any areas you want extra volume on.',
+    sessionLabel: 'Session length',
+    minShort: 'min',
+    equipmentPresetLabel: 'Equipment',
+    equipmentCustomLabel: 'Pick your equipment',
+    injuriesLabel: 'Areas to protect',
+    emphasisLabel: 'Emphasis',
+    none: 'None',
+    equipmentPreset: {
+      full_gym: 'Full gym',
+      full_gym_desc: 'Barbells, machines, cables and more.',
+      home: 'Home gym',
+      home_desc: 'Dumbbells, cables and bodyweight.',
+      bodyweight: 'Bodyweight only',
+      bodyweight_desc: 'No equipment needed.',
+      custom: 'Custom',
+      custom_desc: 'Choose exactly what you have.',
+    },
+    injury: {
+      knee: 'Knee',
+      lower_back: 'Lower back',
+      shoulder: 'Shoulder',
+      elbow_wrist: 'Elbow / wrist',
+      hip: 'Hip',
+      neck: 'Neck',
+    },
     goal: {
       strength: 'Strength',
       hypertrophy: 'Hypertrophy',
@@ -520,6 +656,72 @@ const en: TranslationSchema = {
     proteinShort: 'P',
     carbsShort: 'C',
     fatShort: 'F',
+    stepGoalTitle: 'Your goal',
+    stepGoalSubtitle: 'What are you eating toward?',
+    stepBodyTitle: 'About you',
+    stepBodySubtitle: 'We size your macros from these.',
+    stepCuisineTitle: 'Cuisine',
+    stepCuisineSubtitle: 'Which flavours should we cook in?',
+    stepDietTitle: 'Diet & allergies',
+    stepDietSubtitle: 'Anything the plan must respect?',
+    stepPrefsTitle: 'Preferences',
+    stepPrefsSubtitle: 'A few final touches.',
+    cuisineRegionLabel: 'Region',
+    cuisineCountryLabel: 'Country',
+    anyCountry: 'Any country',
+    dietaryPatternLabel: 'Eating pattern',
+    allergiesLabel: 'Allergies',
+    dislikesLabel: 'Foods to avoid',
+    dislikesPlaceholder: 'e.g. cilantro, liver, blue cheese',
+    mealsPerDayLabel: 'Meals per day',
+    none: 'None',
+    cuisineRegion: {
+      east_asian: 'East Asian',
+      southeast_asian: 'Southeast Asian',
+      south_asian: 'South Asian',
+      western: 'Western',
+      mediterranean: 'Mediterranean',
+      latin_american: 'Latin American',
+      middle_eastern: 'Middle Eastern',
+    },
+    country: {
+      vietnam: 'Vietnam',
+      thailand: 'Thailand',
+      japan: 'Japan',
+      korea: 'Korea',
+      china: 'China',
+      india: 'India',
+      indonesia: 'Indonesia',
+      usa: 'USA',
+      uk: 'UK',
+      italy: 'Italy',
+      france: 'France',
+      spain: 'Spain',
+      greece: 'Greece',
+      mexico: 'Mexico',
+      brazil: 'Brazil',
+      turkey: 'Turkey',
+    },
+    dietaryPattern: {
+      omnivore: 'Omnivore',
+      vegetarian: 'Vegetarian',
+      vegan: 'Vegan',
+      pescatarian: 'Pescatarian',
+      halal: 'Halal',
+      keto: 'Keto',
+      low_carb: 'Low carb',
+    },
+    allergen: {
+      peanuts: 'Peanuts',
+      tree_nuts: 'Tree nuts',
+      shellfish: 'Shellfish',
+      fish: 'Fish',
+      eggs: 'Eggs',
+      dairy: 'Dairy',
+      gluten: 'Gluten',
+      soy: 'Soy',
+      sesame: 'Sesame',
+    },
     goal: {
       strength: 'Strength',
       hypertrophy: 'Hypertrophy',

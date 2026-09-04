@@ -24,4 +24,36 @@ describe('buildWorkoutPrompt', () => {
     const { user } = buildWorkoutPrompt({ ...input, history: [] });
     expect(user).toContain('bench-barbell');
   });
+
+  it('omits optional intake directives when the fields are absent', () => {
+    const { user } = buildWorkoutPrompt(input);
+    expect(user).not.toContain('Additional Requirements');
+    expect(user).not.toContain('Injuries');
+    expect(user).not.toContain('Emphasis');
+    expect(user).not.toContain('Session length');
+  });
+
+  it('embeds injury, equipment, session and emphasis directives when provided', () => {
+    const { user } = buildWorkoutPrompt({
+      ...input,
+      availableEquipment: ['barbell', 'dumbbell'],
+      injuries: ['knee', 'lower_back'],
+      sessionMinutes: 45,
+      emphasis: ['chest', 'arms'],
+    });
+    expect(user).toContain('Additional Requirements');
+    // equipment
+    expect(user).toContain('barbell');
+    expect(user).toContain('dumbbell');
+    // injuries
+    expect(user).toContain('knee');
+    expect(user).toContain('lower_back');
+    expect(user).toContain('AVOID');
+    // session length
+    expect(user).toContain('45');
+    // emphasis
+    expect(user).toContain('extra sets/volume');
+    expect(user).toContain('chest');
+    expect(user).toContain('arms');
+  });
 });

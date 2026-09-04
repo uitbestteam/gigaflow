@@ -28,15 +28,26 @@ export async function processGenerateWorkout(jobId: string, deps: WorkoutGenDeps
     const visible = await listVisible(userId, {});
     const presets = visible.filter((ex) => !ex.isCustom);
 
-    const catalog: PromptExercise[] = presets.map((ex) => ({
+    // When the athlete restricts equipment, filter the catalog to it. Guard
+    // against over-filtering: if too few exercises remain, fall back to the
+    // full catalog so we never build a plan from an (near-)empty set.
+    const MIN_CATALOG = 8;
+    const equipment = input.availableEquipment;
+    let usable = presets;
+    if (equipment && equipment.length > 0) {
+      const filtered = presets.filter((ex) => equipment.includes(ex.equipmentType));
+      if (filtered.length >= MIN_CATALOG) usable = filtered;
+    }
+
+    const catalog: PromptExercise[] = usable.map((ex) => ({
       slug: ex.slug,
       nameEn: ex.name.en,
       muscleGroup: ex.muscleGroup,
     }));
 
-    const exerciseIds = presets.map((ex) => ex.id);
+    const exerciseIds = usable.map((ex) => ex.id);
     const perfMap = await findPerformanceMany(userId, exerciseIds);
-    const idToSlug = new Map(presets.map((ex) => [ex.id, ex.slug]));
+    const idToSlug = new Map(usable.map((ex) => [ex.id, ex.slug]));
 
     const history: PromptHistory[] = [];
     for (const [exerciseId, perf] of perfMap) {
@@ -57,6 +68,10 @@ export async function processGenerateWorkout(jobId: string, deps: WorkoutGenDeps
       daysPerWeek: input.daysPerWeek,
       catalog,
       history,
+      availableEquipment: input.availableEquipment,
+      injuries: input.injuries,
+      sessionMinutes: input.sessionMinutes,
+      emphasis: input.emphasis,
     });
 
     const plan = await deps.engine.generateWorkoutPlan(prompt);
