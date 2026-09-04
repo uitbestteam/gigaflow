@@ -7,9 +7,6 @@ import { firebaseAuth, type TokenVerifier } from '../auth/firebase-auth.js';
 import { quotaGuard } from '../subscription/quota.guard.js';
 import { createJob, findJobForUser } from './generation-job.repo.js';
 import { processGenerateWorkout, type WorkoutGenDeps } from './workout-generation.service.js';
-import { processGenerateMeal, type MealGenDeps } from '../nutrition/meal-generation.service.js';
-
-type InternalTaskEngine = WorkoutGenDeps['engine'] & MealGenDeps['engine'];
 
 export type TaskEnqueuer = (jobId: string) => Promise<void>;
 
@@ -50,27 +47,42 @@ export function makeWorkoutGenRoutes(deps: {
   return app;
 }
 
+/**
+ * Internal routes hit by Cloud Tasks (one per queue). Each `process*` function
+ * is a fully-wired processor (inline generation + completion notification),
+ * injected by `app.ts` so this module stays decoupled from the engines. Guarded
+ * by `internalAuth` (Cloud Tasks' `X-CloudTasks-QueueName` header).
+ */
 export function makeInternalTaskRoutes(deps: {
-  engine: InternalTaskEngine;
-  mealEngine?: MealGenDeps['engine'];
+  processWorkout: TaskEnqueuer;
+  processMeal: TaskEnqueuer;
+  processInbody?: TaskEnqueuer;
 }): Hono {
   const app = new Hono();
   app.use('*', internalAuth());
-  const mealEngine = deps.mealEngine ?? deps.engine;
 
   app.get('/ping', (c) => c.json(apiSuccess({ pong: true })));
 
   app.post('/generate-workout', zValidator('json', generateWorkoutTaskBody), async (c) => {
     const { jobId } = c.req.valid('json');
-    await processGenerateWorkout(jobId, { engine: deps.engine });
+    await deps.processWorkout(jobId);
     return c.json(apiSuccess({ ok: true }));
   });
 
   app.post('/generate-meal', zValidator('json', generateMealTaskBody), async (c) => {
     const { jobId } = c.req.valid('json');
-    await processGenerateMeal(jobId, { engine: mealEngine });
+    await deps.processMeal(jobId);
     return c.json(apiSuccess({ ok: true }));
   });
+
+  const processInbody = deps.processInbody;
+  if (processInbody) {
+    app.post('/analyze-inbody', zValidator('json', generateWorkoutTaskBody), async (c) => {
+      const { jobId } = c.req.valid('json');
+      await processInbody(jobId);
+      return c.json(apiSuccess({ ok: true }));
+    });
+  }
 
   return app;
 }
