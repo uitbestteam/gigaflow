@@ -4,13 +4,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, type Mock } from 'vitest';
 import { AwardKey } from '@gigaflow/shared';
-import type { Award, PersonalRecord, StatsSummary, WeightLog } from '@gigaflow/shared';
+import type { Award, PersonalRecord, StatsSummary, VolumeByWeek, WeightLog } from '@gigaflow/shared';
 import { StatsPage } from './StatsPage';
 
 vi.mock('../../lib/api', () => ({
   getStatsSummary: vi.fn(),
   getAwards: vi.fn(),
   getPrs: vi.fn(),
+  getVolumeByWeek: vi.fn(),
   getWeightHistory: vi.fn(),
   logWeight: vi.fn(),
 }));
@@ -79,6 +80,7 @@ describe('StatsPage', () => {
     (api.getStatsSummary as unknown as Mock).mockResolvedValue(makeSummary());
     (api.getAwards as unknown as Mock).mockResolvedValue([]);
     (api.getPrs as unknown as Mock).mockResolvedValue([]);
+    (api.getVolumeByWeek as unknown as Mock).mockResolvedValue([]);
     (api.getWeightHistory as unknown as Mock).mockResolvedValue([]);
     (api.logWeight as unknown as Mock).mockResolvedValue(makeWeightLog());
   });
@@ -94,6 +96,43 @@ describe('StatsPage', () => {
     expect(screen.getByText('34500')).toBeInTheDocument();
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('8')).toBeInTheDocument();
+  });
+
+  it('shows the current streak with best when the streak is active', async () => {
+    (api.getStatsSummary as unknown as Mock).mockResolvedValue(
+      makeSummary({ currentStreakWeeks: 3, longestStreakWeeks: 6 }),
+    );
+
+    renderPage();
+
+    expect(await screen.findByText('3-week streak')).toBeInTheDocument();
+    expect(screen.getByText('Best: 6 weeks')).toBeInTheDocument();
+  });
+
+  it('shows the streak empty state when there is no active streak', async () => {
+    (api.getStatsSummary as unknown as Mock).mockResolvedValue(
+      makeSummary({ currentStreakWeeks: 0, longestStreakWeeks: 0 }),
+    );
+
+    renderPage();
+
+    expect(await screen.findByText('Train this week to start a streak')).toBeInTheDocument();
+  });
+
+  it('renders a stacked volume-by-muscle chart with a segment per muscle group', async () => {
+    const volume: VolumeByWeek[] = [
+      { weekStart: new Date('2026-08-10T00:00:00.000Z'), byMuscleGroup: { legs: 500, chest: 600 }, total: 1100 },
+      { weekStart: new Date('2026-08-17T00:00:00.000Z'), byMuscleGroup: { legs: 640 }, total: 640 },
+    ];
+    (api.getVolumeByWeek as unknown as Mock).mockResolvedValue(volume);
+
+    const { container } = renderPage();
+
+    await waitFor(() => {
+      // 2 segments (week 1) + 1 segment (week 2) = 3 rects, and no weight bars.
+      expect(container.querySelectorAll('svg rect')).toHaveLength(3);
+    });
+    expect(screen.getByRole('heading', { name: 'Volume by muscle group' })).toBeInTheDocument();
   });
 
   it('shows an earned badge on an earned award and progress on an in-progress award', async () => {

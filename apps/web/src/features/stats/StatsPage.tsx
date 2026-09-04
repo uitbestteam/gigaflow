@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { getAwards, getPrs, getStatsSummary, getWeightHistory, logWeight } from '../../lib/api';
+import { getAwards, getPrs, getStatsSummary, getVolumeByWeek, getWeightHistory, logWeight } from '../../lib/api';
 import { resolveTranslatable } from '../../lib/i18n';
 import { StatTile, type StatTileAccent } from '../../components/StatTile';
 import { MiniBarChart } from '../../components/MiniBarChart';
@@ -10,6 +10,7 @@ import { Skeleton, SkeletonList } from '../../components/Skeleton';
 import { FadeIn, Stagger, StaggerItem } from '../../components/motion';
 import { FlameIcon, SparklesIcon, CheckIcon, ListIcon } from '../../components/icons';
 import { AwardCard } from './AwardCard';
+import { VolumeByMuscleChart } from './VolumeByMuscleChart';
 
 function shortDate(value: Date): string {
   return value.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -35,6 +36,7 @@ export function StatsPage() {
   const summaryQuery = useQuery({ queryKey: ['statsSummary'], queryFn: () => getStatsSummary() });
   const awardsQuery = useQuery({ queryKey: ['awards'], queryFn: () => getAwards() });
   const prsQuery = useQuery({ queryKey: ['prs'], queryFn: () => getPrs() });
+  const volumeByWeekQuery = useQuery({ queryKey: ['volumeByWeek'], queryFn: () => getVolumeByWeek() });
   const weightHistoryQuery = useQuery({ queryKey: ['weightHistory'], queryFn: () => getWeightHistory() });
 
   const [weightKg, setWeightKg] = useState('');
@@ -57,6 +59,7 @@ export function StatsPage() {
   const summary = summaryQuery.data;
   const awards = awardsQuery.data ?? [];
   const prs = prsQuery.data ?? [];
+  const volumeByWeek = volumeByWeekQuery.data ?? [];
   const weightHistory = weightHistoryQuery.data ?? [];
 
   const chartPoints = weightHistory.map((log) => ({
@@ -105,6 +108,36 @@ export function StatsPage() {
         )}
       </section>
 
+      {summary && (
+        <FadeIn>
+          <div className="flex items-center gap-4 rounded-lg border border-border-subtle bg-surface p-4">
+            <span
+              aria-hidden="true"
+              className={summary.currentStreakWeeks > 0 ? 'text-push' : 'text-text-muted'}
+            >
+              <FlameIcon width={28} height={28} />
+            </span>
+            <div className="flex flex-col">
+              <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
+                {t('stats.streakTitle')}
+              </span>
+              {summary.currentStreakWeeks > 0 ? (
+                <>
+                  <span className="text-lg font-extrabold text-text">
+                    {t('stats.streakUnit', { count: summary.currentStreakWeeks })}
+                  </span>
+                  <span className="text-sm text-text-secondary">
+                    {t('stats.streakBest', { count: summary.longestStreakWeeks })}
+                  </span>
+                </>
+              ) : (
+                <span className="text-sm text-text-secondary">{t('stats.streakNone')}</span>
+              )}
+            </div>
+          </div>
+        </FadeIn>
+      )}
+
       <FadeIn className="flex flex-col gap-2">
         <h2 className="text-base font-semibold text-text">{t('stats.awardsTitle')}</h2>
         {awardsQuery.isLoading && <SkeletonList rows={2} />}
@@ -124,24 +157,39 @@ export function StatsPage() {
       </FadeIn>
 
       <FadeIn className="flex flex-col gap-2">
-        <h2 className="text-base font-semibold text-text">{t('stats.prsTitle')}</h2>
+        <h2 className="text-base font-semibold text-text">{t('stats.volumeByMuscleTitle')}</h2>
+        {volumeByWeekQuery.isLoading && <Skeleton className="h-36 w-full" />}
+        {volumeByWeekQuery.isError && (
+          <ErrorRetry message={t('stats.loadError')} retryLabel={t('common.retry')} onRetry={() => void volumeByWeekQuery.refetch()} />
+        )}
+        {!volumeByWeekQuery.isLoading && !volumeByWeekQuery.isError && (
+          <VolumeByMuscleChart data={volumeByWeek} />
+        )}
+      </FadeIn>
+
+      <FadeIn className="flex flex-col gap-2">
+        <h2 className="text-base font-semibold text-text">{t('stats.prTimelineTitle')}</h2>
         {prsQuery.isLoading && <SkeletonList rows={3} />}
         {prsQuery.isError && <ErrorRetry message={t('stats.loadError')} retryLabel={t('common.retry')} onRetry={() => void prsQuery.refetch()} />}
         {prs.length === 0 && !prsQuery.isLoading && !prsQuery.isError && (
           <p className="text-sm text-text-secondary">{t('stats.prsEmpty')}</p>
         )}
-        <Stagger className="flex flex-col gap-2">
-          {prs.map((pr) => {
+        <Stagger className="flex flex-col">
+          {prs.map((pr, index) => {
             const exerciseName = resolveTranslatable(pr.name, i18n.language);
+            const isLast = index === prs.length - 1;
             return (
-              <StaggerItem
-                key={pr.exerciseId}
-                className="flex items-center justify-between gap-3 rounded-md border border-border-subtle bg-surface p-3"
-              >
-                <span className="font-medium text-text">{exerciseName}</span>
-                <span className="tnum text-sm text-text-secondary">
-                  {pr.bestSet.weightKg}kg &times; {pr.bestSet.repsDone} ({t('stats.e1rm')}: {pr.bestSet.e1RM})
-                </span>
+              <StaggerItem key={pr.exerciseId} className="flex items-stretch gap-3">
+                <div className="flex flex-col items-center" aria-hidden="true">
+                  <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-accent" />
+                  {!isLast && <span className="w-px flex-1 bg-border-subtle" />}
+                </div>
+                <div className={`flex flex-1 items-center justify-between gap-3 ${isLast ? '' : 'pb-3'}`}>
+                  <span className="font-medium text-text">{exerciseName}</span>
+                  <span className="tnum text-sm text-text-secondary">
+                    {pr.bestSet.weightKg}kg &times; {pr.bestSet.repsDone} ({t('stats.e1rm')}: {pr.bestSet.e1RM})
+                  </span>
+                </div>
               </StaggerItem>
             );
           })}

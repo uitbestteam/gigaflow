@@ -119,7 +119,10 @@ describe('F3 api helpers', () => {
   });
 
   it('getStatsSummary fetches summary', async () => {
-    const summary = { totalSessions: 1, totalVolume: 2, totalPrs: 3, totalExercises: 4 };
+    const summary = {
+      totalSessions: 1, totalVolume: 2, totalPrs: 3, totalExercises: 4,
+      currentStreakWeeks: 0, longestStreakWeeks: 0, totalMealPlans: 0,
+    };
     const fetchImpl = (async () => ok(summary)) as typeof fetch;
     expect(await getStatsSummary(fetchImpl)).toEqual(summary);
   });

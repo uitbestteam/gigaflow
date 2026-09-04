@@ -94,6 +94,35 @@ describe('stats routes', () => {
     expect(body.data[1]?.bestSet.e1RM).toBe(63.3);
   });
 
+  it('GET /volume-by-week returns weekly volume split by muscle group', async () => {
+    const week = new Date('2026-07-06T10:00:00.000Z'); // Mon 2026-07-06
+    const sess = await getDb().collection('training_sessions').insertOne({
+      userId: 'u1', templateId: 't', sessionNumber: 9, startedAt: week, finishedAt: week, status: 'completed',
+    });
+    await getDb().collection('set_logs').insertOne({
+      sessionId: sess.insertedId.toString(), slotId: 'sl', exerciseId: exId, setNumber: 1,
+      weightKg: 50, repsDone: 10, weightSuggested: 50, repsSuggested: 10, isCompleted: true, loggedAt: week,
+    });
+
+    const app = makeStatsRoutes({ verify });
+    const res = await app.request('/volume-by-week', { headers: { Authorization: 'Bearer ok' } });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      success: boolean;
+      data: Array<{ weekStart: string; byMuscleGroup: Record<string, number>; total: number }>;
+    };
+    expect(body.success).toBe(true);
+    const bucket = body.data.find((w) => w.weekStart.startsWith('2026-07-06'));
+    expect(bucket?.byMuscleGroup).toEqual({ chest: 500 });
+    expect(bucket?.total).toBe(500);
+  });
+
+  it('401 on /volume-by-week without token', async () => {
+    const app = makeStatsRoutes({ verify });
+    const res = await app.request('/volume-by-week');
+    expect(res.status).toBe(401);
+  });
+
   it('GET /awards includes FIRST_WORKOUT earned:true', async () => {
     const app = makeStatsRoutes({ verify });
     const res = await app.request('/awards', { headers: { Authorization: 'Bearer ok' } });
