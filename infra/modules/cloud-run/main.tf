@@ -19,6 +19,13 @@ resource "google_cloud_run_v2_service" "api" {
         container_port = 8080
       }
 
+      resources {
+        # CPU always allocated so fire-and-forget background jobs (AI plan/meal
+        # generation, InBody OCR) run to completion after the 202 response.
+        cpu_idle          = false
+        startup_cpu_boost = true
+      }
+
       dynamic "env" {
         for_each = var.env_vars
         content {
