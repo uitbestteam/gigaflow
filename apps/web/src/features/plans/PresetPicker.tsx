@@ -34,6 +34,7 @@ export function PresetPicker({ onCreated, variant = 'solid' }: PresetPickerProps
         <Button
           key={preset.type}
           variant={variant}
+          size="sm"
           onClick={() => createPlanMutation.mutate(preset.type)}
           disabled={createPlanMutation.isPending}
         >

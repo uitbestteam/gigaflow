@@ -10,6 +10,8 @@ import { JobProgress } from '../../components/JobProgress';
 import { SegmentedFilter } from '../../components/SegmentedFilter';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import { FadeIn, Stagger, StaggerItem } from '../../components/motion';
+import { SparklesIcon, CheckIcon } from '../../components/icons';
 import { ROUTES, planEditPath } from '../../routes';
 
 const GOAL_OPTIONS: Goal[] = [Goal.STRENGTH, Goal.HYPERTROPHY, Goal.GENERAL_FITNESS, Goal.WEIGHT_LOSS];
@@ -62,46 +64,57 @@ export function GeneratePlanPage() {
   const showPreview = status === 'done' && result;
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <h1 className="text-lg font-semibold text-text">{t('ai.title')}</h1>
+    <div className="flex flex-col gap-5 p-4">
+      <FadeIn>
+        <div className="flex flex-col items-center gap-3 rounded-lg bg-grad-primary-soft p-6 text-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-grad-primary shadow-glow-accent">
+            <SparklesIcon className="text-white" width={28} height={28} />
+          </span>
+          <h1 className="text-xl font-extrabold tracking-tight text-gradient">{t('ai.title')}</h1>
+          <p className="text-sm text-text-secondary">{t('ai.heroSubtitle')}</p>
+        </div>
+      </FadeIn>
 
       {!showPreview && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <span className="text-sm text-text-secondary">{t('ai.goalLabel')}</span>
-            <SegmentedFilter
-              options={GOAL_OPTIONS.map((option) => ({ value: option, label: t(`ai.goal.${option}`) }))}
-              value={goal}
-              onChange={setGoal}
-            />
-          </div>
+          <Card variant="flat" className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <span className="text-sm text-text-secondary">{t('ai.goalLabel')}</span>
+              <SegmentedFilter
+                options={GOAL_OPTIONS.map((option) => ({ value: option, label: t(`ai.goal.${option}`) }))}
+                value={goal}
+                onChange={setGoal}
+              />
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <span className="text-sm text-text-secondary">{t('ai.experienceLabel')}</span>
-            <SegmentedFilter
-              options={EXPERIENCE_OPTIONS.map((option) => ({ value: option, label: t(`ai.experience.${option}`) }))}
-              value={experienceLevel}
-              onChange={setExperienceLevel}
-            />
-          </div>
+            <div className="flex flex-col gap-2">
+              <span className="text-sm text-text-secondary">{t('ai.experienceLabel')}</span>
+              <SegmentedFilter
+                options={EXPERIENCE_OPTIONS.map((option) => ({ value: option, label: t(`ai.experience.${option}`) }))}
+                value={experienceLevel}
+                onChange={setExperienceLevel}
+              />
+            </div>
 
-          <label className="flex flex-col gap-2">
-            <span className="text-sm text-text-secondary">{t('ai.daysLabel')}</span>
-            <input
-              type="number"
-              min={1}
-              max={7}
-              value={daysPerWeek}
-              onChange={(event) => setDaysPerWeek(Number(event.target.value))}
-              className="min-h-11 max-w-[8rem] rounded-[10px] border border-border bg-surface px-3 text-text"
-            />
-          </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm text-text-secondary">{t('ai.daysLabel')}</span>
+              <input
+                type="number"
+                min={1}
+                max={7}
+                value={daysPerWeek}
+                onChange={(event) => setDaysPerWeek(Number(event.target.value))}
+                className="min-h-11 max-w-[8rem] rounded-[10px] border border-border bg-surface px-3 text-text"
+              />
+            </label>
+          </Card>
 
-          <Button type="submit" disabled={isBusy}>
+          <Button type="submit" size="lg" fullWidth disabled={isBusy}>
+            <SparklesIcon width={18} height={18} />
             {t('ai.submit')}
           </Button>
 
-          {isBusy && <JobProgress status={status} error={error} />}
+          {isBusy && <JobProgress status={status} error={error} className="justify-center" />}
 
           {status === 'error' && (
             <div className="flex flex-col gap-2">
@@ -115,22 +128,35 @@ export function GeneratePlanPage() {
       )}
 
       {showPreview && (
-        <Card className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold text-text">{result.name}</h2>
-          <div className="flex flex-col gap-1">
-            {result.templates.map((template) => (
-              <div key={template.id} className="text-sm text-text-secondary">
-                {resolveTranslatable(template.name, i18n.language)} · {template.slots.length} {t('ai.exercisesCount')}
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={handleEditInBuilder}>{t('ai.editInBuilder')}</Button>
-            <Button variant="ghost" onClick={() => navigate(ROUTES.plans)}>
-              {t('ai.backToPlans')}
-            </Button>
-          </div>
-        </Card>
+        <FadeIn>
+          <Card variant="glow" className="flex flex-col gap-3 animate-pop">
+            <div className="flex items-center gap-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-grad-primary shadow-glow-accent">
+                <CheckIcon className="text-white" width={18} height={18} />
+              </span>
+              <h2 className="text-base font-semibold text-text">{result.name}</h2>
+            </div>
+            <Stagger className="flex flex-col gap-1">
+              {result.templates.map((template) => (
+                <StaggerItem
+                  key={template.id}
+                  className="rounded-[10px] bg-surface-elevated px-3 py-2 text-sm text-text-secondary"
+                >
+                  {resolveTranslatable(template.name, i18n.language)} · {template.slots.length}{' '}
+                  {t('ai.exercisesCount')}
+                </StaggerItem>
+              ))}
+            </Stagger>
+            <div className="flex gap-2">
+              <Button onClick={handleEditInBuilder} fullWidth>
+                {t('ai.editInBuilder')}
+              </Button>
+              <Button variant="ghost" onClick={() => navigate(ROUTES.plans)}>
+                {t('ai.backToPlans')}
+              </Button>
+            </div>
+          </Card>
+        </FadeIn>
       )}
     </div>
   );

@@ -9,7 +9,7 @@ export interface AuthGateProps {
 }
 
 /**
- * Gates the app behind auth bootstrap: shows a splash while
+ * Gates the app behind auth bootstrap: shows a branded splash while
  * `authStore.status === 'loading'`, a retry prompt on `'error'`, and
  * renders `children` for every other status (`'guest'` | `'user'`).
  */
@@ -22,20 +22,31 @@ export function AuthGate({ children }: AuthGateProps) {
     return (
       <div
         data-testid="auth-splash"
-        className="flex min-h-screen flex-col items-center justify-center gap-4 bg-bg text-text"
+        className="flex min-h-[100dvh] flex-col items-center justify-center gap-6 bg-bg text-text"
       >
-        <Spinner label={t('auth.splashLabel')} />
-        <p className="text-text-secondary">{t('auth.splashLabel')}</p>
+        <div className="animate-pulse-glow flex h-20 w-20 items-center justify-center rounded-xl bg-grad-primary text-2xl font-black text-white">
+          GF
+        </div>
+        <h1 className="text-2xl font-extrabold tracking-tight">
+          <span className="text-gradient">{t('common.appName')}</span>
+        </h1>
+        <div className="flex items-center gap-3 text-text-secondary">
+          <Spinner label={t('auth.splashLabel')} />
+          <p>{t('auth.splashLabel')}</p>
+        </div>
       </div>
     );
   }
 
   if (status === 'error') {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-bg text-text">
-        <p className="text-lg font-medium">{t('auth.errorTitle')}</p>
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-bg px-6 text-center text-text">
+        <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-surface-2 text-3xl">😕</div>
+        <p className="text-lg font-bold">{t('auth.errorTitle')}</p>
         <p className="text-text-secondary">{t('auth.errorBody')}</p>
-        <Button onClick={() => void bootstrap()}>{t('auth.retry')}</Button>
+        <Button size="lg" onClick={() => void bootstrap()}>
+          {t('auth.retry')}
+        </Button>
       </div>
     );
   }

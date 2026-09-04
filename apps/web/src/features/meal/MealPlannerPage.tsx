@@ -7,6 +7,9 @@ import { useJobPolling } from '../../lib/useJobPolling';
 import { JobProgress } from '../../components/JobProgress';
 import { SegmentedFilter } from '../../components/SegmentedFilter';
 import { Button } from '../../components/Button';
+import { Card } from '../../components/Card';
+import { FadeIn, Stagger, StaggerItem } from '../../components/motion';
+import { UtensilsIcon } from '../../components/icons';
 import { MealDayView } from './MealDayView';
 
 const GOAL_OPTIONS: Goal[] = [Goal.STRENGTH, Goal.HYPERTROPHY, Goal.GENERAL_FITNESS, Goal.WEIGHT_LOSS];
@@ -58,89 +61,111 @@ export function MealPlannerPage() {
   const plan = status === 'done' && result !== undefined ? result : activeMealQuery.data;
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <h1 className="text-lg font-semibold text-text">{t('meal.title')}</h1>
+    <div className="flex flex-col gap-5 p-4">
+      <FadeIn>
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-grad-cyan shadow-glow-blue">
+            <UtensilsIcon className="text-white" width={22} height={22} />
+          </span>
+          <div className="flex flex-col">
+            <h1 className="text-lg font-extrabold tracking-tight text-text">{t('meal.title')}</h1>
+            <p className="text-xs text-text-secondary">{t('meal.heroSubtitle')}</p>
+          </div>
+        </div>
+      </FadeIn>
 
       {plan && (
-        <div className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold text-text">{plan.name}</h2>
+        <FadeIn>
+          <Card variant="glow" className="flex flex-col items-center gap-1 py-5 text-center">
+            <span className="text-xs uppercase tracking-wide text-text-secondary">{t('meal.title')}</span>
+            <h2 className="text-lg font-extrabold text-text">{plan.name}</h2>
+          </Card>
+        </FadeIn>
+      )}
+
+      {plan && (
+        <Stagger className="flex flex-col gap-3">
           {plan.days.map((day) => (
-            <MealDayView key={day.dayIndex} day={day} />
+            <StaggerItem key={day.dayIndex}>
+              <MealDayView day={day} />
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       )}
 
       {!plan && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <span className="text-sm text-text-secondary">{t('meal.goalLabel')}</span>
-            <SegmentedFilter
-              options={GOAL_OPTIONS.map((option) => ({ value: option, label: t(`meal.goal.${option}`) }))}
-              value={goal}
-              onChange={setGoal}
-            />
-          </div>
+          <Card variant="flat" className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <span className="text-sm text-text-secondary">{t('meal.goalLabel')}</span>
+              <SegmentedFilter
+                options={GOAL_OPTIONS.map((option) => ({ value: option, label: t(`meal.goal.${option}`) }))}
+                value={goal}
+                onChange={setGoal}
+              />
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <span className="text-sm text-text-secondary">{t('meal.genderLabel')}</span>
-            <SegmentedFilter
-              options={GENDER_OPTIONS.map((option) => ({ value: option, label: t(`meal.gender.${option}`) }))}
-              value={gender}
-              onChange={setGender}
-            />
-          </div>
+            <div className="flex flex-col gap-2">
+              <span className="text-sm text-text-secondary">{t('meal.genderLabel')}</span>
+              <SegmentedFilter
+                options={GENDER_OPTIONS.map((option) => ({ value: option, label: t(`meal.gender.${option}`) }))}
+                value={gender}
+                onChange={setGender}
+              />
+            </div>
 
-          <label className="flex flex-col gap-2">
-            <span className="text-sm text-text-secondary">{t('meal.ageLabel')}</span>
-            <input
-              type="number"
-              min={10}
-              max={100}
-              value={age}
-              onChange={(event) => setAge(Number(event.target.value))}
-              className="min-h-11 max-w-[8rem] rounded-[10px] border border-border bg-surface px-3 text-text"
-            />
-          </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm text-text-secondary">{t('meal.ageLabel')}</span>
+              <input
+                type="number"
+                min={10}
+                max={100}
+                value={age}
+                onChange={(event) => setAge(Number(event.target.value))}
+                className="min-h-11 max-w-[8rem] rounded-[10px] border border-border bg-surface px-3 text-text"
+              />
+            </label>
 
-          <label className="flex flex-col gap-2">
-            <span className="text-sm text-text-secondary">{t('meal.heightLabel')}</span>
-            <input
-              type="number"
-              min={1}
-              value={heightCm}
-              onChange={(event) => setHeightCm(Number(event.target.value))}
-              className="min-h-11 max-w-[8rem] rounded-[10px] border border-border bg-surface px-3 text-text"
-            />
-          </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm text-text-secondary">{t('meal.heightLabel')}</span>
+              <input
+                type="number"
+                min={1}
+                value={heightCm}
+                onChange={(event) => setHeightCm(Number(event.target.value))}
+                className="min-h-11 max-w-[8rem] rounded-[10px] border border-border bg-surface px-3 text-text"
+              />
+            </label>
 
-          <label className="flex flex-col gap-2">
-            <span className="text-sm text-text-secondary">{t('meal.weightLabel')}</span>
-            <input
-              type="number"
-              min={1}
-              value={weightKg}
-              onChange={(event) => setWeightKg(Number(event.target.value))}
-              className="min-h-11 max-w-[8rem] rounded-[10px] border border-border bg-surface px-3 text-text"
-            />
-          </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm text-text-secondary">{t('meal.weightLabel')}</span>
+              <input
+                type="number"
+                min={1}
+                value={weightKg}
+                onChange={(event) => setWeightKg(Number(event.target.value))}
+                className="min-h-11 max-w-[8rem] rounded-[10px] border border-border bg-surface px-3 text-text"
+              />
+            </label>
 
-          <div className="flex flex-col gap-2">
-            <span className="text-sm text-text-secondary">{t('meal.activityLabel')}</span>
-            <SegmentedFilter
-              options={ACTIVITY_OPTIONS.map((option) => ({
-                value: option,
-                label: t(`meal.activity.${option}`),
-              }))}
-              value={activityLevel}
-              onChange={setActivityLevel}
-            />
-          </div>
+            <div className="flex flex-col gap-2">
+              <span className="text-sm text-text-secondary">{t('meal.activityLabel')}</span>
+              <SegmentedFilter
+                options={ACTIVITY_OPTIONS.map((option) => ({
+                  value: option,
+                  label: t(`meal.activity.${option}`),
+                }))}
+                value={activityLevel}
+                onChange={setActivityLevel}
+              />
+            </div>
+          </Card>
 
-          <Button type="submit" disabled={isBusy}>
+          <Button type="submit" size="lg" fullWidth disabled={isBusy}>
             {t('meal.submit')}
           </Button>
 
-          {isBusy && <JobProgress status={status} error={error} />}
+          {isBusy && <JobProgress status={status} error={error} className="justify-center" />}
 
           {status === 'error' && (
             <div className="flex flex-col gap-2">

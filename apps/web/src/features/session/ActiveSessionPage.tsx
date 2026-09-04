@@ -11,7 +11,10 @@ import { ExerciseRow, type ExerciseRowSet, type ExerciseRowSlot, type ExerciseRo
 import { RestTimer } from '../../components/RestTimer';
 import { RirPicker } from '../../components/RirPicker';
 import { Button } from '../../components/Button';
-import { Spinner } from '../../components/Spinner';
+import { Card } from '../../components/Card';
+import { SkeletonList } from '../../components/Skeleton';
+import { FadeIn, Stagger, StaggerItem } from '../../components/motion';
+import { CheckIcon } from '../../components/icons';
 import type { SetBoxStatus } from '../../components/SetBox';
 import { SetEditor } from './SetEditor';
 
@@ -23,6 +26,17 @@ const DEFAULT_REST_SECONDS = 90;
  * normally every slot's exercise resolves via `getExercises()`).
  */
 const FALLBACK_MUSCLE_GROUP = MuscleGroup.CHEST;
+
+/** Muscle-group -> accent border color, using the app's identity tokens. */
+const MUSCLE_GROUP_ACCENT: Record<MuscleGroup, string> = {
+  [MuscleGroup.CHEST]: 'border-push',
+  [MuscleGroup.SHOULDERS]: 'border-push',
+  [MuscleGroup.ARMS]: 'border-push',
+  [MuscleGroup.BACK]: 'border-pull',
+  [MuscleGroup.LEGS]: 'border-legs',
+  [MuscleGroup.CORE]: 'border-core',
+  [MuscleGroup.CARDIO]: 'border-accent',
+};
 
 function formatMmSs(totalSeconds: number): string {
   const clamped = Math.max(0, totalSeconds);
@@ -162,8 +176,8 @@ export function ActiveSessionPage() {
 
   if (exercisesQuery.isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <Spinner label={t('common.loading')} />
+      <div className="flex flex-col gap-4 p-4">
+        <SkeletonList rows={4} />
       </div>
     );
   }
@@ -189,26 +203,26 @@ export function ActiveSessionPage() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <header className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold text-text">
-            {sessionName} <span className="text-text-secondary">#{startResult.session.sessionNumber}</span>
+      <FadeIn className="flex items-center justify-between gap-3 rounded-lg bg-surface-2 p-4">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <h1 className="truncate text-lg font-extrabold tracking-tight text-text">
+            {sessionName} <span className="font-semibold text-text-secondary">#{startResult.session.sessionNumber}</span>
           </h1>
-          <span className="tnum text-sm text-text-secondary" aria-live="off">
+          <span className="tnum text-2xl font-extrabold text-gradient" aria-live="off">
             {formatMmSs(elapsedSeconds)}
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={() => cancelMutation.mutate()} disabled={cancelMutation.isPending}>
-            {t('session.cancel')}
-          </Button>
-          <Button onClick={() => finishMutation.mutate()} disabled={finishMutation.isPending}>
+        <div className="flex shrink-0 flex-col items-stretch gap-2">
+          <Button size="sm" onClick={() => finishMutation.mutate()} disabled={finishMutation.isPending}>
             {t('session.finish')}
           </Button>
+          <Button variant="ghost" size="sm" onClick={() => cancelMutation.mutate()} disabled={cancelMutation.isPending}>
+            {t('session.cancel')}
+          </Button>
         </div>
-      </header>
+      </FadeIn>
 
-      <div className="flex flex-col gap-5">
+      <Stagger className="flex flex-col gap-4">
         {startResult.slots.map((slotTarget) => {
           const slotSession = storeSlots[slotTarget.id];
           if (!slotSession) return null;
@@ -236,15 +250,36 @@ export function ActiveSessionPage() {
           const editingSetInSlot = editingSet && editingSet.slotId === slotTarget.id ? editingSet : undefined;
           const editingThisSlot = editingSetInSlot ? slotSession.sets[editingSetInSlot.setIndex] : undefined;
 
+          const accentClass = MUSCLE_GROUP_ACCENT[slot.muscleGroup] ?? 'border-accent';
+
           return (
-            <div key={slotTarget.id} className="flex flex-col gap-2">
-              <ExerciseRow
-                slot={slot}
-                sets={sets}
-                status={rowStatus}
-                onSetTap={(index) => handleSetTap(slotTarget.id, index)}
-                onSetEdit={(index) => handleSetEdit(slotTarget.id, index)}
-              />
+            <StaggerItem key={slotTarget.id} className="flex flex-col gap-2">
+              <div
+                className={[
+                  'relative rounded-lg border-l-4 bg-surface p-3 shadow-card transition-opacity',
+                  accentClass,
+                  rowStatus === 'pending' ? 'opacity-50' : '',
+                  rowStatus === 'active' ? 'ring-1 ring-accent/40' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {rowStatus === 'done' && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-3 top-3 inline-flex h-6 w-6 items-center justify-center rounded-full bg-success text-white animate-pop"
+                  >
+                    <CheckIcon width={14} height={14} />
+                  </span>
+                )}
+                <ExerciseRow
+                  slot={slot}
+                  sets={sets}
+                  status={rowStatus}
+                  onSetTap={(index) => handleSetTap(slotTarget.id, index)}
+                  onSetEdit={(index) => handleSetEdit(slotTarget.id, index)}
+                />
+              </div>
               {editingThisSlot && (
                 <SetEditor
                   key={`${editingSetInSlot?.slotId}-${editingSetInSlot?.setIndex}`}
@@ -253,25 +288,29 @@ export function ActiveSessionPage() {
                   onCancel={handleSetEditorCancel}
                 />
               )}
-            </div>
+            </StaggerItem>
           );
         })}
-      </div>
+      </Stagger>
 
       {activeRest && (
-        <div className="flex flex-col gap-3 rounded-[10px] border border-border-subtle p-3">
-          <span className="text-sm font-medium text-text-secondary">{t('session.restTimerTitle')}</span>
-          <RestTimer
-            seconds={restSeconds}
-            running={restRunning}
-            onToggle={() => setRestRunning((r) => !r)}
-            onAdjust={(delta) => setRestSeconds((s) => Math.max(0, s + delta))}
-          />
-          <RirPicker
-            value={storeSlots[activeRest.slotId]?.sets[activeRest.setIndex]?.rir}
-            onPick={(rir) => setRir(activeRest.slotId, activeRest.setIndex, rir)}
-          />
-        </div>
+        <FadeIn>
+          <Card variant="glow" className="flex flex-col items-center gap-4">
+            <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
+              {t('session.restTimerTitle')}
+            </span>
+            <RestTimer
+              seconds={restSeconds}
+              running={restRunning}
+              onToggle={() => setRestRunning((r) => !r)}
+              onAdjust={(delta) => setRestSeconds((s) => Math.max(0, s + delta))}
+            />
+            <RirPicker
+              value={storeSlots[activeRest.slotId]?.sets[activeRest.setIndex]?.rir}
+              onPick={(rir) => setRir(activeRest.slotId, activeRest.setIndex, rir)}
+            />
+          </Card>
+        </FadeIn>
       )}
     </div>
   );

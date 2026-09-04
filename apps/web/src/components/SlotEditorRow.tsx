@@ -17,7 +17,7 @@ export interface SlotEditorRowProps {
 const EQUIPMENT_TYPES = Object.values(EquipmentType);
 
 const numberInputClasses =
-  'min-h-11 w-full rounded-[10px] border border-border-subtle bg-surface-elevated px-3 text-text tabular-nums';
+  'min-h-11 w-full rounded-md border border-border-subtle bg-surface px-3 text-text tabular-nums focus:outline-none focus:ring-2 focus:ring-accent/40';
 
 type NumericField = 'setsTarget' | 'repRangeMin' | 'repRangeMax' | 'weightIncrement';
 
@@ -91,17 +91,17 @@ export function SlotEditorRow({ slot, exerciseName, onChange, onRemove, onMove, 
   const increment = useNumericField(slot.weightIncrement, 'weightIncrement', onChange);
 
   return (
-    <Card className={['flex flex-col gap-3', className].filter(Boolean).join(' ')}>
+    <Card variant="flat" className={['flex flex-col gap-3', className].filter(Boolean).join(' ')}>
       <div className="flex items-center justify-between gap-2">
-        <span className="font-medium text-text">{exerciseName}</span>
+        <span className="font-semibold text-text">{exerciseName}</span>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" aria-label={t('builder.moveUp')} onClick={() => onMove('up')}>
+          <Button variant="ghost" size="sm" aria-label={t('builder.moveUp')} onClick={() => onMove('up')}>
             {'↑'}
           </Button>
-          <Button variant="ghost" aria-label={t('builder.moveDown')} onClick={() => onMove('down')}>
+          <Button variant="ghost" size="sm" aria-label={t('builder.moveDown')} onClick={() => onMove('down')}>
             {'↓'}
           </Button>
-          <Button variant="ghost" aria-label={t('builder.removeExercise')} onClick={onRemove}>
+          <Button variant="ghost" size="sm" aria-label={t('builder.removeExercise')} onClick={onRemove}>
             {'✕'}
           </Button>
         </div>
@@ -166,7 +166,7 @@ export function SlotEditorRow({ slot, exerciseName, onChange, onRemove, onMove, 
         {t('builder.equipment')}
         <select
           id={equipmentId}
-          className="min-h-11 w-full rounded-[10px] border border-border-subtle bg-surface-elevated px-3 text-text"
+          className="min-h-11 w-full rounded-md border border-border-subtle bg-surface px-3 text-text focus:outline-none focus:ring-2 focus:ring-accent/40"
           value={slot.equipmentType}
           onChange={(e) => onChange({ equipmentType: e.target.value as EquipmentType })}
         >

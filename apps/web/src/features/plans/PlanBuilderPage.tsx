@@ -7,7 +7,9 @@ import { getExercises, getPlan, createPlan, updatePlan } from '../../lib/api';
 import { usePlanBuilderStore } from '../../store/planBuilderStore';
 import { ROUTES } from '../../routes';
 import { Button } from '../../components/Button';
-import { Spinner } from '../../components/Spinner';
+import { SkeletonList } from '../../components/Skeleton';
+import { FadeIn, Stagger, StaggerItem } from '../../components/motion';
+import { PlusIcon } from '../../components/icons';
 import { TemplateEditor } from '../../components/TemplateEditor';
 import { ExercisePickerModal } from '../../components/ExercisePickerModal';
 
@@ -122,18 +124,18 @@ export function PlanBuilderPage() {
 
   if (id && planQuery.isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <Spinner label={t('common.loading')} />
+      <div className="flex flex-col gap-4 p-4">
+        <SkeletonList rows={3} />
       </div>
     );
   }
 
   if (id && planQuery.isError) {
     return (
-      <div className="flex flex-col gap-3 p-4">
+      <FadeIn className="flex flex-col items-center gap-3 p-4 py-14 text-center">
         <p className="text-text-secondary">{t('builder.loadError')}</p>
         <Button onClick={() => void planQuery.refetch()}>{t('common.retry')}</Button>
-      </div>
+      </FadeIn>
     );
   }
 
@@ -142,42 +144,46 @@ export function PlanBuilderPage() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <input
-        type="text"
-        className="min-h-11 w-full rounded-[10px] border border-border-subtle bg-surface-elevated px-3 text-lg font-semibold text-text"
-        placeholder={t('builder.planNamePlaceholder')}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+      <FadeIn>
+        <input
+          type="text"
+          className="min-h-11 w-full rounded-md border border-border-subtle bg-surface-2 px-3 text-lg font-semibold text-text focus:outline-none focus:ring-2 focus:ring-accent/40"
+          placeholder={t('builder.planNamePlaceholder')}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </FadeIn>
 
-      <div className="flex flex-col gap-3">
+      <Stagger className="flex flex-col gap-3">
         {templates.map((template, ti) => (
-          <TemplateEditor
-            key={ti}
-            template={template}
-            index={ti}
-            exercisesById={exercisesById}
-            currentLang={i18n.language}
-            onNameChange={(value) => setTemplateMeta(ti, { name: { en: value, vi: value } })}
-            onColorChange={(colorTag) => setTemplateMeta(ti, { colorTag })}
-            onAddExercise={() => setPickerTemplateIndex(ti)}
-            onRemove={() => removeTemplate(ti)}
-            onMove={(dir) => moveTemplate(ti, dir)}
-            onSlotChange={(si, patch) => updateSlot(ti, si, patch)}
-            onSlotRemove={(si) => removeSlot(ti, si)}
-            onSlotMove={(si, dir) => moveSlot(ti, si, dir)}
-          />
+          <StaggerItem key={ti}>
+            <TemplateEditor
+              template={template}
+              index={ti}
+              exercisesById={exercisesById}
+              currentLang={i18n.language}
+              onNameChange={(value) => setTemplateMeta(ti, { name: { en: value, vi: value } })}
+              onColorChange={(colorTag) => setTemplateMeta(ti, { colorTag })}
+              onAddExercise={() => setPickerTemplateIndex(ti)}
+              onRemove={() => removeTemplate(ti)}
+              onMove={(dir) => moveTemplate(ti, dir)}
+              onSlotChange={(si, patch) => updateSlot(ti, si, patch)}
+              onSlotRemove={(si) => removeSlot(ti, si)}
+              onSlotMove={(si, dir) => moveSlot(ti, si, dir)}
+            />
+          </StaggerItem>
         ))}
-      </div>
+      </Stagger>
 
-      <Button variant="ghost" className="self-start" onClick={() => addTemplate()}>
+      <Button variant="outline" className="self-start" onClick={() => addTemplate()}>
+        <PlusIcon width={16} height={16} />
         {t('builder.addDay')}
       </Button>
 
       {saveError && <p className="text-sm text-warning">{t('builder.saveError')}</p>}
 
-      <div className="flex items-center gap-2">
-        <Button onClick={handleSave} disabled={isSaving}>
+      <div className="sticky bottom-24 flex items-center gap-2 rounded-lg border border-border-subtle bg-surface/90 p-2 shadow-card backdrop-blur">
+        <Button className="flex-1" onClick={handleSave} disabled={isSaving}>
           {t('common.save')}
         </Button>
         <Button variant="ghost" onClick={handleCancel} disabled={isSaving}>
