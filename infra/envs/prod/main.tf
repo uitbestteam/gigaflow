@@ -27,6 +27,12 @@ resource "google_project_iam_member" "sa_cloud_tasks_enqueuer" {
   member  = "serviceAccount:${google_service_account.api.email}"
 }
 
+resource "google_project_iam_member" "sa_vertex_ai_user" {
+  project = var.project_id
+  role    = "roles/aiplatform.user"
+  member  = "serviceAccount:${google_service_account.api.email}"
+}
+
 module "cloud_tasks" {
   source     = "../../modules/cloud-tasks"
   project_id = var.project_id
