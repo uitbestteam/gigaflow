@@ -131,7 +131,10 @@ describe('workout-gen routes', () => {
     const created = (await create.json()) as { data: { jobId: string } };
     const jobId = created.data.jobId;
 
-    const internalApp = makeInternalTaskRoutes({ engine: FAKE_ENGINE });
+    const internalApp = makeInternalTaskRoutes({
+      processWorkout: inlineEnqueuer({ engine: FAKE_ENGINE }),
+      processMeal: async () => Promise.resolve(),
+    });
 
     const unauthorized = await internalApp.request('/generate-workout', {
       method: 'POST',

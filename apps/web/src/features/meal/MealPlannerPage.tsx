@@ -106,6 +106,7 @@ export function MealPlannerPage() {
   const { run, status, result, error } = useJobPolling<MealPlanDoc | null, GenerateMealInput>({
     start: generateMeal,
     poll: getMealJob,
+    persistKey: 'gf.job.meal',
     fetchResult: async () => {
       await queryClient.invalidateQueries({ queryKey: ['mealActive'] });
       return getActiveMeal();
