@@ -130,6 +130,25 @@ The entire `POST /api/workout/generate` → `GET /api/workout/jobs/:id`,
 `pnpm test` with fake engines (no real API calls), so you can verify the
 endpoints without keys.
 
+#### Vertex AI provider (optional)
+
+The Vertex AI Gemini provider runs alongside AI Studio Gemini and OpenAI
+(text and InBody vision) as an alternative way to reach the same Gemini
+models through Google Cloud. Select and order providers with
+`AI_PROVIDER_ORDER` (e.g. `vertex,gemini,openai`) — the order is the
+fallback priority; leaving it unset keeps the existing default
+(`gemini,openai`), so this feature is entirely opt-in with no behavior
+change if you don't set it. Vertex authenticates via Application Default
+Credentials rather than an API key: locally run
+`gcloud auth application-default login`, and on Cloud Run the runtime
+service account supplies ADC (granted `roles/aiplatform.user` by
+Terraform). Configure it with `VERTEX_PROJECT_ID` (defaults to
+`GCP_PROJECT_ID`), `VERTEX_LOCATION` (default `global`), and
+`VERTEX_MODEL` (default `gemini-2.5-flash`). Requests go to Google's
+`aiplatform.googleapis.com` endpoint, so usage runs through Vertex/GCP
+billing — credit-eligible if your GCP promotion covers Vertex Gemini
+SKUs.
+
 ### Calling auth-protected endpoints
 
 The running server verifies **real Firebase ID tokens**, so `POST /api/auth/session`

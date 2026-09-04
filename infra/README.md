@@ -28,6 +28,7 @@ that don't exist yet:
    ```bash
    gcloud services enable run.googleapis.com secretmanager.googleapis.com \
      cloudtasks.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com \
+     aiplatform.googleapis.com \
      --project=gigaflow-dev
    ```
 
