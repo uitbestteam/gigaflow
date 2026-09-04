@@ -50,15 +50,13 @@ gcloud billing projects link gigaflow-dev --billing-account=<BILLING_ACCOUNT_ID>
 ```
 Add Firebase to the **same** project at <https://console.firebase.google.com> → Add project → pick `gigaflow-dev`.
 
-## 3. Enable APIs
+## 3. Enable APIs — Terraform-managed
 
-```bash
-gcloud services enable run.googleapis.com \
-  cloudtasks.googleapis.com cloudscheduler.googleapis.com \
-  artifactregistry.googleapis.com cloudbuild.googleapis.com \
-  aiplatform.googleapis.com \
-  --project=gigaflow-dev
-```
+No manual step: Terraform enables all required APIs (`run`, `cloudtasks`,
+`cloudscheduler`, `artifactregistry`, `cloudbuild`, `aiplatform`, `iam`) via
+`google_project_service` on the first apply (step 7). A billed project already
+has `serviceusage`/`cloudresourcemanager` on, which is all Terraform needs to
+bootstrap.
 
 ## 4. Firebase — Auth, Web config, FCM
 
@@ -84,16 +82,14 @@ Create a cluster (Atlas = replica set → enables multi-doc transactions later),
 and network access. Copy the SRV connection string `mongodb+srv://USER:PASS@cluster/gigaflow`
 (use a **fresh** password). It goes into `terraform.tfvars` in step 6/7 — not Secret Manager.
 
-## 6. Terraform state bucket + Artifact Registry (one-time, manual)
+## 6. Terraform state bucket (one-time, manual)
 
-The very first state bucket can't be Terraform-managed (chicken-and-egg):
+Only the very first state bucket can't be Terraform-managed (chicken-and-egg —
+Terraform needs it to store state). Everything else (APIs, **Artifact Registry**,
+IAM, Cloud Tasks, Cloud Run, Cloud Scheduler, Cloud Build trigger) is Terraform.
 ```bash
 gcloud storage buckets create gs://gigaflow-tfstate-dev \
   --project=gigaflow-dev --location=asia-southeast1 --uniform-bucket-level-access
-```
-```bash
-gcloud artifacts repositories create gigaflow --repository-format=docker \
-  --location=asia-southeast1 --project=gigaflow-dev
 ```
 
 ## 7. Terraform apply (SA, IAM, Cloud Tasks, Cloud Run + env from tfvars)
@@ -114,13 +110,18 @@ ai_provider_order = "" # "" = default (gemini,openai); "vertex,gemini" = use Ver
 ```
 ```bash
 terraform init                      # uses the GCS backend (needs step 6)
-terraform validate && terraform plan
-terraform apply
+# First apply just the APIs + Artifact Registry so you can push an image in step 8
+# (Cloud Run needs the image to exist before it deploys):
+terraform apply -target=google_project_service.services -target=google_artifact_registry_repository.docker
+# …do step 8 (build & push the image)…
+terraform apply                     # full apply
 ```
-Terraform creates: SA `gigaflow-api`; IAM (`cloudtasks.enqueuer`, `aiplatform.user`);
-Cloud Tasks queues (`workout-gen`, `meal-gen`, `inbody-ocr`); the **Cloud Run** service
-with `MONGODB_URI` / `GEMINI_API_KEY` / `OPENAI_API_KEY` / `MONGODB_DB` / `AI_PROVIDER_ORDER`
-etc. set as **plain env vars** from `terraform.tfvars`.
+Terraform creates: **APIs** (`google_project_service`); **Artifact Registry** repo;
+SA `gigaflow-api`; IAM (`cloudtasks.enqueuer`, `aiplatform.user`, and the **Cloud
+Build SA** roles); Cloud Tasks queues; the **Cloud Run** service with
+`MONGODB_URI` / `GEMINI_API_KEY` / `OPENAI_API_KEY` / `MONGODB_DB` / `AI_PROVIDER_ORDER`
+etc. as **plain env vars** from `terraform.tfvars`; and the **Cloud Scheduler** job
+for the workout-reminder cron.
 
 > ⚠️ **Security trade-off (chosen):** secret values live in `terraform.tfvars`
 > **and** in the Terraform state as plaintext, and are readable by anyone with
@@ -146,26 +147,26 @@ firebase deploy --only hosting --project gigaflow-dev
 curl https://gigaflow-dev.web.app/api/health   # confirms the /api/** rewrite → Cloud Run
 ```
 
-## 10. CI/CD (Cloud Build trigger on `main`)
+## 10. CI/CD (Cloud Build trigger — Terraform, one manual OAuth step)
 
-```bash
-gcloud builds triggers create github --name=gigaflow-main-deploy \
-  --repo-owner=uitbestteam --repo-name=gigaflow --branch-pattern="^main$" \
-  --build-config=cloudbuild.yaml --project=gigaflow-dev
+The Cloud Build **SA IAM** and the **trigger** are Terraform-managed; only the
+GitHub↔Cloud Build OAuth connection is manual (Terraform can't do the handshake):
 
-PROJECT_NUMBER=$(gcloud projects describe gigaflow-dev --format='value(projectNumber)')
-for role in run.admin firebase.admin iam.serviceAccountUser artifactregistry.writer; do
-  gcloud projects add-iam-policy-binding gigaflow-dev \
-    --member="serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" --role="roles/$role"
-done
-```
+1. GCP Console → **Cloud Build → Repositories → Connect** `uitbestteam/gigaflow`
+   (installs the Cloud Build GitHub App).
+2. In `terraform.tfvars` set `enable_build_trigger = true` → `terraform apply`.
+   Terraform creates the `gigaflow-main-deploy` trigger (branch `^main$`,
+   `cloudbuild.yaml`) and grants the Cloud Build SA `run.admin` /
+   `iam.serviceAccountUser` / `artifactregistry.writer` / `firebasehosting.admin`.
+
 (`.github/workflows/ci.yaml` runs tests on PRs; Cloud Build deploys on merge.)
 
 ## 11. Post-provision switch-overs (see `infra/README.md`)
 
-- **Cloud Tasks / Scheduler**: AI generation still runs **inline in-process**; swap the
-  inline enqueuers for real Cloud Tasks calls, add the missing **InBody internal task
-  handler**, and point Cloud Scheduler at `POST /internal/cron/workout-reminders`.
+- **Cloud Tasks (code)**: AI generation still runs **inline in-process**; swap the
+  inline enqueuers for real Cloud Tasks calls and add the missing **InBody internal
+  task handler**. (The Cloud Scheduler job for the reminder cron is already
+  Terraform-managed — no manual wiring.)
 - **Multi-doc transactions**: wrap the active-toggle / `replaceSetLogs` / session-finish
   writes in `withTransaction` (Atlas is a replica set).
 - **Prod**: `infra/envs/prod/` mirrors dev — repeat steps 6–9 against `gigaflow-prod`.

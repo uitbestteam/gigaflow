@@ -46,3 +46,39 @@ variable "ai_provider_order" {
   description = "AI provider priority list, e.g. \"vertex,gemini,openai\". Empty = default (gemini,openai). Set \"vertex,gemini\" to run AI through Vertex (uses the SA's ADC + roles/aiplatform.user)."
   default     = ""
 }
+
+variable "artifact_repo_id" {
+  type        = string
+  description = "Artifact Registry repository id for the API image."
+  default     = "gigaflow"
+}
+
+variable "github_owner" {
+  type        = string
+  description = "GitHub org/user that owns the repo (for the Cloud Build trigger)."
+  default     = "uitbestteam"
+}
+
+variable "github_repo" {
+  type        = string
+  description = "GitHub repository name (for the Cloud Build trigger)."
+  default     = "gigaflow"
+}
+
+variable "enable_build_trigger" {
+  type        = bool
+  description = "Create the Cloud Build GitHub trigger. Set true only AFTER connecting the repo to Cloud Build once via the console (GitHub App OAuth)."
+  default     = false
+}
+
+variable "reminders_cron" {
+  type        = string
+  description = "Cron schedule for the workout-reminder job."
+  default     = "0 9 * * *"
+}
+
+variable "reminders_time_zone" {
+  type        = string
+  description = "IANA time zone for the reminder cron."
+  default     = "Asia/Ho_Chi_Minh"
+}
