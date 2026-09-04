@@ -4,13 +4,20 @@ import { AWARD_CATALOG, evaluateAwards } from './awards.js';
 
 function summary(overrides: Partial<StatsSummary> = {}): StatsSummary {
   return {
-    totalSessions: 0, totalVolume: 0, totalPrs: 0, totalExercises: 0, ...overrides,
+    totalSessions: 0,
+    totalVolume: 0,
+    totalPrs: 0,
+    totalExercises: 0,
+    currentStreakWeeks: 0,
+    longestStreakWeeks: 0,
+    totalMealPlans: 0,
+    ...overrides,
   };
 }
 
 describe('AWARD_CATALOG', () => {
-  it('has exactly the 5 required awards with bilingual copy', () => {
-    expect(AWARD_CATALOG).toHaveLength(5);
+  it('has all 10 awards with bilingual copy', () => {
+    expect(AWARD_CATALOG).toHaveLength(10);
     const keys = AWARD_CATALOG.map((a) => a.key);
     expect(keys).toEqual([
       AwardKey.FIRST_WORKOUT,
@@ -18,6 +25,11 @@ describe('AWARD_CATALOG', () => {
       AwardKey.FIRST_PR,
       AwardKey.TEN_EXERCISES,
       AwardKey.VOLUME_50K,
+      AwardKey.SESSIONS_25,
+      AwardKey.VOLUME_100K,
+      AwardKey.FIVE_PRS,
+      AwardKey.STREAK_4_WEEKS,
+      AwardKey.FIRST_MEAL_PLAN,
     ]);
     for (const def of AWARD_CATALOG) {
       expect(def.name.en).toBeTruthy();
@@ -47,11 +59,32 @@ describe('evaluateAwards', () => {
   });
 
   it('caps current at target even when metric exceeds it', () => {
-    const awards = evaluateAwards(summary({ totalVolume: 999999, totalSessions: 50, totalPrs: 20, totalExercises: 30 }));
+    const awards = evaluateAwards(summary({
+      totalVolume: 999999, totalSessions: 50, totalPrs: 20, totalExercises: 30, currentStreakWeeks: 12, totalMealPlans: 5,
+    }));
     for (const award of awards) {
       expect(award.current).toBeLessThanOrEqual(award.target);
       expect(award.earned).toBe(true);
     }
+  });
+
+  it('earns the new streak/meal-plan/volume awards from their metrics', () => {
+    const awards = evaluateAwards(
+      summary({ currentStreakWeeks: 4, totalMealPlans: 1, totalVolume: 100000, totalPrs: 5, totalSessions: 25 }),
+    );
+    const byKey = (key: AwardKey) => awards.find((a) => a.key === key);
+    expect(byKey(AwardKey.STREAK_4_WEEKS)?.earned).toBe(true);
+    expect(byKey(AwardKey.FIRST_MEAL_PLAN)?.earned).toBe(true);
+    expect(byKey(AwardKey.VOLUME_100K)?.earned).toBe(true);
+    expect(byKey(AwardKey.FIVE_PRS)?.earned).toBe(true);
+    expect(byKey(AwardKey.SESSIONS_25)?.earned).toBe(true);
+  });
+
+  it('does not earn the streak award below 4 weeks', () => {
+    const awards = evaluateAwards(summary({ currentStreakWeeks: 3 }));
+    const streak = awards.find((a) => a.key === AwardKey.STREAK_4_WEEKS);
+    expect(streak?.earned).toBe(false);
+    expect(streak?.current).toBe(3);
   });
 
   it('returns one Award per catalog entry with correct key/name/description/target', () => {

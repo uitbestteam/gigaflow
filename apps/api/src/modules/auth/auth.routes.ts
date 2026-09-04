@@ -1,9 +1,11 @@
 import { Hono, type Context } from 'hono';
+import { zValidator } from '@hono/zod-validator';
 import { getAuth } from 'firebase-admin/auth';
-import { apiSuccess } from '@gigaflow/shared';
+import { apiSuccess, zUserProfile } from '@gigaflow/shared';
 import { errorBody } from '../../middleware/error.js';
 import { firebaseAuth, type TokenVerifier } from './firebase-auth.js';
 import { mergeGuestData } from './merge.repo.js';
+import { setProfile } from './user.repo.js';
 import { getFirebaseApp } from '../../lib/firebase.js';
 
 export function makeAuthRoutes(deps: { verify: TokenVerifier }): Hono {
@@ -13,6 +15,18 @@ export function makeAuthRoutes(deps: { verify: TokenVerifier }): Hono {
   const handler = (c: Context) => c.json(apiSuccess(c.get('user')));
   auth.get('/session', handler);
   auth.post('/session', handler);
+
+  /**
+   * Persist the first-run onboarding profile. Sets `profile` + `onboardedAt` on
+   * the caller's user doc and returns the full updated user, so the client can
+   * drop the onboarding flow immediately.
+   */
+  auth.post('/profile', zValidator('json', zUserProfile), async (c) => {
+    const user = c.get('user');
+    const profile = c.req.valid('json');
+    const updated = await setProfile(user.authId, profile);
+    return c.json(apiSuccess(updated));
+  });
 
   /**
    * Merge a just-abandoned guest's data into the caller's (target) account.

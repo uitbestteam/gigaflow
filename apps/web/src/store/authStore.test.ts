@@ -36,6 +36,16 @@ describe('authStore', () => {
     expect(getAuthToken()).toBe('tok_1');
   });
 
+  it('setUser replaces the stored user and syncs isGuest', async () => {
+    await useAuthStore.getState().bootstrap(deps);
+    const onboarded: User = { ...baseUser, isGuest: false, onboardedAt: new Date() };
+    useAuthStore.getState().setUser(onboarded);
+    const s = useAuthStore.getState();
+    expect(s.user).toBe(onboarded);
+    expect(s.user?.onboardedAt).toBeInstanceOf(Date);
+    expect(s.isGuest).toBe(false);
+  });
+
   it('bootstrap error sets error status', async () => {
     await useAuthStore.getState().bootstrap({
       ...deps,

@@ -11,11 +11,14 @@ import { SparklesIcon } from '../../components/icons';
 import { SessionQueueItem, type SessionQueueStatus } from '../../components/SessionQueueItem';
 import { sessionPath } from '../../routes';
 import { PresetPicker } from '../plans/PresetPicker';
+import { useAuthStore } from '../../store/authStore';
+import { OnboardingFlow } from '../onboarding/OnboardingFlow';
 
 export function HomePage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const user = useAuthStore((s) => s.user);
 
   const activePlanQuery = useQuery({
     queryKey: ['activePlan'],
@@ -29,6 +32,12 @@ export function HomePage() {
       navigate(sessionPath(result.session.id));
     },
   });
+
+  // First-run gate: a signed-in user who hasn't finished onboarding gets the
+  // onboarding flow instead of the home surface.
+  if (user && !user.onboardedAt) {
+    return <OnboardingFlow />;
+  }
 
   if (activePlanQuery.isLoading) {
     return (
