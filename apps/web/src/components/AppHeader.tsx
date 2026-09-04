@@ -12,7 +12,7 @@ export function AppHeader() {
   const setLocale = useLocaleStore((s) => s.setLocale);
 
   return (
-    <header className="glass safe-top sticky top-0 z-40 border-b border-border-subtle">
+    <header className="glass safe-top z-40 shrink-0 border-b border-border-subtle">
       <div className="mx-auto flex max-w-[520px] items-center justify-between gap-3 px-4 py-3">
         <Link to={ROUTES.home} className="text-xl font-extrabold tracking-tight">
           <span className="text-gradient">{t('common.appName')}</span>

@@ -57,6 +57,12 @@
 }
 
 html,
+body,
+#root {
+  height: 100%;
+}
+
+html,
 body {
   background: var(--bg);
 }
@@ -67,6 +73,10 @@ body {
   /* one faint, calm tint — not an aurora light show */
   background-image: radial-gradient(70% 45% at 50% -15%, rgba(79, 131, 241, 0.06), transparent 70%);
   background-attachment: fixed;
+  /* App-shell: the page itself never scrolls — only the <main> content area
+     does. Kills the mobile/PWA address-bar resize jumps and rubber-band bounce. */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .tnum {

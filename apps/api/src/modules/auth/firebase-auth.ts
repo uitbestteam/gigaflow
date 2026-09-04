@@ -1,7 +1,7 @@
 import type { MiddlewareHandler } from 'hono';
 import type { User } from '@gigaflow/shared';
 import { errorBody } from '../../middleware/error.js';
-import { mapSignInProvider } from './provider-map.js';
+import { resolveAuthIdentity } from './provider-map.js';
 import { upsertByAuthId } from './user.repo.js';
 
 declare module 'hono' {
@@ -15,6 +15,13 @@ export interface VerifiedToken {
   email?: string;
   name?: string;
   signInProvider: string;
+  /**
+   * Provider ids linked to this account (keys of the token's
+   * `firebase.identities`), e.g. `['google.com']`. Present even when the
+   * session's `signInProvider` is still `'anonymous'` after a link. Optional
+   * for backward compatibility with verifiers/tests that don't supply it.
+   */
+  identities?: string[];
 }
 
 export type TokenVerifier = (bearerToken: string) => Promise<VerifiedToken>;
@@ -38,10 +45,10 @@ export function firebaseAuth(deps: FirebaseAuthDeps): MiddlewareHandler {
       return c.json(errorBody('Unauthorized'), 401);
     }
 
-    let authProvider: ReturnType<typeof mapSignInProvider>['authProvider'];
+    let authProvider: ReturnType<typeof resolveAuthIdentity>['authProvider'];
     let isGuest: boolean;
     try {
-      ({ authProvider, isGuest } = mapSignInProvider(verified.signInProvider));
+      ({ authProvider, isGuest } = resolveAuthIdentity(verified.signInProvider, verified.identities ?? []));
     } catch {
       return c.json(errorBody('Forbidden'), 403);
     }
