@@ -164,6 +164,9 @@ export interface TranslationSchema {
     analyze: string;
     takenAt: string;
     noResult: string;
+    historyTitle: string;
+    changePhoto: string;
+    analyzeAnother: string;
     metric: {
       weightKg: string;
       bmi: string;
@@ -202,6 +205,28 @@ export interface TranslationSchema {
     weightLabel: string;
     logWeightSubmit: string;
     loadError: string;
+    streakTitle: string;
+    streakUnit: string;
+    streakBest: string;
+    streakNone: string;
+    volumeByMuscleTitle: string;
+    prTimelineTitle: string;
+  };
+  onboarding: {
+    welcomeTitle: string;
+    welcomeBody: string;
+    welcomeCta: string;
+    profileTitle: string;
+    profileSubtitle: string;
+    startTitle: string;
+    startSubtitle: string;
+    startAi: string;
+    startAiDesc: string;
+    startPreset: string;
+    startPresetDesc: string;
+    startBuild: string;
+    startBuildDesc: string;
+    skip: string;
   };
   ai: {
     navLabel: string;
@@ -547,6 +572,9 @@ const en: TranslationSchema = {
     analyze: 'Analyze',
     takenAt: 'Taken on {{date}}',
     noResult: 'No InBody result yet. Upload a scan photo to get started.',
+    historyTitle: 'History',
+    changePhoto: 'Tap to change photo',
+    analyzeAnother: 'Scan another',
     metric: {
       weightKg: 'Weight',
       bmi: 'BMI',
@@ -585,6 +613,28 @@ const en: TranslationSchema = {
     weightLabel: 'Weight (kg)',
     logWeightSubmit: 'Log weight',
     loadError: 'Could not load this. Please try again.',
+    streakTitle: 'Streak',
+    streakUnit: '{{count}}-week streak',
+    streakBest: 'Best: {{count}} weeks',
+    streakNone: 'Train this week to start a streak',
+    volumeByMuscleTitle: 'Volume by muscle group',
+    prTimelineTitle: 'PR timeline',
+  },
+  onboarding: {
+    welcomeTitle: 'Welcome to GigaFlow',
+    welcomeBody: 'Answer a few quick questions and we’ll set up your training in seconds.',
+    welcomeCta: 'Get started',
+    profileTitle: 'About your training',
+    profileSubtitle: 'This tailors your plans and AI suggestions.',
+    startTitle: 'How do you want to start?',
+    startSubtitle: 'You can change everything later.',
+    startAi: 'Let AI build my plan',
+    startAiDesc: 'A personalized weekly plan from your profile.',
+    startPreset: 'Pick a preset',
+    startPresetDesc: 'Push/Pull/Legs, Upper/Lower or Full body.',
+    startBuild: 'Build my own',
+    startBuildDesc: 'Create a plan from scratch.',
+    skip: 'Skip for now',
   },
   ai: {
     navLabel: 'AI generate',

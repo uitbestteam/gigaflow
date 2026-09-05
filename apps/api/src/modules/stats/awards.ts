@@ -59,6 +59,56 @@ export const AWARD_CATALOG: AwardDef[] = [
     target: 50000,
     metric: (s) => s.totalVolume,
   },
+  {
+    key: AwardKey.SESSIONS_25,
+    name: { en: 'Quarter Century', vi: '25 buổi tập' },
+    description: {
+      en: 'Complete 25 training sessions',
+      vi: 'Hoàn thành 25 buổi tập luyện',
+    },
+    target: 25,
+    metric: (s) => s.totalSessions,
+  },
+  {
+    key: AwardKey.VOLUME_100K,
+    name: { en: '100K Volume', vi: '100K khối lượng' },
+    description: {
+      en: 'Lift a total volume of 100,000 kg',
+      vi: 'Nâng tổng khối lượng 100.000 kg',
+    },
+    target: 100000,
+    metric: (s) => s.totalVolume,
+  },
+  {
+    key: AwardKey.FIVE_PRS,
+    name: { en: 'Five Personal Records', vi: 'Năm kỷ lục cá nhân' },
+    description: {
+      en: 'Set 5 personal records',
+      vi: 'Lập 5 kỷ lục cá nhân',
+    },
+    target: 5,
+    metric: (s) => s.totalPrs,
+  },
+  {
+    key: AwardKey.STREAK_4_WEEKS,
+    name: { en: 'Four-Week Streak', vi: 'Chuỗi 4 tuần' },
+    description: {
+      en: 'Train in 4 consecutive weeks',
+      vi: 'Tập luyện trong 4 tuần liên tiếp',
+    },
+    target: 4,
+    metric: (s) => s.currentStreakWeeks,
+  },
+  {
+    key: AwardKey.FIRST_MEAL_PLAN,
+    name: { en: 'First Meal Plan', vi: 'Thực đơn đầu tiên' },
+    description: {
+      en: 'Generate your first meal plan',
+      vi: 'Tạo thực đơn đầu tiên của bạn',
+    },
+    target: 1,
+    metric: (s) => s.totalMealPlans,
+  },
 ];
 
 export function evaluateAwards(summary: StatsSummary): Award[] {

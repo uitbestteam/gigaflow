@@ -39,6 +39,8 @@ export interface AuthState {
   user?: User;
   isGuest: boolean;
   photoURL?: string;
+  /** Replace the stored user doc (e.g. after saving the onboarding profile). */
+  setUser: (user: User) => void;
   bootstrap: (deps?: AuthDeps) => Promise<void>;
   refreshToken: (deps?: AuthDeps) => Promise<void>;
   upgradeGoogle: (deps?: AuthDeps) => Promise<void>;
@@ -79,6 +81,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: undefined,
   user: undefined,
   isGuest: false,
+
+  setUser: (user: User) => set({ user, isGuest: user.isGuest }),
 
   bootstrap: async (deps = defaultDeps) => {
     try {

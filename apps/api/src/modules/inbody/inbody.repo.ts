@@ -38,6 +38,14 @@ export async function findLatestInbody(userId: string): Promise<InbodyResult | n
   return mapId(doc);
 }
 
+/** The user's InBody results, newest first (capped). */
+export async function listInbodyHistory(userId: string, limit = 30): Promise<InbodyResult[]> {
+  const docs = await collection()
+    .find({ userId }, { sort: { createdAt: -1 }, limit })
+    .toArray();
+  return docs.map(mapId);
+}
+
 export async function findInbodyForUser(userId: string, id: string): Promise<InbodyResult | null> {
   if (!ObjectId.isValid(id)) return null;
   const doc = await collection().findOne({ _id: new ObjectId(id), userId });

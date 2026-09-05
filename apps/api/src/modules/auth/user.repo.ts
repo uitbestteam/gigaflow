@@ -1,5 +1,5 @@
 import { getDb } from '../../lib/db.js';
-import { AuthProvider, AuthSource, Language, type User } from '@gigaflow/shared';
+import { AuthProvider, AuthSource, Language, type User, type UserProfile } from '@gigaflow/shared';
 
 const COLLECTION = 'users';
 
@@ -67,4 +67,19 @@ function isDuplicateKeyError(err: unknown): boolean {
 
 export async function findByAuthId(authId: string): Promise<User | null> {
   return collection().findOne({ authId }, { projection: { _id: 0 } }) as Promise<User | null>;
+}
+
+/**
+ * Persist the onboarding profile: `$set`s `profile` + stamps `onboardedAt` so
+ * the client won't re-show the onboarding flow. Returns the updated user doc.
+ */
+export async function setProfile(authId: string, profile: UserProfile): Promise<User> {
+  const now = new Date();
+  const result = await collection().findOneAndUpdate(
+    { authId },
+    { $set: { profile, onboardedAt: now, updatedAt: now } },
+    { returnDocument: 'after', projection: { _id: 0 } },
+  );
+  if (!result) throw new Error('User not found');
+  return result as User;
 }

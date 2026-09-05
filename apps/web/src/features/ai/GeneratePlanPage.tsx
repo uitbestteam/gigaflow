@@ -12,6 +12,7 @@ import {
   type PlanWithTemplates,
 } from '@gigaflow/shared';
 import { generateWorkout, getGenerationJob, getPlan } from '../../lib/api';
+import { useAuthStore } from '../../store/authStore';
 import { useJobPolling } from '../../lib/useJobPolling';
 import { resolveTranslatable } from '../../lib/i18n';
 import { JobProgress } from '../../components/JobProgress';
@@ -80,12 +81,17 @@ export function GeneratePlanPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [goal, setGoal] = useState<Goal>();
-  const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>();
-  const [daysPerWeek, setDaysPerWeek] = useState(3);
+  // Pre-fill intake from the onboarding profile when the user has one.
+  const profile = useAuthStore((s) => s.user?.profile);
+
+  const [goal, setGoal] = useState<Goal | undefined>(profile?.goal);
+  const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel | undefined>(profile?.experienceLevel);
+  const [daysPerWeek, setDaysPerWeek] = useState(profile?.daysPerWeek ?? 3);
   const [sessionMinutes, setSessionMinutes] = useState<number>();
-  const [preset, setPreset] = useState<EquipmentPreset>();
-  const [customEquipment, setCustomEquipment] = useState<EquipmentType[]>([]);
+  const [preset, setPreset] = useState<EquipmentPreset | undefined>(
+    profile?.availableEquipment && profile.availableEquipment.length > 0 ? 'custom' : undefined,
+  );
+  const [customEquipment, setCustomEquipment] = useState<EquipmentType[]>(profile?.availableEquipment ?? []);
   const [injuries, setInjuries] = useState<InjuryArea[]>([]);
   const [emphasis, setEmphasis] = useState<MuscleGroup[]>([]);
 

@@ -14,9 +14,13 @@ import {
   zInbodyResult,
   zStatsSummary,
   zAward,
+  zVolumeByWeek,
+  zUserProfile,
   zWeightLog,
   zDeviceToken,
   type User,
+  type UserProfile,
+  type VolumeByWeek,
   type Plan,
   type PlanWithTemplates,
   type CreatePlanInput,
@@ -150,6 +154,17 @@ async function runFetch<T>(path: string, opts: ApiFetchOptions<T>, allowRetry: b
 
 export async function postAuthSession(): Promise<User> {
   return apiFetch('/auth/session', { method: 'POST', schema: zUser });
+}
+
+/** Save the onboarding profile (sets the user's `profile` + `onboardedAt`). */
+export async function saveProfile(profile: UserProfile): Promise<User> {
+  const body = zUserProfile.parse(profile);
+  return apiFetch('/auth/profile', { method: 'POST', body, schema: zUser });
+}
+
+/** Weekly training volume split by muscle group, oldest→newest (for the trend chart). */
+export async function getVolumeByWeek(): Promise<VolumeByWeek[]> {
+  return apiFetch('/stats/volume-by-week', { schema: zVolumeByWeek.array() });
 }
 
 /**
@@ -292,6 +307,11 @@ export async function getInbodyJob(id: string, fetchImpl?: typeof fetch): Promis
 
 export async function getLatestInbody(fetchImpl?: typeof fetch): Promise<InbodyResult | null> {
   return apiFetch('/inbody/latest', { schema: zInbodyResult.nullable(), fetchImpl });
+}
+
+/** Past InBody results, newest first. */
+export async function getInbodyHistory(fetchImpl?: typeof fetch): Promise<InbodyResult[]> {
+  return apiFetch('/inbody/history', { schema: zInbodyResult.array(), fetchImpl });
 }
 
 export async function getStatsSummary(fetchImpl?: typeof fetch): Promise<StatsSummary> {

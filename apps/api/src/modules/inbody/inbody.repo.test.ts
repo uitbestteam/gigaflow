@@ -3,7 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { connectDb, closeDb } from '../../lib/db.js';
 import type { InbodyMetrics } from '@gigaflow/shared';
 import {
-  ensureInbodyIndexes, createInbodyResult, findLatestInbody, findInbodyForUser,
+  ensureInbodyIndexes, createInbodyResult, findLatestInbody, findInbodyForUser, listInbodyHistory,
 } from './inbody.repo.js';
 
 let mongod: MongoMemoryServer;
@@ -61,5 +61,16 @@ describe('inbody.repo', () => {
 
   it('findInbodyForUser returns null for an invalid hex id', async () => {
     expect(await findInbodyForUser('u1', 'not-a-valid-id')).toBeNull();
+  });
+
+  it('listInbodyHistory returns the user’s results newest-first and is owner-scoped', async () => {
+    const a = await createInbodyResult('hist', metrics);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    const b = await createInbodyResult('hist', { ...metrics, weightKg: 72 });
+    await createInbodyResult('other-user', metrics);
+
+    const history = await listInbodyHistory('hist');
+    expect(history.map((h) => h.id)).toEqual([b.id, a.id]);
+    expect(await listInbodyHistory('no-such-user')).toEqual([]);
   });
 });

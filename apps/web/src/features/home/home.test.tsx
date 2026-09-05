@@ -12,6 +12,10 @@ vi.mock('../../lib/api', () => ({
   getActivePlan: vi.fn(),
   createPlanFromTemplate: vi.fn(),
   startSession: vi.fn(),
+  // HomePage now imports authStore (for the onboarding gate), which statically
+  // imports these from the api module — the mock must provide them.
+  postAuthSession: vi.fn(),
+  saveProfile: vi.fn(),
 }));
 
 function renderHome() {
