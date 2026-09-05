@@ -53,13 +53,27 @@ export function SessionQueueItem({ template, status, onStart, className = '' }: 
   }
 
   const classes = [
-    'flex items-center gap-3 rounded-md p-3',
+    'flex w-full items-center gap-3 rounded-md p-3 text-left',
     status === 'upcoming' ? 'bg-surface-2' : '',
     status === 'done' ? 'opacity-60' : '',
+    onStart && status !== 'done' ? 'transition-transform active:scale-[0.98]' : '',
     className,
   ]
     .filter(Boolean)
     .join(' ');
+
+  // Any non-done day is startable by tapping the whole row.
+  if (onStart && status !== 'done') {
+    return (
+      <button type="button" onClick={onStart} className={classes}>
+        <ColorDot tag={template.colorTag} />
+        <span className={`flex-1 ${STATUS_TEXT_CLASSES[status]}`}>{template.name}</span>
+        <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-3 text-text-secondary">
+          <DumbbellIcon width={16} height={16} />
+        </span>
+      </button>
+    );
+  }
 
   return (
     <div className={classes}>
