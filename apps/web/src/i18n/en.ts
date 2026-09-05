@@ -164,6 +164,9 @@ export interface TranslationSchema {
     analyze: string;
     takenAt: string;
     noResult: string;
+    historyTitle: string;
+    changePhoto: string;
+    analyzeAnother: string;
     metric: {
       weightKg: string;
       bmi: string;
@@ -569,6 +572,9 @@ const en: TranslationSchema = {
     analyze: 'Analyze',
     takenAt: 'Taken on {{date}}',
     noResult: 'No InBody result yet. Upload a scan photo to get started.',
+    historyTitle: 'History',
+    changePhoto: 'Tap to change photo',
+    analyzeAnother: 'Scan another',
     metric: {
       weightKg: 'Weight',
       bmi: 'BMI',

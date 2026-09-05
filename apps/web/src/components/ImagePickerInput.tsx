@@ -87,11 +87,17 @@ export function ImagePickerInput({
     <div className={classes}>
       <label htmlFor={inputId} className={labelClasses}>
         {previewSrc ? (
-          <img
-            src={previewSrc}
-            alt={t('inbody.previewAlt')}
-            className="max-h-48 w-full rounded-[10px] object-contain"
-          />
+          <>
+            <img
+              src={previewSrc}
+              alt={t('inbody.previewAlt')}
+              className="max-h-48 w-full rounded-[10px] object-contain"
+            />
+            <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-accent">
+              <CameraIcon width={14} height={14} />
+              {t('inbody.changePhoto')}
+            </span>
+          </>
         ) : (
           <>
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-grad-primary shadow-glow-accent">
