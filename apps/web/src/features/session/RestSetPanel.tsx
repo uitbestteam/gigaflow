@@ -30,11 +30,10 @@ function fmtMmSs(total: number): string {
 
 /**
  * The convenience panel shown the moment a set is logged: it sticks to the
- * bottom of the screen so the user never scrolls, and lets them (a) run the
- * rest timer and (b) fix the weight/reps + RIR of the set they just tapped
- * right here — no scrolling down, no double-click needed (double-click on the
- * set still opens the full inline editor). Keyed per set by the caller so the
- * draft inputs reset when a new set is logged.
+ * bottom of the screen (never scroll) and lets the user run the rest timer AND
+ * fix the weight/reps + RIR of the set they just tapped, right here. Laid out
+ * to fit any phone width (no horizontal overflow); all controls are ≥44px.
+ * Double-clicking a set still opens the full inline editor elsewhere.
  */
 export function RestSetPanel({
   exerciseName,
@@ -66,96 +65,86 @@ export function RestSetPanel({
       onEdit({ weightKg: wv, repsDone: rv });
     }
   };
-
   const bumpWeight = (delta: number) => {
     const next = Math.max(0, Math.round((Number(weight || '0') + delta) * 100) / 100);
-    const s = String(next);
-    setWeight(s);
-    commit(s, reps);
+    setWeight(String(next));
+    commit(String(next), reps);
   };
   const bumpReps = (delta: number) => {
     const next = Math.max(0, Math.round(Number(reps || '0') + delta));
-    const s = String(next);
-    setReps(s);
-    commit(weight, s);
+    setReps(String(next));
+    commit(weight, String(next));
   };
 
   return (
-    <div className="glass safe-bottom sticky bottom-0 z-30 -mx-4 border-t border-border-subtle px-4 pb-3 pt-3 shadow-nav">
+    <div className="glass safe-bottom sticky bottom-0 z-30 -mx-4 box-border w-[calc(100%+2rem)] overflow-hidden border-t border-border-subtle px-4 pb-3 pt-3 shadow-nav">
       {/* header */}
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <div className="min-w-0">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-baseline gap-2">
           <span className="truncate text-sm font-semibold text-text">{exerciseName}</span>
-          <span className="ml-2 text-xs font-medium text-text-secondary">
-            {t('session.restTimerTitle')} · Set {setNumber}/{totalSets}
+          <span className="shrink-0 text-xs font-medium text-text-secondary">
+            Set {setNumber}/{totalSets}
           </span>
         </div>
         <button
           type="button"
           onClick={onDismiss}
-          className="shrink-0 rounded-pill px-3 py-1 text-xs font-semibold text-text-secondary hover:text-text"
+          className="min-h-9 shrink-0 rounded-pill bg-surface-2 px-3 text-xs font-semibold text-text-secondary active:scale-95"
         >
           {t('session.restTimerSkip')}
         </button>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* compact timer */}
+      {/* timer row: ring toggles pause/resume, ±15s fill the rest of the width */}
+      <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onToggleRest}
           aria-label={restRunning ? t('session.pause') : t('session.resume')}
-          className={restRunning ? 'animate-pulse-glow rounded-full' : ''}
+          className={`shrink-0 rounded-full ${restRunning ? 'animate-pulse-glow' : ''}`}
         >
-          <ProgressRing value={progress} size={64} strokeWidth={6}>
+          <ProgressRing value={progress} size={56} strokeWidth={6}>
             <span className="tnum text-sm font-bold text-text">{fmtMmSs(restSeconds)}</span>
           </ProgressRing>
         </button>
+        <button
+          type="button"
+          onClick={() => onAdjustRest(-15)}
+          className="min-h-11 flex-1 rounded-md border border-border bg-surface-2 text-sm font-semibold text-text active:scale-95"
+        >
+          -15s
+        </button>
+        <button
+          type="button"
+          onClick={() => onAdjustRest(15)}
+          className="min-h-11 flex-1 rounded-md border border-border bg-surface-2 text-sm font-semibold text-text active:scale-95"
+        >
+          +15s
+        </button>
+      </div>
 
-        <div className="flex flex-col gap-1">
-          <div className="flex gap-1">
-            <button
-              type="button"
-              onClick={() => onAdjustRest(-15)}
-              className="min-h-9 rounded-sm border border-border bg-surface-2 px-2 text-xs font-semibold text-text-secondary"
-            >
-              -15s
-            </button>
-            <button
-              type="button"
-              onClick={() => onAdjustRest(15)}
-              className="min-h-9 rounded-sm border border-border bg-surface-2 px-2 text-xs font-semibold text-text-secondary"
-            >
-              +15s
-            </button>
-          </div>
-        </div>
-
-        {/* quick weight / reps steppers */}
-        <div className="ml-auto flex gap-3">
-          <Stepper
-            label={t('session.editWeight')}
-            value={weight}
-            onInput={(s) => {
-              setWeight(s);
-              commit(s, reps);
-            }}
-            onDec={() => bumpWeight(-WEIGHT_STEP)}
-            onInc={() => bumpWeight(WEIGHT_STEP)}
-            width="w-16"
-          />
-          <Stepper
-            label={t('session.editReps')}
-            value={reps}
-            onInput={(s) => {
-              setReps(s);
-              commit(weight, s);
-            }}
-            onDec={() => bumpReps(-1)}
-            onInc={() => bumpReps(1)}
-            width="w-12"
-          />
-        </div>
+      {/* quick edit: two full-width steppers */}
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <Stepper
+          label={t('session.editWeight')}
+          value={weight}
+          onInput={(s) => {
+            setWeight(s);
+            commit(s, reps);
+          }}
+          onDec={() => bumpWeight(-WEIGHT_STEP)}
+          onInc={() => bumpWeight(WEIGHT_STEP)}
+        />
+        <Stepper
+          label={t('session.editReps')}
+          value={reps}
+          onInput={(s) => {
+            setReps(s);
+            commit(weight, s);
+          }}
+          onDec={() => bumpReps(-1)}
+          onInc={() => bumpReps(1)}
+        />
       </div>
 
       <div className="mt-3">
@@ -171,43 +160,41 @@ function Stepper({
   onInput,
   onDec,
   onInc,
-  width,
 }: {
   label: string;
   value: string;
   onInput: (s: string) => void;
   onDec: () => void;
   onInc: () => void;
-  width: string;
 }) {
   return (
-    <label className="flex flex-col items-center gap-1">
-      <span className="text-[10px] font-medium uppercase tracking-wide text-text-muted">{label}</span>
-      <div className="flex items-center gap-1">
+    <div className="flex flex-col gap-1">
+      <span className="text-[11px] font-medium uppercase tracking-wide text-text-muted">{label}</span>
+      <div className="flex items-stretch gap-1.5">
         <button
           type="button"
           onClick={onDec}
           aria-label={`${label} -`}
-          className="flex h-8 w-8 items-center justify-center rounded-sm border border-border bg-surface-2 text-text-secondary"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-surface-2 text-lg font-bold text-text active:scale-95"
         >
-          <span className="text-base leading-none">−</span>
+          −
         </button>
         <input
           type="number"
           inputMode="decimal"
           value={value}
           onChange={(e) => onInput(e.target.value)}
-          className={`tnum min-h-9 ${width} rounded-sm border border-border bg-surface px-1 text-center text-sm font-bold text-text focus:border-accent focus:outline-none`}
+          className="tnum h-11 w-full min-w-0 rounded-md border border-border bg-surface text-center text-base font-bold text-text focus:border-accent focus:outline-none"
         />
         <button
           type="button"
           onClick={onInc}
           aria-label={`${label} +`}
-          className="flex h-8 w-8 items-center justify-center rounded-sm border border-border bg-surface-2 text-text-secondary"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-surface-2 text-text active:scale-95"
         >
-          <PlusIcon width={14} height={14} />
+          <PlusIcon width={16} height={16} />
         </button>
       </div>
-    </label>
+    </div>
   );
 }

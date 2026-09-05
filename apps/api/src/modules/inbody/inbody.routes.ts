@@ -6,7 +6,7 @@ import { quotaGuard } from '../subscription/quota.guard.js';
 import { createJob, findJobForUser } from '../workout/generation-job.repo.js';
 import type { TaskEnqueuer } from '../workout/workout-gen.routes.js';
 import { processAnalyzeInbody, type InbodyDeps } from './inbody.service.js';
-import { findLatestInbody } from './inbody.repo.js';
+import { findLatestInbody, listInbodyHistory } from './inbody.repo.js';
 import type { VisionAnalyzer } from './vision.js';
 
 export function inlineInbodyEnqueuer(deps: InbodyDeps): TaskEnqueuer {
@@ -44,6 +44,12 @@ export function makeInbodyRoutes(deps: {
     const user = c.get('user');
     const result = await findLatestInbody(user.authId);
     return c.json(apiSuccess(result));
+  });
+
+  app.get('/history', async (c) => {
+    const user = c.get('user');
+    const results = await listInbodyHistory(user.authId);
+    return c.json(apiSuccess(results));
   });
 
   return app;

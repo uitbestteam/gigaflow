@@ -164,6 +164,9 @@ const vi: TranslationSchema = {
     analyze: 'Phân tích',
     takenAt: 'Đo lúc {{date}}',
     noResult: 'Chưa có kết quả InBody. Tải ảnh kết quả đo để bắt đầu.',
+    historyTitle: 'Lịch sử',
+    changePhoto: 'Chạm để đổi ảnh',
+    analyzeAnother: 'Đo lần nữa',
     metric: {
       weightKg: 'Cân nặng',
       bmi: 'BMI',

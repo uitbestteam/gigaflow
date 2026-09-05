@@ -309,6 +309,11 @@ export async function getLatestInbody(fetchImpl?: typeof fetch): Promise<InbodyR
   return apiFetch('/inbody/latest', { schema: zInbodyResult.nullable(), fetchImpl });
 }
 
+/** Past InBody results, newest first. */
+export async function getInbodyHistory(fetchImpl?: typeof fetch): Promise<InbodyResult[]> {
+  return apiFetch('/inbody/history', { schema: zInbodyResult.array(), fetchImpl });
+}
+
 export async function getStatsSummary(fetchImpl?: typeof fetch): Promise<StatsSummary> {
   return apiFetch('/stats/summary', { schema: zStatsSummary, fetchImpl });
 }
