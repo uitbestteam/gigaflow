@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { WorkoutTemplate } from '@gigaflow/shared';
-import { getActivePlan, startSession } from '../../lib/api';
+import { getActivePlan, getLastSession, startSession } from '../../lib/api';
 import { resolveTranslatable } from '../../lib/i18n';
 import { Button } from '../../components/Button';
 import { SkeletonList } from '../../components/Skeleton';
@@ -23,6 +23,12 @@ export function HomePage() {
   const activePlanQuery = useQuery({
     queryKey: ['activePlan'],
     queryFn: getActivePlan,
+  });
+
+  // The most recently completed session tells us which day to suggest next.
+  const lastSessionQuery = useQuery({
+    queryKey: ['lastSession'],
+    queryFn: getLastSession,
   });
 
   const startSessionMutation = useMutation({
@@ -78,12 +84,18 @@ export function HomePage() {
 
   const templates: WorkoutTemplate[] = [...plan.templates].sort((a, b) => a.orderIndex - b.orderIndex);
 
+  // Suggest the day AFTER the last completed one (rotation). Any day can still
+  // be started — the suggestion is only the highlighted hero.
+  const lastTemplateId = lastSessionQuery.data?.templateId;
+  const lastIndex = lastTemplateId ? templates.findIndex((tpl) => tpl.id === lastTemplateId) : -1;
+  const suggestedIndex = lastIndex >= 0 && templates.length > 0 ? (lastIndex + 1) % templates.length : 0;
+
   return (
     <div className="flex flex-col gap-4 p-4">
       <h1 className="text-lg font-extrabold tracking-tight text-text">{t('home.queueTitle')}</h1>
       <Stagger className="flex flex-col gap-3">
         {templates.map((template, index) => {
-          const status: SessionQueueStatus = index === 0 ? 'next' : 'upcoming';
+          const status: SessionQueueStatus = index === suggestedIndex ? 'next' : 'upcoming';
           return (
             <StaggerItem key={template.id}>
               <SessionQueueItem
@@ -93,7 +105,8 @@ export function HomePage() {
                   colorTag: template.colorTag,
                 }}
                 status={status}
-                onStart={status === 'next' ? () => startSessionMutation.mutate(template.id) : undefined}
+                // Every day is startable — not just the suggested one.
+                onStart={() => startSessionMutation.mutate(template.id)}
               />
             </StaggerItem>
           );

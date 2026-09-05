@@ -16,6 +16,7 @@ import * as api from '../../lib/api';
 
 vi.mock('../../lib/api', () => ({
   getActivePlan: vi.fn(),
+  getLastSession: vi.fn().mockResolvedValue(null),
   createPlanFromTemplate: vi.fn(),
   startSession: vi.fn(),
   saveProfile: vi.fn(),
