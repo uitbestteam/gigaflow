@@ -121,6 +121,11 @@ export enum AwardKey {
   FIRST_PR = 'first_pr',
   TEN_EXERCISES = 'ten_exercises',
   VOLUME_50K = 'volume_50k',
+  SESSIONS_25 = 'sessions_25',
+  VOLUME_100K = 'volume_100k',
+  FIVE_PRS = 'five_prs',
+  STREAK_4_WEEKS = 'streak_4_weeks',
+  FIRST_MEAL_PLAN = 'first_meal_plan',
 }
 
 export enum ImageMimeType {

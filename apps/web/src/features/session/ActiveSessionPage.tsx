@@ -8,15 +8,13 @@ import { resolveTranslatable } from '../../lib/i18n';
 import { useSessionStore } from '../../store/sessionStore';
 import { ROUTES, sessionSummaryPath } from '../../routes';
 import { ExerciseRow, type ExerciseRowSet, type ExerciseRowSlot, type ExerciseRowStatus } from '../../components/ExerciseRow';
-import { RestTimer } from '../../components/RestTimer';
-import { RirPicker } from '../../components/RirPicker';
 import { Button } from '../../components/Button';
-import { Card } from '../../components/Card';
 import { SkeletonList } from '../../components/Skeleton';
 import { FadeIn, Stagger, StaggerItem } from '../../components/motion';
 import { CheckIcon } from '../../components/icons';
 import type { SetBoxStatus } from '../../components/SetBox';
 import { SetEditor } from './SetEditor';
+import { RestSetPanel } from './RestSetPanel';
 
 const DEFAULT_REST_SECONDS = 90;
 
@@ -293,25 +291,39 @@ export function ActiveSessionPage() {
         })}
       </Stagger>
 
-      {activeRest && (
-        <FadeIn>
-          <Card variant="glow" className="flex flex-col items-center gap-4">
-            <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
-              {t('session.restTimerTitle')}
-            </span>
-            <RestTimer
-              seconds={restSeconds}
-              running={restRunning}
-              onToggle={() => setRestRunning((r) => !r)}
-              onAdjust={(delta) => setRestSeconds((s) => Math.max(0, s + delta))}
+      {activeRest &&
+        (() => {
+          const slot = storeSlots[activeRest.slotId];
+          const set = slot?.sets[activeRest.setIndex];
+          if (!slot || !set) return null;
+          const slotTarget = startResult.slots.find((s) => s.id === activeRest.slotId);
+          const exercise = slotTarget ? exercisesById.get(slotTarget.exerciseId) : undefined;
+          const name = exercise
+            ? resolveTranslatable(exercise.name, i18n.language)
+            : slotTarget?.exerciseId ?? '';
+          return (
+            <RestSetPanel
+              key={`${activeRest.slotId}-${activeRest.setIndex}`}
+              exerciseName={name}
+              setNumber={activeRest.setIndex + 1}
+              totalSets={slot.sets.length}
+              weightKg={set.weightKg}
+              repsDone={set.repsDone}
+              rir={set.rir}
+              restSeconds={restSeconds}
+              restRunning={restRunning}
+              onToggleRest={() => setRestRunning((r) => !r)}
+              onAdjustRest={(delta) => setRestSeconds((s) => Math.max(0, s + delta))}
+              onEdit={(v) => editSet(activeRest.slotId, activeRest.setIndex, v)}
+              onSetRir={(r) => setRir(activeRest.slotId, activeRest.setIndex, r)}
+              onDismiss={() => {
+                setRest(activeRest.slotId, activeRest.setIndex, restElapsedRef.current);
+                setActiveRest(null);
+                setRestRunning(false);
+              }}
             />
-            <RirPicker
-              value={storeSlots[activeRest.slotId]?.sets[activeRest.setIndex]?.rir}
-              onPick={(rir) => setRir(activeRest.slotId, activeRest.setIndex, rir)}
-            />
-          </Card>
-        </FadeIn>
-      )}
+          );
+        })()}
     </div>
   );
 }

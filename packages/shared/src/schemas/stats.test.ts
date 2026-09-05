@@ -6,7 +6,17 @@ describe('stats schemas', () => {
     expect(zPersonalRecord.safeParse({ exerciseId: 'e1', name: { en: 'Bench', vi: 'Đẩy ngực' }, bestSet: { weightKg: 100, repsDone: 5, e1RM: 116.7 } }).success).toBe(true);
   });
   it('accepts a summary', () => {
-    expect(zStatsSummary.safeParse({ totalSessions: 3, totalVolume: 12000, totalPrs: 5, totalExercises: 5 }).success).toBe(true);
+    expect(
+      zStatsSummary.safeParse({
+        totalSessions: 3,
+        totalVolume: 12000,
+        totalPrs: 5,
+        totalExercises: 5,
+        currentStreakWeeks: 2,
+        longestStreakWeeks: 4,
+        totalMealPlans: 1,
+      }).success,
+    ).toBe(true);
   });
   it('rejects a negative summary field', () => {
     expect(zStatsSummary.safeParse({ totalSessions: -1, totalVolume: 0, totalPrs: 0, totalExercises: 0 }).success).toBe(false);

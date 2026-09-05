@@ -71,6 +71,9 @@ vi.mock('../../lib/api', () => ({
   generateWorkout: vi.fn(),
   getGenerationJob: vi.fn(),
   getPlan: vi.fn(),
+  // GeneratePlanPage now imports authStore (to pre-fill from the profile),
+  // which statically imports postAuthSession from the api module.
+  postAuthSession: vi.fn(),
 }));
 
 import * as api from '../../lib/api';
