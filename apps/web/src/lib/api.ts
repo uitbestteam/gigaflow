@@ -199,6 +199,11 @@ export async function getSession(): Promise<TrainingSession | null> {
   return apiFetch('/sessions/active', { schema: zTrainingSession.nullable() });
 }
 
+/** Most recently completed session — used to suggest the next training day. */
+export async function getLastSession(): Promise<TrainingSession | null> {
+  return apiFetch('/sessions/last', { schema: zTrainingSession.nullable() });
+}
+
 export async function logSets(id: string, sets: LogSetInput[]): Promise<SetLog[]> {
   return apiFetch(`/sessions/${id}/sets`, {
     method: 'POST',

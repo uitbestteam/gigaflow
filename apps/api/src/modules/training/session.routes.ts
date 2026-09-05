@@ -4,7 +4,7 @@ import { zValidator } from '@hono/zod-validator';
 import { apiSuccess, zLogSetInput } from '@gigaflow/shared';
 import { errorBody } from '../../middleware/error.js';
 import { firebaseAuth, type TokenVerifier } from '../auth/firebase-auth.js';
-import { findActiveSession } from './session.repo.js';
+import { findActiveSession, findLastCompletedSession } from './session.repo.js';
 import {
   startSession, logSets, finishSession, cancelSession, lastForExercise, SessionError,
 } from './session.service.js';
@@ -29,6 +29,11 @@ export function makeSessionRoutes(deps: { verify: TokenVerifier }): Hono {
 
   app.get('/active', async (c) => {
     const session = await findActiveSession(c.get('user').authId);
+    return c.json(apiSuccess(session));
+  });
+
+  app.get('/last', async (c) => {
+    const session = await findLastCompletedSession(c.get('user').authId);
     return c.json(apiSuccess(session));
   });
 

@@ -67,6 +67,17 @@ export async function findActiveSession(userId: string): Promise<TrainingSession
   return mapId<TrainingSession>(doc);
 }
 
+/** The user's most recently completed session (highest sessionNumber), used to
+ * suggest the next training day in rotation. */
+export async function findLastCompletedSession(userId: string): Promise<TrainingSession | null> {
+  const doc = await trainingSessions().findOne(
+    { userId, status: SessionStatus.COMPLETED },
+    { sort: { sessionNumber: -1 } },
+  );
+  if (!doc) return null;
+  return mapId<TrainingSession>(doc);
+}
+
 export async function replaceSetLogs(sessionId: string, sets: LogSetInput[]): Promise<SetLog[]> {
   await setLogs().deleteMany({ sessionId });
   if (sets.length === 0) return [];
