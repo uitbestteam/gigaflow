@@ -152,6 +152,11 @@ export function ActiveSessionPage() {
       if (!id) return;
       queryClient.setQueryData(['session', id], finished);
       queryClient.setQueryData(['session', id, 'sets'], setLogs);
+      // Finishing a session changes what the Home queue should suggest next
+      // (rotation) and the active plan; invalidate so Home shows the correct
+      // order when the user navigates back, instead of 30s-stale cache.
+      void queryClient.invalidateQueries({ queryKey: ['lastSession'] });
+      void queryClient.invalidateQueries({ queryKey: ['activePlan'] });
       reset();
       navigate(sessionSummaryPath(id));
     },
